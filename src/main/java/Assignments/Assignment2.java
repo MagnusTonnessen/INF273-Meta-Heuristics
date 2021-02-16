@@ -59,10 +59,6 @@ public class Assignment2 {
         return bestSolution;
     }
 
-    public void runInstance(String fileName) {
-        runInstance(fileName, 10);
-    }
-
     public void runInstance(String fileName, int times) {
         System.out.println("\n--- Running Random Search ---\n");
         System.out.println(fileName.substring(0, fileName.length() - 4).replace("_", " ") + "\n");
@@ -101,7 +97,7 @@ public class Assignment2 {
 
     public void runAllInstances() {
         for (String instance :instances) {
-            runInstance(instance);
+            runInstance(instance, 10);
         }
     }
 }

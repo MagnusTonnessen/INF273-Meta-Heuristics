@@ -26,8 +26,6 @@ public class PDPUtils {
 
         Map<String, Object> problemMap = new HashMap<>();
 
-
-
         try {
             int nNodes;
             int nVehicles;
@@ -54,66 +52,55 @@ public class PDPUtils {
             nVehicles = Integer.parseInt(input.get(3));
             nCalls = Integer.parseInt(input.get(nVehicles + 6));
 
-            // A
-
             vehicle = IntStream
-                    .range(0, nVehicles)
-                    .mapToObj(i -> Arrays
+                        .range(0, nVehicles)
+                        .mapToObj(i -> Arrays
                             .stream(input.get(1 + 4 + i).split(","))
                             .mapToInt(Integer::parseInt)
                             .toArray())
-                    .toArray(int[][]::new);
-
-            // B
+                        .toArray(int[][]::new);
 
             validCalls = IntStream
-                    .range(0, nVehicles)
-                    .mapToObj(i -> Arrays
-                            .stream(input.get(1 + 7 + nVehicles + i).split(","))
-                            .mapToInt(Integer::parseInt)
-                            .toArray())
-                    .toArray(int[][]::new);
+                            .range(0, nVehicles)
+                            .mapToObj(i -> Arrays
+                                .stream(input.get(1 + 7 + nVehicles + i).split(","))
+                                .mapToInt(Integer::parseInt)
+                                .toArray())
+                            .toArray(int[][]::new);
 
             vesselCargo = new int[nVehicles][nCalls];
             IntStream.range(0, nVehicles).forEach(i -> Arrays.stream(validCalls[i]).forEach(j -> vesselCargo[i][j - 1] = 1));
 
-            // C
-
             cargo = IntStream
-                    .range(0, nCalls)
-                    .mapToObj(i -> Arrays
+                        .range(0, nCalls)
+                        .mapToObj(i -> Arrays
                             .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
                             .skip(1)
                             .mapToInt(Integer::parseInt)
                             .toArray())
-                    .toArray(int[][]::new);
+                        .toArray(int[][]::new);
 
             travelCost = new int[nVehicles][nNodes][nNodes];
             travelTime = new int[nVehicles][nNodes][nNodes];
 
-            // D
-
             IntStream
-                    .range(0, nNodes * nNodes * nVehicles)
-                    .mapToObj(i -> Arrays
-                            .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
-                            .mapToInt(Integer::parseInt)
-                            .toArray())
-                    .forEach(arr -> {
-                        travelTime[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[3];
-                        travelCost[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[4];
-                    });
+                .range(0, nNodes * nNodes * nVehicles)
+                .mapToObj(i -> Arrays
+                    .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
+                    .mapToInt(Integer::parseInt)
+                    .toArray())
+                .forEach(arr -> {
+                    travelTime[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[3];
+                    travelCost[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[4];
+                });
 
-            // E
-
-            nodeTimesAndCosts =
-                    IntStream
-                        .range(0, nVehicles  * nCalls)
-                        .mapToObj(i -> Arrays
-                                .stream(input.get(1 + 1 + 2 * nVehicles + nCalls + 10 + nNodes * nNodes * nVehicles - 1 + i).split(","))
-                                .mapToInt(Integer::parseInt)
-                                .toArray())
-                        .toArray(int[][]::new);
+            nodeTimesAndCosts = IntStream
+                                    .range(0, nVehicles  * nCalls)
+                                    .mapToObj(i -> Arrays
+                                        .stream(input.get(1 + 1 + 2 * nVehicles + nCalls + 10 + nNodes * nNodes * nVehicles - 1 + i).split(","))
+                                        .mapToInt(Integer::parseInt)
+                                        .toArray())
+                                    .toArray(int[][]::new);
 
             loadingTime = new int[nVehicles][nCalls];
             unloadingTime = new int[nVehicles][nCalls];
