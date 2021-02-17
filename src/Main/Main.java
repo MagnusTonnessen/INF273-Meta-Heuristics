@@ -22,7 +22,7 @@ public class Main {
     static String simulatedAnnealing = "simulatedAnnealing";
 
     static String[] instances = new String[] {C7V3, C18V5, C35V7, C80V20, C130V40};
-    static String[] searchingAlgorithms = new String[] {simulatedAnnealing};
+    static String[] searchingAlgorithms = new String[] {blindRandomSearch, localSearch, simulatedAnnealing};
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
