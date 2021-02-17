@@ -1,4 +1,4 @@
-package Utils;
+package Utilities;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -302,5 +302,17 @@ public class PDPUtils {
         Integer[] indexes = IntStream.range(0, array.length).boxed().toArray(Integer[]::new);
         Arrays.sort(indexes, Comparator.comparingInt(i -> array[i]));
         return Arrays.stream(indexes).mapToInt(i -> i).toArray();
+    }
+
+    public static int[] generateInitSolution(Map<String, Object> problem) {
+        int nCalls = (int) problem.get("nCalls");
+        int nVehicles = (int) problem.get("nVehicles");
+        int[] initSol = new int[2 * nCalls + nVehicles];
+        IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2)/2);
+        return initSol;
+    }
+
+    public void generatePDF() {
+
     }
 }
