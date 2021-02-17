@@ -8,14 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.joining;
 
 public class PDPUtils {
 
-    private static final Random random = new Random();
+    public static final Random random = new Random();
 
     /**
      * Load problem into map
@@ -162,7 +159,7 @@ public class PDPUtils {
         int[][][] travelTime = (int[][][]) problem.get("travelTime");
 
         int[] sol = IntStream.range(0, solution.length + 1).map(i -> i < solution.length ? solution[i] : 0).toArray();
-        int[] zeroIndex = IntStream.range(0, solution.length).filter(i -> sol[i] == 0).toArray();
+        int[] zeroIndex = IntStream.range(0, sol.length).filter(i -> sol[i] == 0).toArray();
 
         boolean feasibility = true;
         int tempIdx = 0;

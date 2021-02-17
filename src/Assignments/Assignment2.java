@@ -1,10 +1,13 @@
 package Assignments;
 
-import static Utils.PDPUtils.*;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import static Utils.PDPUtils.costFunction;
+import static Utils.PDPUtils.feasibilityCheck;
+import static Utils.PDPUtils.loadProblem;
+import static Utils.PDPUtils.shuffle;
 
 public class Assignment2 {
 
