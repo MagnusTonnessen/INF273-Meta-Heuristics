@@ -1,7 +1,7 @@
-package Main;
+package main;
 
-import Code.SearchingAlgorithms;
-import Utilities.PDFCreator;
+import algorithms.SearchingAlgorithms;
+import utils.PDFCreator;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
@@ -9,12 +9,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static Utilities.PDPUtils.costFunction;
-import static Utilities.PDPUtils.generateInitSolution;
-import static Utilities.PDPUtils.loadProblem;
-import static Utilities.Utils.getAlgorithmName;
-import static Utilities.Utils.getInstanceName;
-import static Utilities.Utils.rightPad;
+import static utils.PDPUtils.costFunction;
+import static utils.PDPUtils.generateInitSolution;
+import static utils.PDPUtils.loadProblem;
+import static utils.Utils.getAlgorithmName;
+import static utils.Utils.getInstanceName;
+import static utils.Utils.rightPad;
 
 public class Main {
 
@@ -113,7 +113,7 @@ public class Main {
 
         String algorithmName = getAlgorithmName(searchingAlgorithm);
         String instanceName = getInstanceName(filePath);
-        Map<String, Object> problem = loadProblem("resources/" + filePath);
+        Map<String, Object> problem = loadProblem("src/main/resources/" + filePath);
 
         int[] initialSolution = generateInitSolution(problem);
         double initialCost = costFunction(initialSolution, problem);
@@ -121,8 +121,6 @@ public class Main {
         double bestCost = initialCost;
         double totalCost = 0;
         double executionTime = 0;
-
-        //printRunInfo(instanceName, algorithmName, initialSolution, initialCost);
 
         for (int i = 0; i < 10; i++) {
             System.out.print("\rProgress: " + (i+1) + "/" + 10);
@@ -151,7 +149,6 @@ public class Main {
         if (pdf != null) {
             pdf.addRow(algorithmName, averageCost, bestCost, improvement, averageExecutionTime);
         }
-        //printRunResults(algorithmName, resultsMap);
 
         return resultsMap;
     }

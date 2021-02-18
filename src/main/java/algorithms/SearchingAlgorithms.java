@@ -1,16 +1,12 @@
-package Code;
+package algorithms;
 
 import java.util.Map;
 
-import static Code.NeighboursOperators.oneInsert;
-import static Code.NeighboursOperators.randomSolution;
-import static Code.NeighboursOperators.threeExchange;
-import static Code.NeighboursOperators.twoExchange;
-import static Utilities.PDPUtils.costFunction;
-import static Utilities.PDPUtils.feasibilityCheck;
-import static Utilities.PDPUtils.random;
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
+import static utils.PDPUtils.costFunction;
+import static utils.PDPUtils.feasibilityCheck;
+import static utils.PDPUtils.random;
 
 public class SearchingAlgorithms {
 
@@ -28,7 +24,7 @@ public class SearchingAlgorithms {
 
         for (int i = 0; i < ITERATIONS; i++) {
 
-            currentSolution = randomSolution(problem);
+            currentSolution = NeighboursOperators.randomSolution(problem);
             currentCost = costFunction(currentSolution, problem);
 
             if (feasibilityCheck(currentSolution, problem) && currentCost < bestCost) {
@@ -58,11 +54,11 @@ public class SearchingAlgorithms {
             double p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = twoExchange(bestSolution);
+                currentSolution = NeighboursOperators.twoExchange(bestSolution);
             } else if (p < P1 + P2) {
-                currentSolution = threeExchange(bestSolution);
+                currentSolution = NeighboursOperators.threeExchange(bestSolution);
             } else {
-                currentSolution = oneInsert(bestSolution);
+                currentSolution = NeighboursOperators.oneInsert(bestSolution);
             }
 
             currentCost = costFunction(currentSolution, problem);
@@ -101,11 +97,11 @@ public class SearchingAlgorithms {
             p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = twoExchange(incumbentSolution);
+                currentSolution = NeighboursOperators.twoExchange(incumbentSolution);
             } else if (p < P1 + P2) {
-                currentSolution = threeExchange(incumbentSolution);
+                currentSolution = NeighboursOperators.threeExchange(incumbentSolution);
             } else {
-                currentSolution = oneInsert(incumbentSolution);
+                currentSolution = NeighboursOperators.oneInsert(incumbentSolution);
             }
 
             currentCost = costFunction(currentSolution, problem);

@@ -1,11 +1,10 @@
-package Code;
+package algorithms;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import static Utilities.PDPUtils.random;
-import static Utilities.PDPUtils.shuffle;
+import static utils.PDPUtils.*;
 
 public class NeighboursOperators {
 
