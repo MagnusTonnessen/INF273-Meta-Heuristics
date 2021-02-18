@@ -14,7 +14,7 @@ import static java.lang.Math.pow;
 
 public class SearchingAlgorithms {
 
-    static final int ITERATIONS = 100000;
+    static final int ITERATIONS = 10000;
 
     // RANDOM SEARCH
 
