@@ -34,7 +34,10 @@ public class Utils {
                 .collect(joining(" "));
     }
 
-    public static String getInstanceName(String instance) {
-        return instance.substring(0, instance.length() - 4).replace("_", " ");
+    public static String getInstanceName(String filePath) {
+        return filePath
+                .replace("src/main/resources/", "")
+                .replace("_", " ")
+                .replace(".txt", "");
     }
 }

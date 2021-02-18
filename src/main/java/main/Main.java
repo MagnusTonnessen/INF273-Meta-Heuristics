@@ -15,21 +15,9 @@ import static utils.PDPUtils.loadProblem;
 import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.rightPad;
+import static utils.Constants.*;
 
 public class Main {
-
-    static final String C7V3 = "Call_7_Vehicle_3.txt";
-    static final String C18V5 = "Call_18_Vehicle_5.txt";
-    static final String C35V7 = "Call_35_Vehicle_7.txt";
-    static final String C80V20 = "Call_80_Vehicle_20.txt";
-    static final String C130V40 = "Call_130_Vehicle_40.txt";
-
-    static final String RANDOM_SEARCH = "randomSearch";
-    static final String LOCAL_SEARCH = "localSearch";
-    static final String SIMULATED_ANNEALING = "simulatedAnnealing";
-
-    static final String[] instances = new String[] {C7V3, C18V5, C35V7, C80V20, C130V40};
-    static final String[] searchingAlgorithms = new String[] {RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING};
 
     static PDFCreator pdf;
 
@@ -42,18 +30,18 @@ public class Main {
         pdf = new PDFCreator("Results.pdf");
         pdf.openDocument();
 
-        for (String instance : instances) {
+        for (String filePath : FILE_PATHS) {
 
             String bestAlgorithm = "";
             int[] bestSolution = new int[0];
             double bestCost = Integer.MAX_VALUE;
 
-            pdf.newTable(getInstanceName(instance));
+            pdf.newTable(getInstanceName(filePath));
 
-            for (String search : searchingAlgorithms) {
+            for (String search : SEARCHING_ALGORITHMS) {
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search, int[].class, Map.class);
 
-                Map<String, Object> searchResults = runInstance(instance, searchingAlgorithm);
+                Map<String, Object> searchResults = runInstance(filePath, searchingAlgorithm);
 
                 if ((double) searchResults.get("Best cost") < bestCost) {
                     bestAlgorithm = getAlgorithmName(searchingAlgorithm);
@@ -69,9 +57,9 @@ public class Main {
     }
 
     public static void runAllInstances() throws Exception {
-        for (String instance : instances) {
+        for (String filePath : FILE_PATHS) {
 
-            System.out.println("\n" + getInstanceName(instance));
+            System.out.println("\n" + getInstanceName(filePath));
 
             System.out.println(
                     rightPad("", 22) +
@@ -84,10 +72,10 @@ public class Main {
             String bestAlgorithm = "";
             double bestCost = Integer.MAX_VALUE;
 
-            for (String search : searchingAlgorithms) {
+            for (String search : SEARCHING_ALGORITHMS) {
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search, int[].class, Map.class);
 
-                Map<String, Object> searchResults = runInstance(instance, searchingAlgorithm);
+                Map<String, Object> searchResults = runInstance(filePath, searchingAlgorithm);
 
                 if ((double) searchResults.get("Best cost") < bestCost) {
                     bestAlgorithm = getAlgorithmName(searchingAlgorithm);
@@ -113,7 +101,7 @@ public class Main {
 
         String algorithmName = getAlgorithmName(searchingAlgorithm);
         String instanceName = getInstanceName(filePath);
-        Map<String, Object> problem = loadProblem("src/main/resources/" + filePath);
+        Map<String, Object> problem = loadProblem(filePath);
 
         int[] initialSolution = generateInitSolution(problem);
         double initialCost = costFunction(initialSolution, problem);

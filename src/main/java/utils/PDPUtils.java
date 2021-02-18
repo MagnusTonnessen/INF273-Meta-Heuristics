@@ -16,10 +16,10 @@ public class PDPUtils {
 
     /**
      * Load problem into map
-     * @param filename Path of problem file
+     * @param filePath Path of problem file
      * @return Map with problem info
      */
-    public static Map<String, Object> loadProblem(String filename) {
+    public static Map<String, Object> loadProblem(String filePath) {
 
         Map<String, Object> problemMap = new HashMap<>();
 
@@ -43,7 +43,7 @@ public class PDPUtils {
             int[][][] travelTime;
             int[][][] travelCost;
 
-            List<String> input = Files.readAllLines(Path.of(filename));
+            List<String> input = Files.readAllLines(Path.of(filePath));
 
             nNodes = Integer.parseInt(input.get(1));
             nVehicles = Integer.parseInt(input.get(3));
