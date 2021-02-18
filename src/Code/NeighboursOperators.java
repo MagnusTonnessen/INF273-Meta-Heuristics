@@ -1,9 +1,11 @@
-package Assignments;
+package Code;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.IntStream;
 
-import static Utilities.PDPUtils.*;
+import static Utilities.PDPUtils.random;
+import static Utilities.PDPUtils.shuffle;
 
 public class NeighboursOperators {
 
@@ -80,5 +82,26 @@ public class NeighboursOperators {
             }
         }
         return newSolution;
+    }
+
+    public static int[] randomSolution(Map<String, Object> problem) {
+        int nCalls = (int) problem.get("nCalls");
+        int nVehicles = (int) problem.get("nVehicles");
+        int[] pickup = IntStream.range(1, nCalls + nVehicles + 1).map(i -> (i > nCalls ? 0 : i)).toArray();
+
+        shuffle(pickup);
+
+        int[] solution = new int[2 * nCalls + nVehicles];
+        int[] zeroIndex = IntStream.range(0, pickup.length + 1).filter(i -> i >= pickup.length || pickup[i] == 0).toArray();
+        int idx = 0;
+
+        for (int i = 0; i < nVehicles + 1; i++) {
+            int[] vehicle = Arrays.stream(pickup, idx, zeroIndex[i]).mapToObj(j -> new int[] {j, j}).flatMapToInt(Arrays::stream).toArray();
+            shuffle(vehicle);
+            System.arraycopy(vehicle, 0, solution, idx * 2 - i, vehicle.length);
+            idx = zeroIndex[i] + 1;
+        }
+
+        return solution;
     }
 }

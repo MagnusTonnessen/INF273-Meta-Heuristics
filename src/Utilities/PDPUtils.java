@@ -311,8 +311,4 @@ public class PDPUtils {
         IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2)/2);
         return initSol;
     }
-
-    public void generatePDF() {
-
-    }
 }
