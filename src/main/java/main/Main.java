@@ -66,7 +66,7 @@ public class Main {
                     rightPad("Average objective", 20) +
                     rightPad("Best objective", 17) +
                     rightPad("Improvement (%)", 18) +
-                    rightPad("Running time (s)", 20)
+                    rightPad("Running time (ms)", 20)
             );
 
             String bestAlgorithm = "";
@@ -125,7 +125,7 @@ public class Main {
 
         double averageCost = totalCost / 10;
         double improvement = 100.0 * (initialCost - bestCost) / initialCost;
-        double averageExecutionTime = (executionTime / 10) / 1000;
+        double averageExecutionTime = executionTime / 10;
 
         Map<String, Object> resultsMap = new HashMap<>();
         resultsMap.put("Best cost", bestCost);
