@@ -86,7 +86,7 @@ public class PDFCreator {
         table.addCell(newCell("Average objective"));
         table.addCell(newCell("Best objective"));
         table.addCell(newCell("Improvement (%)"));
-        table.addCell(newCell("Running time (s)"));
+        table.addCell(newCell("Running time (ms)"));
     }
 
     private void addEmptyLine(int n) {
