@@ -1,14 +1,16 @@
 package algorithms;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.stream.IntStream;
 
-import static utils.PDPUtils.*;
+import static utils.Constants.problem;
+import static utils.PDPUtils.random;
+import static utils.PDPUtils.shuffle;
 
 public class NeighboursOperators {
 
     public static int[] oneInsert(int[] solution) {
+
         int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> i >= solution.length || solution[i] == 0).toArray();
         int nCalls = (solution.length - zeroIndexes.length + 1)/2;
         int valueToRelocate = random.nextInt(nCalls) + 1;
@@ -41,49 +43,52 @@ public class NeighboursOperators {
 
         int[] newSolution = Arrays.stream(solution).toArray();
 
-        int[] zeroIndex = IntStream.range(0, newSolution.length).filter(i -> solution[i] == 0).toArray();
-        int idx = random.nextInt(zeroIndex.length);
-        int endIdx = zeroIndex[idx];
-        int startIdx = idx > 0 ? zeroIndex[idx - 1] + 1 : 0;
+        int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> i >= solution.length || solution[i] == 0).toArray();
+        int nCalls = (solution.length - zeroIndexes.length + 1)/2;
+        int firstValue = random.nextInt(nCalls) + 1;
+        int secondValue = random.nextInt(nCalls) + 1;
 
-        if (endIdx - startIdx > 3) {
-            int swapIdx1 = startIdx + random.nextInt(endIdx - startIdx - 1);
-            int swapIdx2 = startIdx+ random.nextInt(endIdx - startIdx - 1);
-            int swapValue1 = newSolution[swapIdx1];
-            int swapValue2 = newSolution[swapIdx2];
-            if (swapValue1 != swapValue2) {
-                newSolution[swapIdx1] = swapValue2;
-                newSolution[swapIdx2] = swapValue1;
-            }
-        }
+        if (firstValue == secondValue) { return newSolution; }
+
+        int[] firstValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstValue).toArray();
+        int[] secondValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondValue).toArray();
+
+        newSolution[firstValueIndex[0]] = secondValue;
+        newSolution[firstValueIndex[1]] = secondValue;
+        newSolution[secondValueIndex[0]] = firstValue;
+        newSolution[secondValueIndex[1]] = firstValue;
+
         return newSolution;
     }
 
     public static int[] threeExchange(int[] solution) {
+
         int[] newSolution = Arrays.stream(solution).toArray();
 
-        int[] zeroIndex = IntStream.range(0, newSolution.length).filter(i -> solution[i] == 0).toArray();
-        int idx = random.nextInt(zeroIndex.length);
-        int endIdx = zeroIndex[idx];
-        int startIdx = idx > 0 ? zeroIndex[idx - 1] + 1 : 0;
+        int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> i >= solution.length || solution[i] == 0).toArray();
+        int nCalls = (solution.length - zeroIndexes.length + 1)/2;
 
-        if (endIdx - startIdx > 5) {
-            int swapIdx1 = startIdx + random.nextInt(endIdx - startIdx - 1);
-            int swapIdx2 = startIdx + random.nextInt(endIdx - startIdx - 1);
-            int swapIdx3 = startIdx + random.nextInt(endIdx - startIdx - 1);
-            int swapValue1 = newSolution[swapIdx1];
-            int swapValue2 = newSolution[swapIdx2];
-            int swapValue3 = newSolution[swapIdx3];
-            if (swapValue1 != swapValue2 && swapValue1 != swapValue3 && swapValue2 != swapValue3) {
-                newSolution[swapIdx1] = swapValue3;
-                newSolution[swapIdx2] = swapValue1;
-                newSolution[swapIdx3] = swapValue2;
-            }
-        }
+        int firstValue = random.nextInt(nCalls) + 1;
+        int secondValue = random.nextInt(nCalls) + 1;
+        int thirdValue = random.nextInt(nCalls) + 1;
+
+        if (firstValue == secondValue || secondValue == thirdValue || firstValue == thirdValue) { return newSolution; }
+
+        int[] firstValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstValue).toArray();
+        int[] secondValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondValue).toArray();
+        int[] thirdValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == thirdValue).toArray();
+
+        newSolution[firstValueIndex[0]] = thirdValue;
+        newSolution[firstValueIndex[1]] = thirdValue;
+        newSolution[secondValueIndex[0]] = firstValue;
+        newSolution[secondValueIndex[1]] = firstValue;
+        newSolution[thirdValueIndex[0]] = secondValue;
+        newSolution[thirdValueIndex[1]] = secondValue;
+
         return newSolution;
     }
 
-    public static int[] randomSolution(Map<String, Object> problem) {
+    public static int[] randomSolution() {
         int nCalls = (int) problem.get("nCalls");
         int nVehicles = (int) problem.get("nVehicles");
         int[] pickup = IntStream.range(1, nCalls + nVehicles + 1).map(i -> (i > nCalls ? 0 : i)).toArray();

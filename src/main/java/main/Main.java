@@ -5,17 +5,24 @@ import utils.PDFCreator;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.IntStream;
 
+import static utils.Constants.FILE_PATHS;
+import static utils.Constants.SEARCHING_ALGORITHMS;
+import static utils.Constants.initialize;
+import static utils.Constants.searchingAlgorithms;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.generateInitSolution;
 import static utils.PDPUtils.loadProblem;
 import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.rightPad;
-import static utils.Constants.*;
 
 public class Main {
 
@@ -23,34 +30,34 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        runAllInstances();
+        runAllInstancesAndWriteToPDF();
     }
 
     public static void runAllInstancesAndWriteToPDF() throws Exception {
-        pdf = new PDFCreator("Results.pdf");
+        pdf = new PDFCreator("Assignment3.pdf");
         pdf.openDocument();
 
         for (String filePath : FILE_PATHS) {
 
-            String bestAlgorithm = "";
-            int[] bestSolution = new int[0];
-            double bestCost = Integer.MAX_VALUE;
+            System.out.println(getInstanceName(filePath));
+
+            initialize(filePath);
+
+            List<int[]> bestSolutions = new ArrayList<>(SEARCHING_ALGORITHMS.length);
 
             pdf.newTable(getInstanceName(filePath));
 
             for (String search : SEARCHING_ALGORITHMS) {
-                Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search, int[].class, Map.class);
+                System.out.println("\n" + getAlgorithmName(search));
+                Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
 
                 Map<String, Object> searchResults = runInstance(filePath, searchingAlgorithm);
 
-                if ((double) searchResults.get("Best cost") < bestCost) {
-                    bestAlgorithm = getAlgorithmName(searchingAlgorithm);
-                    bestSolution = (int[]) searchResults.get("Best solution");
-                    bestCost = (double) searchResults.get("Best cost");
-                }
+                bestSolutions.add((int[]) searchResults.get("Best solution"));
             }
 
-            pdf.addTableAndBestSolution(bestSolution, bestAlgorithm);
+            System.out.println("\n");
+            pdf.addTableAndBestSolution(bestSolutions, SEARCHING_ALGORITHMS);
         }
 
         pdf.closeDocument();
@@ -69,18 +76,14 @@ public class Main {
                     rightPad("Running time (s)", 20)
             );
 
-            String bestAlgorithm = "";
-            double bestCost = Integer.MAX_VALUE;
+            List<int[]> bestSolutions = new ArrayList<>(SEARCHING_ALGORITHMS.length);
 
             for (String search : SEARCHING_ALGORITHMS) {
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search, int[].class, Map.class);
 
                 Map<String, Object> searchResults = runInstance(filePath, searchingAlgorithm);
 
-                if ((double) searchResults.get("Best cost") < bestCost) {
-                    bestAlgorithm = getAlgorithmName(searchingAlgorithm);
-                    bestCost = (double) searchResults.get("Best cost");
-                }
+                bestSolutions.add((int[]) searchResults.get("Best solution"));
 
                 DecimalFormat format = new DecimalFormat("0.00#");
 
@@ -93,7 +96,10 @@ public class Main {
                 );
             }
 
-            System.out.println("\nBest solution found with " + bestAlgorithm + "\n");
+            IntStream.range(0, SEARCHING_ALGORITHMS.length).forEach(i -> {
+                System.out.println("\nBest solution found with " + getAlgorithmName(SEARCHING_ALGORITHMS[i]));
+                System.out.println(Arrays.toString(bestSolutions.get(i)) + "\n");
+            });
         }
     }
 
@@ -113,7 +119,7 @@ public class Main {
         for (int i = 0; i < 10; i++) {
             System.out.print("\rProgress: " + (i+1) + "/" + 10);
             long startTime = System.currentTimeMillis();
-            int[] solution = (int[]) searchingAlgorithm.invoke(new SearchingAlgorithms(), initialSolution, problem);
+            int[] solution = (int[]) searchingAlgorithm.invoke(searchingAlgorithms);
             executionTime += System.currentTimeMillis() - startTime;
             double cost = costFunction(solution, problem);
             totalCost += cost;

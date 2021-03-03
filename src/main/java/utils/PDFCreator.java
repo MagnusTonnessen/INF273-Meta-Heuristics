@@ -15,8 +15,11 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static utils.Utils.getAlgorithmName;
 
 /**
  * Writes results of search to pdf document
@@ -41,19 +44,21 @@ public class PDFCreator {
         document.open();
     }
 
-    public void addTableAndBestSolution(int[] bestSolution, String algorithmName) throws Exception {
+    public void addTableAndBestSolution(List<int[]> bestSolutions, String[] algorithmNames) throws Exception {
 
         paragraph.add(table);
 
-        newParagraph();
+        IntStream.range(0, bestSolutions.size()).forEach(i -> {
+            addEmptyLine(1);
 
-        Font font = FontFactory.getFont(FontFactory.TIMES, 12, BaseColor.BLACK);
-        Phrase phrase = new Phrase();
-        phrase.add(new Chunk("Best solution found with " + algorithmName + "\n", font));
-        phrase.add(new Chunk(Arrays.toString(bestSolution), font));
+            Font font = FontFactory.getFont(FontFactory.TIMES, 12, BaseColor.BLACK);
+            Phrase phrase = new Phrase();
+            phrase.add(new Chunk("Best solution found with " + getAlgorithmName(algorithmNames[i]) + "\n", font));
+            phrase.add(new Chunk(Arrays.toString(bestSolutions.get(i)), font));
 
-        paragraph.add(phrase);
-        paragraph.setAlignment(Element.ALIGN_CENTER);
+            paragraph.add(phrase);
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+        });
 
         newParagraph();
     }

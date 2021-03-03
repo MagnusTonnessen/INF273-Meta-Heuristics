@@ -34,6 +34,13 @@ public class Utils {
                 .collect(joining(" "));
     }
 
+    public static String getAlgorithmName(String algorithm) {
+        return Arrays
+                .stream(algorithm.split("(?=[A-Z])"))
+                .map(w -> w.substring(0,1).toUpperCase() + w.substring(1))
+                .collect(joining(" "));
+    }
+
     public static String getInstanceName(String filePath) {
         return filePath
                 .replace("src/main/resources/", "")

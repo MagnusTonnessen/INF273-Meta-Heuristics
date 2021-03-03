@@ -1,20 +1,23 @@
 package algorithms;
 
-import java.util.Map;
-
+import static algorithms.NeighboursOperators.oneInsert;
+import static algorithms.NeighboursOperators.randomSolution;
+import static algorithms.NeighboursOperators.threeExchange;
+import static algorithms.NeighboursOperators.twoExchange;
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
+import static utils.Constants.ITERATIONS;
+import static utils.Constants.initialSolution;
+import static utils.Constants.problem;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.random;
 
 public class SearchingAlgorithms {
 
-    static final int ITERATIONS = 10000;
-
     // RANDOM SEARCH
 
-    public int[] randomSearch(int[] initialSolution, Map<String, Object> problem) {
+    public int[] randomSearch() {
 
         int[] bestSolution = initialSolution;
         double bestCost = costFunction(bestSolution, problem);
@@ -24,7 +27,7 @@ public class SearchingAlgorithms {
 
         for (int i = 0; i < ITERATIONS; i++) {
 
-            currentSolution = NeighboursOperators.randomSolution(problem);
+            currentSolution = randomSolution();
             currentCost = costFunction(currentSolution, problem);
 
             if (feasibilityCheck(currentSolution, problem) && currentCost < bestCost) {
@@ -37,11 +40,11 @@ public class SearchingAlgorithms {
 
     // LOCAL SEARCH
 
-    public int[] localSearch(int[] initialSolution, Map<String, Object> problem) {
-        return localSearch(initialSolution, problem, 0.33, 0.33);
+    public int[] localSearch() {
+        return localSearch(0.33, 0.33);
     }
 
-    public int[] localSearch(int[] initialSolution, Map<String, Object> problem, double P1, double P2) {
+    public int[] localSearch(double P1, double P2) {
 
         int[] bestSolution = initialSolution;
         double bestCost = costFunction(bestSolution, problem);
@@ -54,11 +57,11 @@ public class SearchingAlgorithms {
             double p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = NeighboursOperators.twoExchange(bestSolution);
+                currentSolution = twoExchange(bestSolution);
             } else if (p < P1 + P2) {
-                currentSolution = NeighboursOperators.threeExchange(bestSolution);
+                currentSolution = threeExchange(bestSolution);
             } else {
-                currentSolution = NeighboursOperators.oneInsert(bestSolution);
+                currentSolution = oneInsert(bestSolution);
             }
 
             currentCost = costFunction(currentSolution, problem);
@@ -73,11 +76,11 @@ public class SearchingAlgorithms {
 
     // SIMULATED ANNEALING
 
-    public int[] simulatedAnnealing(int[] initialSolution, Map<String, Object> problem) {
-        return simulatedAnnealing(initialSolution, problem, 0.33, 0.33, 100, 0.999);
+    public int[] simulatedAnnealing() {
+        return simulatedAnnealing(0.33, 0.33, 200, 0.999);
     }
 
-    public int[] simulatedAnnealing(int[] initialSolution, Map<String, Object> problem, double P1, double P2, double T0, double a) {
+    public int[] simulatedAnnealing(double P1, double P2, double T0, double a) {
 
         int[] incumbentSolution = initialSolution;
         double incumbentCost = costFunction(incumbentSolution, problem);
@@ -97,11 +100,11 @@ public class SearchingAlgorithms {
             p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = NeighboursOperators.twoExchange(incumbentSolution);
+                currentSolution = twoExchange(incumbentSolution);
             } else if (p < P1 + P2) {
-                currentSolution = NeighboursOperators.threeExchange(incumbentSolution);
+                currentSolution = threeExchange(incumbentSolution);
             } else {
-                currentSolution = NeighboursOperators.oneInsert(incumbentSolution);
+                currentSolution = oneInsert(incumbentSolution);
             }
 
             currentCost = costFunction(currentSolution, problem);
