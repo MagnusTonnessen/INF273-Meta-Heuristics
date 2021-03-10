@@ -1,14 +1,13 @@
 package main;
 
-import algorithms.Operators;
 import algorithms.SearchingAlgorithms;
 import utils.JSONCreator;
 import utils.PDFCreator;
-import utils.PDPUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -43,8 +42,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        System.out.println("Org: " + Arrays.toString(new int[]{1, 1, 0, 2, 3, 2, 3, 0, 4, 5, 5, 4, 0, 6, 6, 7, 7}));
-        System.out.println("New: " + Arrays.toString(Operators.oneInsert(new int[]{1, 1, 0, 2, 3, 2, 3, 0, 4, 5, 5, 4, 0, 6, 6, 7, 7})));
+        runInstances(Collections.singletonList(SIMULATED_ANNEALING));
     }
 
     public static void assignment4() throws Exception {
@@ -76,7 +74,7 @@ public class Main {
 
             Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(SIMULATED_ANNEALING_NEW_OPERATORS);
 
-            Map<String, Object> searchResults = runInstance(searchingAlgorithm, true);
+            Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, true);
             System.out.println("\r" + getAlgorithmName(SIMULATED_ANNEALING_NEW_OPERATORS));
 
             results.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS).putAll(searchResults);
@@ -116,7 +114,7 @@ public class Main {
                 System.out.println("\n" + getAlgorithmName(search));
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
 
-                Map<String, Object> searchResults = runInstance(searchingAlgorithm, true);
+                Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, true);
 
                 bestSolutions.add((int[]) searchResults.get("Best solution"));
             }
@@ -146,7 +144,7 @@ public class Main {
             System.out.println("\n" + getAlgorithmName(RANDOM_SEARCH));
             Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(RANDOM_SEARCH);
 
-            Map<String, Object> searchResults = runInstance(searchingAlgorithm, true);
+            Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, true);
 
             bestSolutions.add((int[]) searchResults.get("Best solution"));
 
@@ -158,32 +156,36 @@ public class Main {
     }
 
     public static void runAllInstances() throws Exception {
+        runInstances(Arrays.asList(SEARCHING_ALGORITHMS));
+    }
+
+    public static void runInstances(List<String> algorithms) throws Exception {
         for (String filePath : INSTANCES) {
 
             initialize(filePath);
 
             printRunInfo();
 
-            List<int[]> bestSolutions = new ArrayList<>(SEARCHING_ALGORITHMS.length);
+            List<int[]> bestSolutions = new ArrayList<>(algorithms.size());
 
-            for (String search : SEARCHING_ALGORITHMS) {
+            for (String search : algorithms) {
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
 
-                Map<String, Object> searchResults = runInstance(searchingAlgorithm, false);
+                Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, false);
 
                 bestSolutions.add((int[]) searchResults.get("Best solution"));
 
                 printRunResults(getAlgorithmName(search), searchResults);
             }
 
-            IntStream.range(0, SEARCHING_ALGORITHMS.length).forEach(i -> {
-                System.out.println("\nBest solution found with " + getAlgorithmName(SEARCHING_ALGORITHMS[i]));
+            IntStream.range(0, algorithms.size()).forEach(i -> {
+                System.out.println("\nBest solution found with " + getAlgorithmName(algorithms.get(i)));
                 System.out.println(Arrays.toString(bestSolutions.get(i)) + "\n");
             });
         }
     }
 
-    public static Map<String, Object> runInstance(Method searchingAlgorithm, boolean writeToPDF) throws Exception {
+    public static Map<String, Object> runInstance(Method searchingAlgorithm, int times, boolean writeToPDF) throws Exception {
 
         String algorithmName = getAlgorithmName(searchingAlgorithm);
 
@@ -192,8 +194,8 @@ public class Main {
         double totalCost = 0;
         double executionTime = 0;
 
-        for (int i = 0; i < 10; i++) {
-            System.out.print("\r" + getAlgorithmName(searchingAlgorithm) + " progress: " + (i + 1) + "/" + 10);
+        for (int i = 0; i < times; i++) {
+            System.out.print("\r" + getAlgorithmName(searchingAlgorithm) + " progress: " + (i + 1) + "/" + times);
             long startTime = System.currentTimeMillis();
             int[] solution = (int[]) searchingAlgorithm.invoke(searchingAlgorithms);
             executionTime += System.currentTimeMillis() - startTime;
@@ -205,9 +207,9 @@ public class Main {
             }
         }
 
-        double averageCost = totalCost / 10;
-        double improvement = 100.0 * (PDPUtils.initialCost - bestCost) / PDPUtils.initialCost;
-        double averageExecutionTime = (executionTime / 10) / 1000;
+        double averageCost = totalCost / times;
+        double improvement = 100.0 * (initialCost - bestCost) / initialCost;
+        double averageExecutionTime = (executionTime / times) / 1000;
 
         Map<String, Object> resultsMap = new HashMap<>();
         resultsMap.put("Best solution", bestSolution);

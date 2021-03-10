@@ -1,6 +1,7 @@
 package algorithms;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.IntStream;
 
 import static utils.Constants.random;
@@ -108,36 +109,43 @@ public class Operators {
 
     // Not transporting is most expensive
     public static int[] transportAll(int[] solution) {
-        int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> solution[i] == 0).toArray();
+
+        int[] newSolution = Arrays.stream(solution).toArray();
+
+        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
         int dummyCallIndex = zeroIndexes[zeroIndexes.length - 1] + 1;
         int dummyCallsLength = (solution.length - dummyCallIndex);
 
         if (dummyCallIndex == solution.length) {
-            return solution;
+            return newSolution;
         }
 
         int idx = random.nextInt(dummyCallsLength);
         int valueToRelocate = solution[dummyCallIndex + idx];
-        int insertIndex = zeroIndexes[bestInsertVehicle(valueToRelocate)];
+        int[] valueIndexes = IntStream.range(dummyCallIndex, solution.length).filter(i -> solution[i] == valueToRelocate).toArray();
+        int insertIndex = zeroIndexes[smallestVehicle(solution)];
 
         return IntStream.range(0, solution.length).map(i -> {
             if (insertIndex < valueIndexes[0] && i >= insertIndex && i <= valueIndexes[1]) {
                 return i - 1 <= insertIndex ?
                         valueToRelocate :
                         solution[i - ((i - 2) < valueIndexes[0] ? 1 : 0) - ((i - 2) < valueIndexes[1] ? 1 : 0)];
-            } else if (i >= valueIndexes[0] && i < insertIndex) {
-                return i + 2 >= insertIndex ?
-                        valueToRelocate :
-                        solution[i + 1 + (i + 1 >= valueIndexes[1] ? 1 : 0)];
             }
             return solution[i];
         }).toArray();
-
-        return solution;
     }
 
-    public static int bestInsertVehicle(int call) {
-        return 0;
+    public static double percentageTransported(int[] solution) {
+        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
+        int totalCalls = (solution.length - zeroIndexes.length) / 2;
+        int callsNotTransported = (solution.length - (zeroIndexes[zeroIndexes.length - 1] + 1)) / 2;
+        int callsTransported = totalCalls - callsNotTransported;
+        return (double) callsTransported / totalCalls;
+    }
+
+    public static int smallestVehicle(int[] solution) {
+        int[] zeroIndexes = IntStream.range(-1, solution.length).filter(i -> i == -1 || solution[i] == 0).toArray();
+        return IntStream.range(0, zeroIndexes.length - 1).mapToObj(i -> new int[]{i, zeroIndexes[i + 1] - zeroIndexes[i]}).min(Comparator.comparingInt(v -> v[1])).get()[0];
     }
 
     // Calls with similar origin node and destination node

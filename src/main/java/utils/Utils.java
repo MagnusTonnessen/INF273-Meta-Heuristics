@@ -31,10 +31,10 @@ public class Utils {
 
         System.out.println("\r" +
                 rightPad(algorithmName, pad + 25) +
-                rightPad(format.format(results.get("Average cost")), pad) +
-                rightPad(format.format(results.get("Best cost")), pad) +
-                rightPad(format.format(results.get("Improvement")), pad) +
-                rightPad(format.format(results.get("Average execution time")), pad)
+                rightPad(format.format((double) results.get("Average objective")), pad) +
+                rightPad(format.format((double) results.get("Best objective")), pad) +
+                rightPad(format.format((double) results.get("Improvement")), pad) +
+                rightPad(format.format((double) results.get("Average run time")), pad)
         );
     }
 

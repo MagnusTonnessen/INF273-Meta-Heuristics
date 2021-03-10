@@ -3,6 +3,7 @@ package algorithms;
 import static algorithms.Operators.oneInsert;
 import static algorithms.Operators.randomSolution;
 import static algorithms.Operators.threeExchange;
+import static algorithms.Operators.transportAll;
 import static algorithms.Operators.twoExchange;
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
@@ -20,7 +21,7 @@ public class SearchingAlgorithms {
 
     public int[] randomSearch() {
 
-        int[] bestSolution = initialSolution;
+        int[] bestSolution = initialSolution.clone();
         double bestCost = initialCost;
 
         int[] currentSolution;
@@ -47,7 +48,7 @@ public class SearchingAlgorithms {
 
     public int[] localSearch(double P1, double P2) {
 
-        int[] bestSolution = initialSolution;
+        int[] bestSolution = initialSolution.clone();
         double bestCost = initialCost;
 
         int[] currentSolution;
@@ -83,10 +84,10 @@ public class SearchingAlgorithms {
 
     public int[] simulatedAnnealing(double P1, double P2, double T0, double a) {
 
-        int[] incumbentSolution = initialSolution;
+        int[] incumbentSolution = initialSolution.clone();
         double incumbentCost = initialCost;
 
-        int[] bestSolution = incumbentSolution;
+        int[] bestSolution = incumbentSolution.clone();
         double bestCost = incumbentCost;
 
         int[] currentSolution;
@@ -134,15 +135,15 @@ public class SearchingAlgorithms {
     // SIMULATED ANNEALING NEW OPERATORS
 
     public int[] simulatedAnnealingNewOperators() {
-        return simulatedAnnealingNewOperators(0.33, 0.33, 200, 0.999);
+        return simulatedAnnealingNewOperators(100, 0.999);
     }
 
-    public int[] simulatedAnnealingNewOperators(double P1, double P2, double T0, double a) {
+    public int[] simulatedAnnealingNewOperators(double T0, double a) {
 
-        int[] incumbentSolution = initialSolution;
+        int[] incumbentSolution = initialSolution.clone();
         double incumbentCost = initialCost;
 
-        int[] bestSolution = incumbentSolution;
+        int[] bestSolution = incumbentSolution.clone();
         double bestCost = incumbentCost;
 
         int[] currentSolution;
@@ -151,6 +152,10 @@ public class SearchingAlgorithms {
         double T = T0;
         double deltaE;
         double p;
+
+        double P3 = Operators.percentageTransported(incumbentSolution) / 2;
+        double P1 = (1 - P3) / 2;
+        double P2 = (1 - P3) / 2;
 
         for (int i = 0; i < ITERATIONS; i++) {
 
@@ -161,7 +166,7 @@ public class SearchingAlgorithms {
             } else if (p < P1 + P2) {
                 currentSolution = threeExchange(incumbentSolution);
             } else {
-                currentSolution = oneInsert(incumbentSolution);
+                currentSolution = transportAll(incumbentSolution);
             }
 
             currentCost = costFunction(currentSolution, problem);
