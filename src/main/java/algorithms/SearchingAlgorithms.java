@@ -1,17 +1,17 @@
 package algorithms;
 
-import static algorithms.NeighboursOperators.oneInsert;
-import static algorithms.NeighboursOperators.randomSolution;
-import static algorithms.NeighboursOperators.threeExchange;
-import static algorithms.NeighboursOperators.twoExchange;
+import static algorithms.Operators.oneInsert;
+import static algorithms.Operators.randomSolution;
+import static algorithms.Operators.threeExchange;
+import static algorithms.Operators.twoExchange;
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
 import static utils.Constants.ITERATIONS;
-import static utils.Constants.initialSolution;
-import static utils.Constants.problem;
+import static utils.Constants.random;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
-import static utils.PDPUtils.random;
+import static utils.PDPUtils.initialSolution;
+import static utils.PDPUtils.problem;
 
 public class SearchingAlgorithms {
 
@@ -109,7 +109,7 @@ public class SearchingAlgorithms {
 
             currentCost = costFunction(currentSolution, problem);
 
-            deltaE =  currentCost - incumbentCost;
+            deltaE = currentCost - incumbentCost;
 
             boolean currentFeasible = feasibilityCheck(currentSolution, problem);
 
@@ -129,4 +129,61 @@ public class SearchingAlgorithms {
         }
         return bestSolution;
     }
+
+    // SIMULATED ANNEALING NEW OPERATORS
+
+    public int[] simulatedAnnealingNewOperators() {
+        return simulatedAnnealingNewOperators(0.33, 0.33, 200, 0.999);
+    }
+
+    public int[] simulatedAnnealingNewOperators(double P1, double P2, double T0, double a) {
+
+        int[] incumbentSolution = initialSolution;
+        double incumbentCost = costFunction(incumbentSolution, problem);
+
+        int[] bestSolution = incumbentSolution;
+        double bestCost = incumbentCost;
+
+        int[] currentSolution;
+        double currentCost;
+
+        double T = T0;
+        double deltaE;
+        double p;
+
+        for (int i = 0; i < ITERATIONS; i++) {
+
+            p = random.nextDouble();
+
+            if (p < P1) {
+                currentSolution = twoExchange(incumbentSolution);
+            } else if (p < P1 + P2) {
+                currentSolution = threeExchange(incumbentSolution);
+            } else {
+                currentSolution = oneInsert(incumbentSolution);
+            }
+
+            currentCost = costFunction(currentSolution, problem);
+
+            deltaE = currentCost - incumbentCost;
+
+            boolean currentFeasible = feasibilityCheck(currentSolution, problem);
+
+            if (currentFeasible && deltaE < 0) {
+                incumbentSolution = currentSolution;
+                incumbentCost = currentCost;
+
+                if (incumbentCost < bestCost) {
+                    bestSolution = incumbentSolution;
+                    bestCost = incumbentCost;
+                }
+            } else if (currentFeasible && random.nextDouble() < pow(E, -deltaE / T)) {
+                incumbentSolution = currentSolution;
+                incumbentCost = currentCost;
+            }
+            T *= a;
+        }
+        return bestSolution;
+    }
+
 }

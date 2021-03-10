@@ -1,43 +1,64 @@
 package utils;
 
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
+import static utils.PDPUtils.initialCost;
+import static utils.PDPUtils.instanceName;
 
 public class Utils {
 
-    public static void printRunInfo(String instanceName, String algorithmName, int[] initialSolution, double initialCost) {
-        System.out.println("\n--- Running " + algorithmName + " on " + instanceName + " ---\n");
-        System.out.println("Initial solution: " + Arrays.toString(initialSolution));
+    public static final int pad = 20;
+
+    public static void printRunInfo() {
+        System.out.println("\n--- " + instanceName + " ---\n");
         System.out.printf("Initial cost: %.2f\n\n", initialCost);
+
+        System.out.println(
+                rightPad("", pad + 25) +
+                        rightPad("Average objective", pad) +
+                        rightPad("Best objective", pad) +
+                        rightPad("Improvement (%)", pad) +
+                        rightPad("Running time (seconds)", pad)
+        );
     }
 
     public static void printRunResults(String algorithmName, Map<String, Object> results) {
-        System.out.printf("\n\nAverage cost: %.2f\n" , (double) results.get("Average cost"));
-        System.out.printf("Best cost: %.2f\n", (double) results.get("Best cost"));
-        System.out.println("Best solution: " + Arrays.toString((int[]) results.get("Best solution")));
-        System.out.printf("Improvement: %.2f %%\n", (double) results.get("Improvement"));
-        System.out.printf("Average execution time: %.3f seconds\n", (double) results.get("Average execution time"));
-        System.out.println("\n--- End of " + algorithmName + " ---");
+        DecimalFormat format = new DecimalFormat("0.00#");
+
+        System.out.println("\r" +
+                rightPad(algorithmName, pad + 25) +
+                rightPad(format.format(results.get("Average cost")), pad) +
+                rightPad(format.format(results.get("Best cost")), pad) +
+                rightPad(format.format(results.get("Improvement")), pad) +
+                rightPad(format.format(results.get("Average execution time")), pad)
+        );
     }
 
     public static String rightPad(String text, int length) {
-        return String.format("%-" + length + "." + length + "s", text);
+        return String.format("%1$-" + length + "s", text);
     }
 
     public static String getAlgorithmName(Method algorithm) {
+        if (algorithm.getName().contains("simulated")) {
+            return "Simulated Annealing (" + (algorithm.getName().contains("New") ? "with new operators" : "old") + ")";
+        }
         return Arrays
                 .stream(algorithm.getName().split("(?=[A-Z])"))
-                .map(w -> w.substring(0,1).toUpperCase() + w.substring(1))
+                .map(w -> w.substring(0, 1).toUpperCase() + w.substring(1))
                 .collect(joining(" "));
     }
 
     public static String getAlgorithmName(String algorithm) {
+        if (algorithm.contains("simulated")) {
+            return "Simulated Annealing (" + (algorithm.contains("New") ? "with new operators" : "old") + ")";
+        }
         return Arrays
                 .stream(algorithm.split("(?=[A-Z])"))
-                .map(w -> w.substring(0,1).toUpperCase() + w.substring(1))
+                .map(w -> w.substring(0, 1).toUpperCase() + w.substring(1))
                 .collect(joining(" "));
     }
 

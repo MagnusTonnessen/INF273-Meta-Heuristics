@@ -3,16 +3,48 @@ package algorithms;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import static utils.Constants.problem;
-import static utils.PDPUtils.random;
+import static utils.Constants.random;
+import static utils.PDPUtils.problem;
 import static utils.PDPUtils.shuffle;
 
-public class NeighboursOperators {
+public class Operators {
+
+    public static int[] newOneInsert(int[] solution) {
+
+        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
+        int nCalls = (solution.length - zeroIndexes.length) / 2;
+        int valueToRelocate = 3; //random.nextInt(nCalls) + 1;
+        int[] valueIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == valueToRelocate).toArray();
+        int idx = 2; //random.nextInt(zeroIndexes.length);
+        int insertIdx = zeroIndexes[idx];
+
+        System.out.println("Relocate value: " + valueToRelocate);
+        System.out.println("Value indexes: " + valueIndexes[0] + ", " + valueIndexes[1]);
+        System.out.println("Insert idx: " + insertIdx);
+
+        return IntStream.range(0, solution.length).map(i -> {
+            if (i < Math.min(insertIdx, valueIndexes[0]) || i > Math.max(insertIdx + 1, valueIndexes[1])) {
+                return solution[i];
+            }
+
+            if (insertIdx < valueIndexes[0]) {
+                if (i == insertIdx || i == insertIdx + 1) {
+                    return valueToRelocate;
+                }
+                return solution[i - ((i - 2) < valueIndexes[0] ? 1 : 0) - ((i - 2) < valueIndexes[1] ? 1 : 0)];
+            } else {
+                if (i == insertIdx - 1 || i == insertIdx - 2) {
+                    return valueToRelocate;
+                }
+                return solution[i + (i >= valueIndexes[0] ? 1 : 0) + ((i + 1) >= valueIndexes[1] ? 1 : 0)];
+            }
+        }).toArray();
+    }
 
     public static int[] oneInsert(int[] solution) {
 
         int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> i >= solution.length || solution[i] == 0).toArray();
-        int nCalls = (solution.length - zeroIndexes.length + 1)/2;
+        int nCalls = (solution.length - zeroIndexes.length + 1) / 2;
         int valueToRelocate = random.nextInt(nCalls) + 1;
         int[] valueIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == valueToRelocate).toArray();
         int idx = random.nextInt(zeroIndexes.length);
@@ -26,14 +58,28 @@ public class NeighboursOperators {
         return IntStream.range(0, solution.length).map(oldIndex -> {
             int newIndex = oldIndex;
             if (valueIndexes[1] < insertIdx && newIndex < insertIdx) {
-                if (newIndex >= valueIndexes[0]) { newIndex++; }
-                if (newIndex >= valueIndexes[1]) { newIndex++; }
-                if (newIndex == insertIdx || newIndex == insertIdx + 1) { return valueToRelocate; }
-            } else if (newIndex <= valueIndexes[1]){
-                if (newIndex == insertIdx || newIndex == insertIdx + 1) { return valueToRelocate; }
-                if (newIndex > insertIdx) { newIndex -= 2; }
-                if (newIndex >= valueIndexes[0]) { newIndex++; }
-                if (newIndex >= valueIndexes[1]) { newIndex++; }
+                if (newIndex >= valueIndexes[0]) {
+                    newIndex++;
+                }
+                if (newIndex >= valueIndexes[1]) {
+                    newIndex++;
+                }
+                if (newIndex == insertIdx || newIndex == insertIdx + 1) {
+                    return valueToRelocate;
+                }
+            } else if (newIndex <= valueIndexes[1]) {
+                if (newIndex == insertIdx || newIndex == insertIdx + 1) {
+                    return valueToRelocate;
+                }
+                if (newIndex > insertIdx) {
+                    newIndex -= 2;
+                }
+                if (newIndex >= valueIndexes[0]) {
+                    newIndex++;
+                }
+                if (newIndex >= valueIndexes[1]) {
+                    newIndex++;
+                }
             }
             return solution[newIndex];
         }).toArray();
@@ -43,12 +89,14 @@ public class NeighboursOperators {
 
         int[] newSolution = Arrays.stream(solution).toArray();
 
-        int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> i >= solution.length || solution[i] == 0).toArray();
-        int nCalls = (solution.length - zeroIndexes.length + 1)/2;
+        int numVehicles = (int) IntStream.range(0, solution.length).filter(i -> solution[i] == 0).count();
+        int nCalls = (solution.length - numVehicles) / 2;
         int firstValue = random.nextInt(nCalls) + 1;
         int secondValue = random.nextInt(nCalls) + 1;
 
-        if (firstValue == secondValue) { return newSolution; }
+        if (firstValue == secondValue) {
+            return newSolution;
+        }
 
         int[] firstValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstValue).toArray();
         int[] secondValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondValue).toArray();
@@ -66,13 +114,15 @@ public class NeighboursOperators {
         int[] newSolution = Arrays.stream(solution).toArray();
 
         int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> i >= solution.length || solution[i] == 0).toArray();
-        int nCalls = (solution.length - zeroIndexes.length + 1)/2;
+        int nCalls = (solution.length - zeroIndexes.length + 1) / 2;
 
         int firstValue = random.nextInt(nCalls) + 1;
         int secondValue = random.nextInt(nCalls) + 1;
         int thirdValue = random.nextInt(nCalls) + 1;
 
-        if (firstValue == secondValue || secondValue == thirdValue || firstValue == thirdValue) { return newSolution; }
+        if (firstValue == secondValue || secondValue == thirdValue || firstValue == thirdValue) {
+            return newSolution;
+        }
 
         int[] firstValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstValue).toArray();
         int[] secondValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondValue).toArray();
@@ -100,12 +150,27 @@ public class NeighboursOperators {
         int idx = 0;
 
         for (int i = 0; i < nVehicles + 1; i++) {
-            int[] vehicle = Arrays.stream(pickup, idx, zeroIndex[i]).mapToObj(j -> new int[] {j, j}).flatMapToInt(Arrays::stream).toArray();
+            int[] vehicle = Arrays.stream(pickup, idx, zeroIndex[i]).mapToObj(j -> new int[]{j, j}).flatMapToInt(Arrays::stream).toArray();
             shuffle(vehicle);
             System.arraycopy(vehicle, 0, solution, idx * 2 - i, vehicle.length);
             idx = zeroIndex[i] + 1;
         }
 
+        return solution;
+    }
+
+    // Not transporting is most expensive
+    public static int[] transportAll(int[] solution) {
+        return solution;
+    }
+
+    // Calls with similar origin node and destination node
+    public static int[] similarCalls(int[] solution) {
+        return solution;
+    }
+
+    // Reduce time calls have to wait for pickup / delivery
+    public static int[] reduceWaitTime(int[] solution) {
         return solution;
     }
 }

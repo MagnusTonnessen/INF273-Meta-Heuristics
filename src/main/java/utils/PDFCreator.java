@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static utils.Constants.INSTANCES;
 import static utils.Utils.getAlgorithmName;
+import static utils.Utils.getInstanceName;
 
 /**
  * Writes results of search to pdf document
@@ -57,15 +59,43 @@ public class PDFCreator {
             phrase.add(new Chunk(Arrays.toString(bestSolutions.get(i)), font));
 
             paragraph.add(phrase);
-            paragraph.setAlignment(Element.ALIGN_CENTER);
         });
+        paragraph.setAlignment(Element.ALIGN_CENTER);
 
+        newParagraph();
+    }
+
+    public void addTable() throws Exception {
+        paragraph.add(table);
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        newParagraph();
+    }
+
+    public void addTextBlock(String text) throws Exception {
+        Phrase phrase = new Phrase();
+        phrase.add(new Chunk(text));
+        paragraph.add(phrase);
+        paragraph.setAlignment(Element.ALIGN_LEFT);
+        newParagraph();
+    }
+
+    public void addBestSolutions(List<int[]> bestSolutions) throws Exception {
+        IntStream.range(0, bestSolutions.size()).forEach(i -> {
+            addEmptyLine(1);
+
+            Font font = FontFactory.getFont(FontFactory.TIMES, 12, BaseColor.BLACK);
+            Phrase phrase = new Phrase();
+            phrase.add(new Chunk("Best solution found for " + getInstanceName(INSTANCES[i]) + "\n", font));
+            phrase.add(new Chunk(Arrays.toString(bestSolutions.get(i)), font));
+
+            paragraph.add(phrase);
+        });
+        paragraph.setAlignment(Element.ALIGN_CENTER);
         newParagraph();
     }
 
     private void newParagraph() throws Exception {
         addEmptyLine(1);
-        paragraph.setAlignment(Element.ALIGN_CENTER);
         document.add(paragraph);
         paragraph = new Paragraph();
     }
@@ -86,7 +116,7 @@ public class PDFCreator {
         table.addCell(newCell("Average objective"));
         table.addCell(newCell("Best objective"));
         table.addCell(newCell("Improvement (%)"));
-        table.addCell(newCell("Running time (ms)"));
+        table.addCell(newCell("Running time (seconds)"));
     }
 
     private void addEmptyLine(int n) {

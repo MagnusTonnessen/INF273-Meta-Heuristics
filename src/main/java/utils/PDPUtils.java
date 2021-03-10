@@ -7,15 +7,28 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.IntStream;
+
+import static utils.Constants.random;
+import static utils.Utils.getInstanceName;
 
 public class PDPUtils {
 
-    public static final Random random = new Random();
+    public static String instanceName;
+    public static Map<String, Object> problem;
+    public static int[] initialSolution;
+    public static double initialCost;
+
+    public static void initialize(String filePath) {
+        instanceName = getInstanceName(filePath);
+        problem = loadProblem(filePath);
+        initialSolution = generateInitSolution(problem);
+        initialCost = costFunction(initialSolution, problem);
+    }
 
     /**
      * Load problem into map
+     *
      * @param filePath Path of problem file
      * @return Map with problem info
      */
@@ -50,54 +63,54 @@ public class PDPUtils {
             nCalls = Integer.parseInt(input.get(nVehicles + 6));
 
             vehicle = IntStream
-                        .range(0, nVehicles)
-                        .mapToObj(i -> Arrays
+                    .range(0, nVehicles)
+                    .mapToObj(i -> Arrays
                             .stream(input.get(1 + 4 + i).split(","))
                             .mapToInt(Integer::parseInt)
                             .toArray())
-                        .toArray(int[][]::new);
+                    .toArray(int[][]::new);
 
             validCalls = IntStream
-                            .range(0, nVehicles)
-                            .mapToObj(i -> Arrays
-                                .stream(input.get(1 + 7 + nVehicles + i).split(","))
-                                .mapToInt(Integer::parseInt)
-                                .toArray())
-                            .toArray(int[][]::new);
+                    .range(0, nVehicles)
+                    .mapToObj(i -> Arrays
+                            .stream(input.get(1 + 7 + nVehicles + i).split(","))
+                            .mapToInt(Integer::parseInt)
+                            .toArray())
+                    .toArray(int[][]::new);
 
             vesselCargo = new int[nVehicles][nCalls];
             IntStream.range(0, nVehicles).forEach(i -> Arrays.stream(validCalls[i]).forEach(j -> vesselCargo[i][j - 1] = 1));
 
             cargo = IntStream
-                        .range(0, nCalls)
-                        .mapToObj(i -> Arrays
+                    .range(0, nCalls)
+                    .mapToObj(i -> Arrays
                             .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
                             .skip(1)
                             .mapToInt(Integer::parseInt)
                             .toArray())
-                        .toArray(int[][]::new);
+                    .toArray(int[][]::new);
 
             travelCost = new int[nVehicles][nNodes][nNodes];
             travelTime = new int[nVehicles][nNodes][nNodes];
 
             IntStream
-                .range(0, nNodes * nNodes * nVehicles)
-                .mapToObj(i -> Arrays
-                    .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
-                    .mapToInt(Integer::parseInt)
-                    .toArray())
-                .forEach(arr -> {
-                    travelTime[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[3];
-                    travelCost[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[4];
-                });
+                    .range(0, nNodes * nNodes * nVehicles)
+                    .mapToObj(i -> Arrays
+                            .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
+                            .mapToInt(Integer::parseInt)
+                            .toArray())
+                    .forEach(arr -> {
+                        travelTime[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[3];
+                        travelCost[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[4];
+                    });
 
             nodeTimesAndCosts = IntStream
-                                    .range(0, nVehicles  * nCalls)
-                                    .mapToObj(i -> Arrays
-                                        .stream(input.get(1 + 1 + 2 * nVehicles + nCalls + 10 + nNodes * nNodes * nVehicles - 1 + i).split(","))
-                                        .mapToInt(Integer::parseInt)
-                                        .toArray())
-                                    .toArray(int[][]::new);
+                    .range(0, nVehicles * nCalls)
+                    .mapToObj(i -> Arrays
+                            .stream(input.get(1 + 1 + 2 * nVehicles + nCalls + 10 + nNodes * nNodes * nVehicles - 1 + i).split(","))
+                            .mapToInt(Integer::parseInt)
+                            .toArray())
+                    .toArray(int[][]::new);
 
             loadingTime = new int[nVehicles][nCalls];
             unloadingTime = new int[nVehicles][nCalls];
@@ -142,9 +155,8 @@ public class PDPUtils {
     }
 
     /**
-     *
      * @param solution solution to check feasibility of
-     * @param problem problem info
+     * @param problem  problem info
      * @return true if solution is feasible
      */
     public static boolean feasibilityCheck(int[] solution, Map<String, Object> problem) {
@@ -161,9 +173,7 @@ public class PDPUtils {
         int[] sol = IntStream.range(0, solution.length + 1).map(i -> i < solution.length ? solution[i] : 0).toArray();
         int[] zeroIndex = IntStream.range(0, sol.length).filter(i -> sol[i] == 0).toArray();
 
-        boolean feasibility = true;
         int tempIdx = 0;
-        String errorMessage = "Feasible";
 
         for (int i = 0; i < nVehicles; i++) {
             int finalI = i;
@@ -175,11 +185,6 @@ public class PDPUtils {
             if (noDoubleCallOnVehicle > 0) {
                 if (Arrays.stream(currentVPlan).anyMatch(j -> vesselCargo[finalI][j] == 0)) {
                     return false;
-                    /*
-                    feasibility = false;
-                    errorMessage = "Incompatible vessel and cargo";
-                    break;
-                    */
                 } else {
                     int currentTime = 0;
                     int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
@@ -191,11 +196,6 @@ public class PDPUtils {
                     Arrays.parallelPrefix(loadSize, Integer::sum);
                     if (IntStream.range(0, loadSize.length).anyMatch(j -> vesselCapacity[finalI] - loadSize[j] < 0)) {
                         return false;
-                        /*
-                        feasibility = false;
-                        errorMessage = "Capacity exceeded";
-                        break;
-                        */
                     }
 
                     int[][] timeWindowsSorted = IntStream.range(0, 2).mapToObj(j -> IntStream.range(0, sortRoute.length).map(k -> cargo[sortRoute[k]][(k % 2 == 0 ? 4 : 6) + j]).toArray()).toArray(int[][]::new);
@@ -216,24 +216,18 @@ public class PDPUtils {
                         arriveTime[j] = Math.max(currentTime + routeTravelTime[j], timeWindows[0][j]);
                         if (arriveTime[j] > timeWindows[1][j]) {
                             return false;
-                            /*
-                            feasibility = false;
-                            errorMessage = "Time window exceeded at call " + j;
-                            break;
-                            */
                         }
                         currentTime = arriveTime[j] + LUTime[j];
                     }
                 }
             }
         }
-        return feasibility;
+        return true;
     }
 
     /**
-     *
      * @param solution solution to calculate cost of
-     * @param problem problem info
+     * @param problem  problem info
      * @return cost of solution
      */
     public static double costFunction(int[] solution, Map<String, Object> problem) {
@@ -282,6 +276,7 @@ public class PDPUtils {
 
     /**
      * Shuffle int array
+     *
      * @param array array to shuffle
      */
     public static void shuffle(int[] array) {
@@ -294,7 +289,6 @@ public class PDPUtils {
     }
 
     /**
-     *
      * @param array array to get shuffle indices from
      * @return Indices of element after sort
      */
@@ -308,7 +302,7 @@ public class PDPUtils {
         int nCalls = (int) problem.get("nCalls");
         int nVehicles = (int) problem.get("nVehicles");
         int[] initSol = new int[2 * nCalls + nVehicles];
-        IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2)/2);
+        IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2) / 2);
         return initSol;
     }
 }
