@@ -43,9 +43,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        System.out.println("New: " + Arrays.toString(Operators.newOneInsert(new int[]{1, 1, 0, 2, 3, 2, 3, 0, 4, 5, 5, 4, 0, 6, 6, 7, 7})));
-        System.out.println("Sol: " + Arrays.toString(new int[]{1, 1, 0, 2, 2, 0, 4, 5, 5, 4, 3, 3, 0, 6, 6, 7, 7}));
         System.out.println("Org: " + Arrays.toString(new int[]{1, 1, 0, 2, 3, 2, 3, 0, 4, 5, 5, 4, 0, 6, 6, 7, 7}));
+        System.out.println("New: " + Arrays.toString(Operators.oneInsert(new int[]{1, 1, 0, 2, 3, 2, 3, 0, 4, 5, 5, 4, 0, 6, 6, 7, 7})));
     }
 
     public static void assignment4() throws Exception {

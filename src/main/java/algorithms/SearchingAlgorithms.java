@@ -10,6 +10,7 @@ import static utils.Constants.ITERATIONS;
 import static utils.Constants.random;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
+import static utils.PDPUtils.initialCost;
 import static utils.PDPUtils.initialSolution;
 import static utils.PDPUtils.problem;
 
@@ -20,7 +21,7 @@ public class SearchingAlgorithms {
     public int[] randomSearch() {
 
         int[] bestSolution = initialSolution;
-        double bestCost = costFunction(bestSolution, problem);
+        double bestCost = initialCost;
 
         int[] currentSolution;
         double currentCost;
@@ -47,7 +48,7 @@ public class SearchingAlgorithms {
     public int[] localSearch(double P1, double P2) {
 
         int[] bestSolution = initialSolution;
-        double bestCost = costFunction(bestSolution, problem);
+        double bestCost = initialCost;
 
         int[] currentSolution;
         double currentCost;
@@ -83,7 +84,7 @@ public class SearchingAlgorithms {
     public int[] simulatedAnnealing(double P1, double P2, double T0, double a) {
 
         int[] incumbentSolution = initialSolution;
-        double incumbentCost = costFunction(incumbentSolution, problem);
+        double incumbentCost = initialCost;
 
         int[] bestSolution = incumbentSolution;
         double bestCost = incumbentCost;
@@ -139,7 +140,7 @@ public class SearchingAlgorithms {
     public int[] simulatedAnnealingNewOperators(double P1, double P2, double T0, double a) {
 
         int[] incumbentSolution = initialSolution;
-        double incumbentCost = costFunction(incumbentSolution, problem);
+        double incumbentCost = initialCost;
 
         int[] bestSolution = incumbentSolution;
         double bestCost = incumbentCost;

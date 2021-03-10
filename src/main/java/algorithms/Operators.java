@@ -9,79 +9,26 @@ import static utils.PDPUtils.shuffle;
 
 public class Operators {
 
-    public static int[] newOneInsert(int[] solution) {
+    public static int[] oneInsert(int[] solution) {
 
         int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
         int nCalls = (solution.length - zeroIndexes.length) / 2;
-        int valueToRelocate = 3; //random.nextInt(nCalls) + 1;
-        int[] valueIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == valueToRelocate).toArray();
-        int idx = 2; //random.nextInt(zeroIndexes.length);
-        int insertIdx = zeroIndexes[idx];
-
-        System.out.println("Relocate value: " + valueToRelocate);
-        System.out.println("Value indexes: " + valueIndexes[0] + ", " + valueIndexes[1]);
-        System.out.println("Insert idx: " + insertIdx);
-
-        return IntStream.range(0, solution.length).map(i -> {
-            if (i < Math.min(insertIdx, valueIndexes[0]) || i > Math.max(insertIdx + 1, valueIndexes[1])) {
-                return solution[i];
-            }
-
-            if (insertIdx < valueIndexes[0]) {
-                if (i == insertIdx || i == insertIdx + 1) {
-                    return valueToRelocate;
-                }
-                return solution[i - ((i - 2) < valueIndexes[0] ? 1 : 0) - ((i - 2) < valueIndexes[1] ? 1 : 0)];
-            } else {
-                if (i == insertIdx - 1 || i == insertIdx - 2) {
-                    return valueToRelocate;
-                }
-                return solution[i + (i >= valueIndexes[0] ? 1 : 0) + ((i + 1) >= valueIndexes[1] ? 1 : 0)];
-            }
-        }).toArray();
-    }
-
-    public static int[] oneInsert(int[] solution) {
-
-        int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> i >= solution.length || solution[i] == 0).toArray();
-        int nCalls = (solution.length - zeroIndexes.length + 1) / 2;
         int valueToRelocate = random.nextInt(nCalls) + 1;
         int[] valueIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == valueToRelocate).toArray();
         int idx = random.nextInt(zeroIndexes.length);
-        int vehicleIdx = zeroIndexes[idx];
-        int insertIdx = idx > 0 ? zeroIndexes[idx - 1] + 1 : 0;
+        int zeroIndex = zeroIndexes[idx];
 
-        if (insertIdx <= valueIndexes[0] && valueIndexes[0] < vehicleIdx) {
-            return solution;
-        }
-
-        return IntStream.range(0, solution.length).map(oldIndex -> {
-            int newIndex = oldIndex;
-            if (valueIndexes[1] < insertIdx && newIndex < insertIdx) {
-                if (newIndex >= valueIndexes[0]) {
-                    newIndex++;
-                }
-                if (newIndex >= valueIndexes[1]) {
-                    newIndex++;
-                }
-                if (newIndex == insertIdx || newIndex == insertIdx + 1) {
-                    return valueToRelocate;
-                }
-            } else if (newIndex <= valueIndexes[1]) {
-                if (newIndex == insertIdx || newIndex == insertIdx + 1) {
-                    return valueToRelocate;
-                }
-                if (newIndex > insertIdx) {
-                    newIndex -= 2;
-                }
-                if (newIndex >= valueIndexes[0]) {
-                    newIndex++;
-                }
-                if (newIndex >= valueIndexes[1]) {
-                    newIndex++;
-                }
+        return IntStream.range(0, solution.length).map(i -> {
+            if (zeroIndex < valueIndexes[0] && i >= zeroIndex && i <= valueIndexes[1]) {
+                return i - 1 <= zeroIndex ?
+                        valueToRelocate :
+                        solution[i - ((i - 2) < valueIndexes[0] ? 1 : 0) - ((i - 2) < valueIndexes[1] ? 1 : 0)];
+            } else if (i >= valueIndexes[0] && i < zeroIndex) {
+                return i + 2 >= zeroIndex ?
+                        valueToRelocate :
+                        solution[i + 1 + (i + 1 >= valueIndexes[1] ? 1 : 0)];
             }
-            return solution[newIndex];
+            return solution[i];
         }).toArray();
     }
 
@@ -161,7 +108,36 @@ public class Operators {
 
     // Not transporting is most expensive
     public static int[] transportAll(int[] solution) {
+        int[] zeroIndexes = IntStream.range(0, solution.length + 1).filter(i -> solution[i] == 0).toArray();
+        int dummyCallIndex = zeroIndexes[zeroIndexes.length - 1] + 1;
+        int dummyCallsLength = (solution.length - dummyCallIndex);
+
+        if (dummyCallIndex == solution.length) {
+            return solution;
+        }
+
+        int idx = random.nextInt(dummyCallsLength);
+        int valueToRelocate = solution[dummyCallIndex + idx];
+        int insertIndex = zeroIndexes[bestInsertVehicle(valueToRelocate)];
+
+        return IntStream.range(0, solution.length).map(i -> {
+            if (insertIndex < valueIndexes[0] && i >= insertIndex && i <= valueIndexes[1]) {
+                return i - 1 <= insertIndex ?
+                        valueToRelocate :
+                        solution[i - ((i - 2) < valueIndexes[0] ? 1 : 0) - ((i - 2) < valueIndexes[1] ? 1 : 0)];
+            } else if (i >= valueIndexes[0] && i < insertIndex) {
+                return i + 2 >= insertIndex ?
+                        valueToRelocate :
+                        solution[i + 1 + (i + 1 >= valueIndexes[1] ? 1 : 0)];
+            }
+            return solution[i];
+        }).toArray();
+
         return solution;
+    }
+
+    public static int bestInsertVehicle(int call) {
+        return 0;
     }
 
     // Calls with similar origin node and destination node
