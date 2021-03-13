@@ -5,32 +5,49 @@ import java.util.Comparator;
 import java.util.stream.IntStream;
 
 import static utils.Constants.random;
+import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.problem;
 import static utils.PDPUtils.shuffle;
 
 public class Operators {
 
+    public static int[] randomSolution() {
+        int nCalls = (int) problem.get("nCalls");
+        int nVehicles = (int) problem.get("nVehicles");
+        int[] pickup = IntStream.range(1, nCalls + nVehicles + 1).map(i -> (i > nCalls ? 0 : i)).toArray();
+
+        shuffle(pickup);
+
+        int[] solution = new int[2 * nCalls + nVehicles];
+        int[] zeroIndex = IntStream.range(0, pickup.length + 1).filter(i -> i >= pickup.length || pickup[i] == 0).toArray();
+        int idx = 0;
+
+        for (int i = 0; i < nVehicles + 1; i++) {
+            int[] vehicle = Arrays.stream(pickup, idx, zeroIndex[i]).mapToObj(j -> new int[]{j, j}).flatMapToInt(Arrays::stream).toArray();
+            shuffle(vehicle);
+            System.arraycopy(vehicle, 0, solution, idx * 2 - i, vehicle.length);
+            idx = zeroIndex[i] + 1;
+        }
+
+        return solution;
+    }
+
     public static int[] oneInsert(int[] solution) {
+
+        int[] newSolution = Arrays.stream(solution).toArray();
 
         int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
         int nCalls = (solution.length - zeroIndexes.length) / 2;
-        int valueToRelocate = random.nextInt(nCalls) + 1;
-        int[] valueIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == valueToRelocate).toArray();
-        int idx = random.nextInt(zeroIndexes.length);
-        int zeroIndex = zeroIndexes[idx];
+        int callToRelocate = random.nextInt(nCalls) + 1;
+        int[] feasibleInsertIndexes = findFeasibleInsertIndexes(solution, callToRelocate);
 
-        return IntStream.range(0, solution.length).map(i -> {
-            if (zeroIndex < valueIndexes[0] && i >= zeroIndex && i <= valueIndexes[1]) {
-                return i - 1 <= zeroIndex ?
-                        valueToRelocate :
-                        solution[i - ((i - 2) < valueIndexes[0] ? 1 : 0) - ((i - 2) < valueIndexes[1] ? 1 : 0)];
-            } else if (i >= valueIndexes[0] && i < zeroIndex) {
-                return i + 2 >= zeroIndex ?
-                        valueToRelocate :
-                        solution[i + 1 + (i + 1 >= valueIndexes[1] ? 1 : 0)];
-            }
-            return solution[i];
-        }).toArray();
+        if (feasibleInsertIndexes.length < 1) {
+            return newSolution;
+        }
+
+        int insertIndex = feasibleInsertIndexes[random.nextInt(feasibleInsertIndexes.length)];
+
+        return moveCall(solution, insertIndex, callToRelocate);
     }
 
     public static int[] twoExchange(int[] solution) {
@@ -86,27 +103,6 @@ public class Operators {
         return newSolution;
     }
 
-    public static int[] randomSolution() {
-        int nCalls = (int) problem.get("nCalls");
-        int nVehicles = (int) problem.get("nVehicles");
-        int[] pickup = IntStream.range(1, nCalls + nVehicles + 1).map(i -> (i > nCalls ? 0 : i)).toArray();
-
-        shuffle(pickup);
-
-        int[] solution = new int[2 * nCalls + nVehicles];
-        int[] zeroIndex = IntStream.range(0, pickup.length + 1).filter(i -> i >= pickup.length || pickup[i] == 0).toArray();
-        int idx = 0;
-
-        for (int i = 0; i < nVehicles + 1; i++) {
-            int[] vehicle = Arrays.stream(pickup, idx, zeroIndex[i]).mapToObj(j -> new int[]{j, j}).flatMapToInt(Arrays::stream).toArray();
-            shuffle(vehicle);
-            System.arraycopy(vehicle, 0, solution, idx * 2 - i, vehicle.length);
-            idx = zeroIndex[i] + 1;
-        }
-
-        return solution;
-    }
-
     // Not transporting is most expensive
     public static int[] transportAll(int[] solution) {
 
@@ -121,18 +117,80 @@ public class Operators {
         }
 
         int idx = random.nextInt(dummyCallsLength);
-        int valueToRelocate = solution[dummyCallIndex + idx];
-        int[] valueIndexes = IntStream.range(dummyCallIndex, solution.length).filter(i -> solution[i] == valueToRelocate).toArray();
-        int insertIndex = zeroIndexes[smallestVehicle(solution)];
+        int callToRelocate = solution[dummyCallIndex + idx];
+        int[] feasibleInsertIndexes = findFeasibleInsertIndexes(solution, callToRelocate);
 
+        if (feasibleInsertIndexes.length < 1) {
+            return newSolution;
+        }
+
+        int insertIndex = feasibleInsertIndexes[random.nextInt(feasibleInsertIndexes.length)];
+
+        return moveCall(solution, insertIndex, callToRelocate);
+    }
+    // Calls with similar origin node and destination node
+
+    public static int[] similarCalls(int[] solution) {
+        return solution;
+    }
+    // Reduce time calls have to wait for pickup / delivery
+
+    public static int[] reduceWaitTime(int[] solution) {
+        return solution;
+    }
+
+
+    public static int[] moveCall(int[] solution, int insertIndex, int call) {
+        int[] callIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == call).toArray();
         return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < valueIndexes[0] && i >= insertIndex && i <= valueIndexes[1]) {
-                return i - 1 <= insertIndex ?
-                        valueToRelocate :
-                        solution[i - ((i - 2) < valueIndexes[0] ? 1 : 0) - ((i - 2) < valueIndexes[1] ? 1 : 0)];
+            if (insertIndex < callIndexes[0] && i >= insertIndex && i <= callIndexes[1]) {
+                return i - 1 <= insertIndex ? call : solution[i - ((i - 2) < callIndexes[0] ? 1 : 0) - ((i - 2) < callIndexes[1] ? 1 : 0)];
+            } else if (i >= callIndexes[0] && i < insertIndex) {
+                return i + 2 >= insertIndex ? call : solution[i + 1 + (i + 1 >= callIndexes[1] ? 1 : 0)];
             }
             return solution[i];
         }).toArray();
+    }
+
+    public static int[] movePickup(int[] solution, int call, int insertIndex) {
+        int pickupIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == call).sorted().toArray()[0];
+        return IntStream.range(0, solution.length).map(i -> {
+            if (insertIndex < pickupIndex && i >= insertIndex && i <= pickupIndex) {
+                return i == insertIndex ? call : solution[i - ((i - 2) < pickupIndex ? 1 : 0)];
+            } else if (i >= pickupIndex && i < insertIndex) {
+                return i + 2 == insertIndex ? call : solution[i + 1];
+            }
+            return solution[i];
+        }).toArray();
+    }
+
+    public static int[] moveDelivery(int[] solution, int call, int insertIndex) {
+        int pickupIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == call).sorted().toArray()[0];
+        return IntStream.range(0, solution.length).map(i -> {
+            if (insertIndex < pickupIndex && i >= insertIndex && i <= pickupIndex) {
+                return i == insertIndex ? call : solution[i - ((i - 2) < pickupIndex ? 1 : 0)];
+            } else if (i >= pickupIndex && i < insertIndex) {
+                return i + 2 == insertIndex ? call : solution[i + 1];
+            }
+            return solution[i];
+        }).toArray();
+    }
+
+    public static int[] testAllInserts(int[] solution, int vehicleIndex, int call) {
+        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
+        int vehicleEnd = zeroIndexes[vehicleIndex];
+        int vehicleStart = vehicleIndex > 0 ? zeroIndexes[vehicleIndex - 1] + 1: 0;
+        for (int index = vehicleStart; index < vehicleEnd; index++) {
+            int[] newSolution = moveCall(solution, index, call);
+            if (feasibilityCheck(newSolution)) {
+                return newSolution;
+            }
+        }
+    }
+
+    public static int[] findFeasibleInsertIndexes(int[] solution, int call) {
+        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
+        return Arrays.stream(zeroIndexes).filter(i -> feasibilityCheck(moveCall(solution, i, call))).toArray();
     }
 
     public static double percentageTransported(int[] solution) {
@@ -146,15 +204,5 @@ public class Operators {
     public static int smallestVehicle(int[] solution) {
         int[] zeroIndexes = IntStream.range(-1, solution.length).filter(i -> i == -1 || solution[i] == 0).toArray();
         return IntStream.range(0, zeroIndexes.length - 1).mapToObj(i -> new int[]{i, zeroIndexes[i + 1] - zeroIndexes[i]}).min(Comparator.comparingInt(v -> v[1])).get()[0];
-    }
-
-    // Calls with similar origin node and destination node
-    public static int[] similarCalls(int[] solution) {
-        return solution;
-    }
-
-    // Reduce time calls have to wait for pickup / delivery
-    public static int[] reduceWaitTime(int[] solution) {
-        return solution;
     }
 }

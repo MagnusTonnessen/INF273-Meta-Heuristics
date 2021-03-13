@@ -154,6 +154,9 @@ public class PDPUtils {
         return problemMap;
     }
 
+    public static boolean feasibilityCheck(int[] solution) {
+        return feasibilityCheck(solution, problem);
+    }
     /**
      * @param solution solution to check feasibility of
      * @param problem  problem info

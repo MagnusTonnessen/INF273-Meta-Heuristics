@@ -79,7 +79,7 @@ public class SearchingAlgorithms {
     // SIMULATED ANNEALING
 
     public int[] simulatedAnnealing() {
-        return simulatedAnnealing(0.33, 0.33, 200, 0.999);
+        return simulatedAnnealing(0.33, 0.33, 100, 0.999);
     }
 
     public int[] simulatedAnnealing(double P1, double P2, double T0, double a) {
@@ -135,10 +135,10 @@ public class SearchingAlgorithms {
     // SIMULATED ANNEALING NEW OPERATORS
 
     public int[] simulatedAnnealingNewOperators() {
-        return simulatedAnnealingNewOperators(100, 0.999);
+        return simulatedAnnealingNewOperators(0.33, 0.33, 200, 0.999);
     }
 
-    public int[] simulatedAnnealingNewOperators(double T0, double a) {
+    public int[] simulatedAnnealingNewOperators(double P1, double P2, double T0, double a) {
 
         int[] incumbentSolution = initialSolution.clone();
         double incumbentCost = initialCost;
@@ -153,10 +153,11 @@ public class SearchingAlgorithms {
         double deltaE;
         double p;
 
-        double P3 = Operators.percentageTransported(incumbentSolution) / 2;
+        /*
+        double P3 = 1 - Operators.percentageTransported(incumbentSolution) / 2;
         double P1 = (1 - P3) / 2;
         double P2 = (1 - P3) / 2;
-
+        */
         for (int i = 0; i < ITERATIONS; i++) {
 
             p = random.nextDouble();

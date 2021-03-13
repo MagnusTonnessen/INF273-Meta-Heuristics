@@ -1,5 +1,6 @@
 package main;
 
+import algorithms.Operators;
 import algorithms.SearchingAlgorithms;
 import utils.JSONCreator;
 import utils.PDFCreator;
@@ -14,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static utils.Constants.C7V3;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -42,7 +44,9 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        runInstances(Collections.singletonList(SIMULATED_ANNEALING));
+        initialize(C7V3);
+
+        System.out.println(Arrays.toString(Operators.movePickup(initialSolution, 2, 0)));
     }
 
     public static void assignment4() throws Exception {
