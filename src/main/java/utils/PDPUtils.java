@@ -74,6 +74,7 @@ public class PDPUtils {
                     .range(0, nVehicles)
                     .mapToObj(i -> Arrays
                             .stream(input.get(1 + 7 + nVehicles + i).split(","))
+                            .skip(1)
                             .mapToInt(Integer::parseInt)
                             .toArray())
                     .toArray(int[][]::new);
@@ -307,5 +308,15 @@ public class PDPUtils {
         int[] initSol = new int[2 * nCalls + nVehicles];
         IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2) / 2);
         return initSol;
+    }
+
+    public static int[] validCallForVehicle(int vehicle) {
+        int[] calls = ((int[][]) problem.get("vesselCargo"))[vehicle - 1];
+        return IntStream.range(0, calls.length).filter(call -> calls[call] == 1).toArray();
+    }
+
+    public static int[] validVehiclesForCall(int call) {
+        int[] vehicles = Arrays.stream((int[][]) problem.get("vesselCargo")).mapToInt(vehicle -> vehicle[call - 1]).toArray();
+        return IntStream.range(0, vehicles.length).filter(vehicle -> vehicles[vehicle] == 1).toArray();
     }
 }

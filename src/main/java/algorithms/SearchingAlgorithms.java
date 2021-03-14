@@ -1,10 +1,12 @@
 package algorithms;
 
-import static algorithms.Operators.oneInsert;
-import static algorithms.Operators.randomSolution;
-import static algorithms.Operators.threeExchange;
-import static algorithms.Operators.transportAll;
-import static algorithms.Operators.twoExchange;
+import operators.Operators;
+
+import static operators.Operators.oneInsert;
+import static operators.Operators.randomSolution;
+import static operators.Operators.threeExchange;
+import static operators.Operators.transportAll;
+import static operators.Operators.twoExchange;
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
 import static utils.Constants.ITERATIONS;
@@ -153,13 +155,13 @@ public class SearchingAlgorithms {
         double deltaE;
         double p;
 
-        /*
-        double P3 = 1 - Operators.percentageTransported(incumbentSolution) / 2;
-        double P1 = (1 - P3) / 2;
-        double P2 = (1 - P3) / 2;
-        */
         for (int i = 0; i < ITERATIONS; i++) {
 
+            double P3 = 1 - Operators.percentageTransported(incumbentSolution) / 2;
+            System.out.println("P3: " + P3);
+            P1 = (1 - P3) / 2;
+            P2 = (1 - P3) / 2;
+            
             p = random.nextDouble();
 
             if (p < P1) {

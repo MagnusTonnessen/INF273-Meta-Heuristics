@@ -1,9 +1,9 @@
 package main;
 
-import algorithms.Operators;
 import algorithms.SearchingAlgorithms;
 import utils.JSONCreator;
 import utils.PDFCreator;
+import utils.PDPUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static utils.Constants.C130V40;
 import static utils.Constants.C7V3;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
@@ -28,6 +29,7 @@ import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.Constants.results;
 import static utils.Constants.searchingAlgorithms;
 import static utils.PDPUtils.costFunction;
+import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.initialCost;
 import static utils.PDPUtils.initialSolution;
 import static utils.PDPUtils.initialize;
@@ -46,7 +48,6 @@ public class Main {
         Locale.setDefault(Locale.ROOT);
         initialize(C7V3);
 
-        System.out.println(Arrays.toString(Operators.movePickup(initialSolution, 2, 0)));
     }
 
     public static void assignment4() throws Exception {
