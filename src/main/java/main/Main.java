@@ -63,7 +63,7 @@ public class Main {
 
                 Results searchResults = runInstance(searchingAlgorithm, 10, false);
 
-                bestSolutions.add(searchResults.bestSolution);
+                bestSolutions.add(searchResults.bestSolution());
 
                 printRunResults(getAlgorithmName(search), searchResults);
             }
@@ -142,7 +142,7 @@ public class Main {
 
             results.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS).putAll(searchResults.asMap());
 
-            bestSolutions.add(searchResults.bestSolution);
+            bestSolutions.add(searchResults.bestSolution());
 
             pdf.addTable();
         }
@@ -179,7 +179,7 @@ public class Main {
 
                 Results searchResults = runInstance(searchingAlgorithm, 10, true);
 
-                bestSolutions.add(searchResults.bestSolution);
+                bestSolutions.add(searchResults.bestSolution());
             }
 
             System.out.println("\n");
@@ -209,7 +209,7 @@ public class Main {
 
             Results searchResults = runInstance(searchingAlgorithm, 10, true);
 
-            bestSolutions.add(searchResults.bestSolution);
+            bestSolutions.add(searchResults.bestSolution());
 
             System.out.println("\n");
             pdf.addTableAndBestSolution(bestSolutions, SEARCHING_ALGORITHMS);
@@ -217,5 +217,4 @@ public class Main {
 
         pdf.closeDocument();
     }
-
 }

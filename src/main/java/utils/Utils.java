@@ -30,10 +30,10 @@ public class Utils {
 
         System.out.println("\r" +
                 rightPad(algorithmName, pad + 25) +
-                rightPad(format.format(results.averageObjective), pad) +
-                rightPad(format.format(results.bestObjective), pad) +
-                rightPad(format.format(results.improvement), pad) +
-                rightPad(format.format(results.averageRunTime), pad)
+                rightPad(format.format(results.averageObjective()), pad) +
+                rightPad(format.format(results.bestObjective()), pad) +
+                rightPad(format.format(results.improvement()), pad) +
+                rightPad(format.format(results.averageRunTime()), pad)
         );
     }
 
