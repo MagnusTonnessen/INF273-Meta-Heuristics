@@ -10,7 +10,6 @@
 
   <build>
     <plugins>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -20,8 +19,17 @@
           <compilerArgs>--enable-preview</compilerArgs>
         </configuration>
       </plugin>
-
     </plugins>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <outputDirectory>target</outputDirectory>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>src/main/results</directory>
+      </resource>
+    </resources>
   </build>
 
 
