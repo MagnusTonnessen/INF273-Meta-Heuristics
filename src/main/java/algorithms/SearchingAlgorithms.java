@@ -1,21 +1,18 @@
 package algorithms;
 
-import operators.Operators;
-
+import static java.lang.Math.E;
+import static java.lang.Math.pow;
 import static operators.Operators.oneInsert;
 import static operators.Operators.randomSolution;
 import static operators.Operators.threeExchange;
 import static operators.Operators.transportAll;
 import static operators.Operators.twoExchange;
-import static java.lang.Math.E;
-import static java.lang.Math.pow;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.random;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.initialCost;
 import static utils.PDPUtils.initialSolution;
-import static utils.PDPUtils.problem;
 
 public class SearchingAlgorithms {
 
@@ -32,9 +29,9 @@ public class SearchingAlgorithms {
         for (int i = 0; i < ITERATIONS; i++) {
 
             currentSolution = randomSolution();
-            currentCost = costFunction(currentSolution, problem);
+            currentCost = costFunction(currentSolution);
 
-            if (feasibilityCheck(currentSolution, problem) && currentCost < bestCost) {
+            if (feasibilityCheck(currentSolution) && currentCost < bestCost) {
                 bestSolution = currentSolution;
                 bestCost = currentCost;
             }
@@ -68,9 +65,9 @@ public class SearchingAlgorithms {
                 currentSolution = oneInsert(bestSolution);
             }
 
-            currentCost = costFunction(currentSolution, problem);
+            currentCost = costFunction(currentSolution);
 
-            if (feasibilityCheck(currentSolution, problem) && currentCost < bestCost) {
+            if (feasibilityCheck(currentSolution) && currentCost < bestCost) {
                 bestSolution = currentSolution;
                 bestCost = currentCost;
             }
@@ -81,7 +78,7 @@ public class SearchingAlgorithms {
     // SIMULATED ANNEALING
 
     public int[] simulatedAnnealing() {
-        return simulatedAnnealing(0.33, 0.33, 100, 0.999);
+        return simulatedAnnealing(0.33, 0.33, 200, 0.999);
     }
 
     public int[] simulatedAnnealing(double P1, double P2, double T0, double a) {
@@ -111,11 +108,11 @@ public class SearchingAlgorithms {
                 currentSolution = oneInsert(incumbentSolution);
             }
 
-            currentCost = costFunction(currentSolution, problem);
+            currentCost = costFunction(currentSolution);
 
             deltaE = currentCost - incumbentCost;
 
-            boolean currentFeasible = feasibilityCheck(currentSolution, problem);
+            boolean currentFeasible = feasibilityCheck(currentSolution);
 
             if (currentFeasible && deltaE < 0) {
                 incumbentSolution = currentSolution;
@@ -157,11 +154,12 @@ public class SearchingAlgorithms {
 
         for (int i = 0; i < ITERATIONS; i++) {
 
+            /*
             double P3 = 1 - Operators.percentageTransported(incumbentSolution) / 2;
-            System.out.println("P3: " + P3);
             P1 = (1 - P3) / 2;
             P2 = (1 - P3) / 2;
-            
+            */
+
             p = random.nextDouble();
 
             if (p < P1) {
@@ -172,11 +170,11 @@ public class SearchingAlgorithms {
                 currentSolution = transportAll(incumbentSolution);
             }
 
-            currentCost = costFunction(currentSolution, problem);
+            currentCost = costFunction(currentSolution);
 
             deltaE = currentCost - incumbentCost;
 
-            boolean currentFeasible = feasibilityCheck(currentSolution, problem);
+            boolean currentFeasible = feasibilityCheck(currentSolution);
 
             if (currentFeasible && deltaE < 0) {
                 incumbentSolution = currentSolution;

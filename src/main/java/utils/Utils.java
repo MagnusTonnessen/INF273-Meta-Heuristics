@@ -3,7 +3,6 @@ package utils;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
 import static utils.PDPUtils.initialCost;
@@ -26,15 +25,15 @@ public class Utils {
         );
     }
 
-    public static void printRunResults(String algorithmName, Map<String, Object> results) {
+    public static void printRunResults(String algorithmName, Results results) {
         DecimalFormat format = new DecimalFormat("0.00#");
 
         System.out.println("\r" +
                 rightPad(algorithmName, pad + 25) +
-                rightPad(format.format((double) results.get("Average objective")), pad) +
-                rightPad(format.format((double) results.get("Best objective")), pad) +
-                rightPad(format.format((double) results.get("Improvement")), pad) +
-                rightPad(format.format((double) results.get("Average run time")), pad)
+                rightPad(format.format(results.averageObjective), pad) +
+                rightPad(format.format(results.bestObjective), pad) +
+                rightPad(format.format(results.improvement), pad) +
+                rightPad(format.format(results.averageRunTime), pad)
         );
     }
 

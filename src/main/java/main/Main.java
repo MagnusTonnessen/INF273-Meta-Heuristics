@@ -3,7 +3,7 @@ package main;
 import algorithms.SearchingAlgorithms;
 import utils.JSONCreator;
 import utils.PDFCreator;
-import utils.PDPUtils;
+import utils.Results;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,8 +15,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import static utils.Constants.C130V40;
-import static utils.Constants.C7V3;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -29,11 +27,9 @@ import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.Constants.results;
 import static utils.Constants.searchingAlgorithms;
 import static utils.PDPUtils.costFunction;
-import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.initialCost;
 import static utils.PDPUtils.initialSolution;
 import static utils.PDPUtils.initialize;
-import static utils.PDPUtils.problem;
 import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
@@ -46,8 +42,70 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        initialize(C7V3);
+        runInstances(Collections.singletonList(SIMULATED_ANNEALING_NEW_OPERATORS));
+    }
 
+    public static void runAllInstances() throws Exception {
+        runInstances(Arrays.asList(SEARCHING_ALGORITHMS));
+    }
+
+    public static void runInstances(List<String> algorithms) throws Exception {
+        for (String filePath : INSTANCES) {
+
+            initialize(filePath);
+
+            printRunInfo();
+
+            List<int[]> bestSolutions = new ArrayList<>(algorithms.size());
+
+            for (String search : algorithms) {
+                Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
+
+                Results searchResults = runInstance(searchingAlgorithm, 10, false);
+
+                bestSolutions.add(searchResults.bestSolution);
+
+                printRunResults(getAlgorithmName(search), searchResults);
+            }
+
+            IntStream.range(0, algorithms.size()).forEach(i -> {
+                System.out.println("\nBest solution found with " + getAlgorithmName(algorithms.get(i)));
+                System.out.println(Arrays.toString(bestSolutions.get(i)) + "\n");
+            });
+        }
+    }
+
+    public static Results runInstance(Method searchingAlgorithm, int times, boolean writeToPDF) throws Exception {
+
+        String algorithmName = getAlgorithmName(searchingAlgorithm);
+
+        int[] bestSolution = initialSolution;
+        double bestCost = initialCost;
+        double totalCost = 0;
+        double executionTime = 0;
+
+        for (int i = 0; i < times; i++) {
+            System.out.print("\r" + getAlgorithmName(searchingAlgorithm) + " progress: " + (i + 1) + "/" + times);
+            long startTime = System.currentTimeMillis();
+            int[] solution = (int[]) searchingAlgorithm.invoke(searchingAlgorithms);
+            executionTime += System.currentTimeMillis() - startTime;
+            double cost = costFunction(solution);
+            totalCost += cost;
+            if (cost < bestCost) {
+                bestSolution = solution;
+                bestCost = cost;
+            }
+        }
+
+        double averageCost = totalCost / times;
+        double improvement = 100.0 * (initialCost - bestCost) / initialCost;
+        double averageExecutionTime = (executionTime / times) / 1000;
+
+        if (writeToPDF) {
+            pdf.addRow(algorithmName, averageCost, bestCost, improvement, averageExecutionTime);
+        }
+
+        return new Results(bestSolution, bestCost, averageCost, improvement, averageExecutionTime);
     }
 
     public static void assignment4() throws Exception {
@@ -79,12 +137,12 @@ public class Main {
 
             Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(SIMULATED_ANNEALING_NEW_OPERATORS);
 
-            Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, true);
+            Results searchResults = runInstance(searchingAlgorithm, 10, true);
             System.out.println("\r" + getAlgorithmName(SIMULATED_ANNEALING_NEW_OPERATORS));
 
-            results.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS).putAll(searchResults);
+            results.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS).putAll(searchResults.asMap());
 
-            bestSolutions.add((int[]) searchResults.get("Best solution"));
+            bestSolutions.add(searchResults.bestSolution);
 
             pdf.addTable();
         }
@@ -119,9 +177,9 @@ public class Main {
                 System.out.println("\n" + getAlgorithmName(search));
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
 
-                Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, true);
+                Results searchResults = runInstance(searchingAlgorithm, 10, true);
 
-                bestSolutions.add((int[]) searchResults.get("Best solution"));
+                bestSolutions.add(searchResults.bestSolution);
             }
 
             System.out.println("\n");
@@ -149,9 +207,9 @@ public class Main {
             System.out.println("\n" + getAlgorithmName(RANDOM_SEARCH));
             Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(RANDOM_SEARCH);
 
-            Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, true);
+            Results searchResults = runInstance(searchingAlgorithm, 10, true);
 
-            bestSolutions.add((int[]) searchResults.get("Best solution"));
+            bestSolutions.add(searchResults.bestSolution);
 
             System.out.println("\n");
             pdf.addTableAndBestSolution(bestSolutions, SEARCHING_ALGORITHMS);
@@ -160,73 +218,4 @@ public class Main {
         pdf.closeDocument();
     }
 
-    public static void runAllInstances() throws Exception {
-        runInstances(Arrays.asList(SEARCHING_ALGORITHMS));
-    }
-
-    public static void runInstances(List<String> algorithms) throws Exception {
-        for (String filePath : INSTANCES) {
-
-            initialize(filePath);
-
-            printRunInfo();
-
-            List<int[]> bestSolutions = new ArrayList<>(algorithms.size());
-
-            for (String search : algorithms) {
-                Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
-
-                Map<String, Object> searchResults = runInstance(searchingAlgorithm, 10, false);
-
-                bestSolutions.add((int[]) searchResults.get("Best solution"));
-
-                printRunResults(getAlgorithmName(search), searchResults);
-            }
-
-            IntStream.range(0, algorithms.size()).forEach(i -> {
-                System.out.println("\nBest solution found with " + getAlgorithmName(algorithms.get(i)));
-                System.out.println(Arrays.toString(bestSolutions.get(i)) + "\n");
-            });
-        }
-    }
-
-    public static Map<String, Object> runInstance(Method searchingAlgorithm, int times, boolean writeToPDF) throws Exception {
-
-        String algorithmName = getAlgorithmName(searchingAlgorithm);
-
-        int[] bestSolution = initialSolution;
-        double bestCost = initialCost;
-        double totalCost = 0;
-        double executionTime = 0;
-
-        for (int i = 0; i < times; i++) {
-            System.out.print("\r" + getAlgorithmName(searchingAlgorithm) + " progress: " + (i + 1) + "/" + times);
-            long startTime = System.currentTimeMillis();
-            int[] solution = (int[]) searchingAlgorithm.invoke(searchingAlgorithms);
-            executionTime += System.currentTimeMillis() - startTime;
-            double cost = costFunction(solution, problem);
-            totalCost += cost;
-            if (cost < bestCost) {
-                bestSolution = solution;
-                bestCost = cost;
-            }
-        }
-
-        double averageCost = totalCost / times;
-        double improvement = 100.0 * (initialCost - bestCost) / initialCost;
-        double averageExecutionTime = (executionTime / times) / 1000;
-
-        Map<String, Object> resultsMap = new HashMap<>();
-        resultsMap.put("Best solution", bestSolution);
-        resultsMap.put("Best objective", bestCost);
-        resultsMap.put("Average objective", averageCost);
-        resultsMap.put("Improvement", improvement);
-        resultsMap.put("Average run time", averageExecutionTime);
-
-        if (writeToPDF) {
-            pdf.addRow(algorithmName, averageCost, bestCost, improvement, averageExecutionTime);
-        }
-
-        return resultsMap;
-    }
 }

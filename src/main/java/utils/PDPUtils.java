@@ -1,29 +1,34 @@
 package utils;
 
+import objects.Call;
+import objects.NodeTimeAndCost;
+import objects.TravelTimeAndCost;
+import objects.Vehicle;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toList;
 import static utils.Constants.random;
 import static utils.Utils.getInstanceName;
 
 public class PDPUtils {
 
     public static String instanceName;
-    public static Map<String, Object> problem;
+    public static Problem problem;
     public static int[] initialSolution;
     public static double initialCost;
 
-    public static void initialize(String filePath) {
+    public static void initialize(String filePath) throws Exception {
         instanceName = getInstanceName(filePath);
         problem = loadProblem(filePath);
-        initialSolution = generateInitSolution(problem);
-        initialCost = costFunction(initialSolution, problem);
+        initialSolution = problem.initialSolution;
+        initialCost = problem.initialCost;
     }
 
     /**
@@ -32,147 +37,163 @@ public class PDPUtils {
      * @param filePath Path of problem file
      * @return Map with problem info
      */
-    public static Map<String, Object> loadProblem(String filePath) {
+    public static Problem loadProblem(String filePath) throws Exception {
 
-        Map<String, Object> problemMap = new HashMap<>();
+        int nNodes;
+        int nVehicles;
+        int nCalls;
 
-        try {
-            int nNodes;
-            int nVehicles;
-            int nCalls;
+        int[][] validCalls;
+        int[][] nodes;
 
-            int[][] vehicle;
-            int[][] validCalls;
-            int[][] nodeTimesAndCosts;
+        Vehicle[] vehicles;
+        Call[] calls;
+        TravelTimeAndCost[] travelTimeAndCosts;
+        NodeTimeAndCost[] nodeTimeAndCosts;
 
-            int[] vesselCapacity;
-            int[][] cargo;
-            int[][] firstTravelTime;
-            int[][] firstTravelCost;
-            int[][] loadingTime;
-            int[][] unloadingTime;
-            int[][] vesselCargo;
-            int[][] portCost;
-            int[][][] travelTime;
-            int[][][] travelCost;
+        int[] vesselCapacity;
+        int[][] cargo;
+        int[][] firstTravelTime;
+        int[][] firstTravelCost;
+        int[][] loadingTime;
+        int[][] unloadingTime;
+        int[][] vesselCargo;
+        int[][] portCost;
+        int[][][] travelTime;
+        int[][][] travelCost;
 
-            List<String> input = Files.readAllLines(Path.of(filePath));
+        List<String> input = Files.readAllLines(Path.of(filePath));
 
-            nNodes = Integer.parseInt(input.get(1));
-            nVehicles = Integer.parseInt(input.get(3));
-            nCalls = Integer.parseInt(input.get(nVehicles + 6));
+        nNodes = Integer.parseInt(input.get(1));
+        nVehicles = Integer.parseInt(input.get(3));
+        nCalls = Integer.parseInt(input.get(nVehicles + 6));
 
-            vehicle = IntStream
-                    .range(0, nVehicles)
-                    .mapToObj(i -> Arrays
-                            .stream(input.get(1 + 4 + i).split(","))
-                            .mapToInt(Integer::parseInt)
-                            .toArray())
-                    .toArray(int[][]::new);
+        validCalls = IntStream
+                .range(0, nVehicles)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 7 + nVehicles + i).split(","))
+                        .skip(1)
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .toArray(int[][]::new);
 
-            validCalls = IntStream
-                    .range(0, nVehicles)
-                    .mapToObj(i -> Arrays
-                            .stream(input.get(1 + 7 + nVehicles + i).split(","))
-                            .skip(1)
-                            .mapToInt(Integer::parseInt)
-                            .toArray())
-                    .toArray(int[][]::new);
+        vehicles = IntStream
+                .range(0, nVehicles)
+                .mapToObj(i -> new Vehicle(Arrays
+                        .stream(input.get(1 + 4 + i).split(","))
+                        .mapToInt(Integer::parseInt)
+                        .toArray(), validCalls[i]))
+                .toArray(Vehicle[]::new);
 
-            vesselCargo = new int[nVehicles][nCalls];
-            IntStream.range(0, nVehicles).forEach(i -> Arrays.stream(validCalls[i]).forEach(j -> vesselCargo[i][j - 1] = 1));
+        vesselCargo = new int[nVehicles][nCalls];
+        IntStream.range(0, nVehicles).forEach(i -> Arrays.stream(validCalls[i]).forEach(j -> vesselCargo[i][j - 1] = 1));
 
-            cargo = IntStream
-                    .range(0, nCalls)
-                    .mapToObj(i -> Arrays
-                            .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
-                            .skip(1)
-                            .mapToInt(Integer::parseInt)
-                            .toArray())
-                    .toArray(int[][]::new);
+        cargo = IntStream
+                .range(0, nCalls)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
+                        .skip(1)
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .toArray(int[][]::new);
 
-            travelCost = new int[nVehicles][nNodes][nNodes];
-            travelTime = new int[nVehicles][nNodes][nNodes];
+        calls = IntStream
+                .range(0, nCalls)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .map(Call::new)
+                .toArray(Call[]::new);
 
-            IntStream
-                    .range(0, nNodes * nNodes * nVehicles)
-                    .mapToObj(i -> Arrays
-                            .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
-                            .mapToInt(Integer::parseInt)
-                            .toArray())
-                    .forEach(arr -> {
-                        travelTime[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[3];
-                        travelCost[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[4];
-                    });
+        travelCost = new int[nVehicles][nNodes][nNodes];
+        travelTime = new int[nVehicles][nNodes][nNodes];
 
-            nodeTimesAndCosts = IntStream
-                    .range(0, nVehicles * nCalls)
-                    .mapToObj(i -> Arrays
-                            .stream(input.get(1 + 1 + 2 * nVehicles + nCalls + 10 + nNodes * nNodes * nVehicles - 1 + i).split(","))
-                            .mapToInt(Integer::parseInt)
-                            .toArray())
-                    .toArray(int[][]::new);
-
-            loadingTime = new int[nVehicles][nCalls];
-            unloadingTime = new int[nVehicles][nCalls];
-            portCost = new int[nVehicles][nCalls];
-
-            IntStream.range(0, nVehicles * nCalls).forEach(i -> {
-                loadingTime[nodeTimesAndCosts[i][0] - 1][nodeTimesAndCosts[i][1] - 1] = nodeTimesAndCosts[i][2];
-                unloadingTime[nodeTimesAndCosts[i][0] - 1][nodeTimesAndCosts[i][1] - 1] = nodeTimesAndCosts[i][4];
-                portCost[nodeTimesAndCosts[i][0] - 1][nodeTimesAndCosts[i][1] - 1] = nodeTimesAndCosts[i][3] + nodeTimesAndCosts[i][5];
-            });
-
-            vesselCapacity = new int[nVehicles];
-            firstTravelTime = new int[nVehicles][nNodes];
-            firstTravelCost = new int[nVehicles][nNodes];
-
-            IntStream.range(0, nVehicles).forEach(i -> {
-                vesselCapacity[i] = vehicle[i][3];
-                IntStream.range(0, nNodes).forEach(j -> {
-                    firstTravelTime[i][j] = travelTime[i][vehicle[i][1] - 1][j] + vehicle[i][2];
-                    firstTravelCost[i][j] = travelCost[i][vehicle[i][1] - 1][j];
+        IntStream
+                .range(0, nNodes * nNodes * nVehicles)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .forEach(arr -> {
+                    travelTime[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[3];
+                    travelCost[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[4];
                 });
+
+        travelTimeAndCosts = IntStream
+                .range(0, nNodes * nNodes * nVehicles)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .map(TravelTimeAndCost::new)
+                .toArray(TravelTimeAndCost[]::new);
+
+        nodeTimeAndCosts = IntStream
+                .range(0, nVehicles * nCalls)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 1 + 2 * nVehicles + nCalls + 10 + nNodes * nNodes * nVehicles - 1 + i).split(","))
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .map(NodeTimeAndCost::new)
+                .toArray(NodeTimeAndCost[]::new);
+
+        nodes = IntStream
+                .range(0, nVehicles * nCalls)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 1 + 2 * nVehicles + nCalls + 10 + nNodes * nNodes * nVehicles - 1 + i).split(","))
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .toArray(int[][]::new);
+
+        loadingTime = new int[nVehicles][nCalls];
+        unloadingTime = new int[nVehicles][nCalls];
+        portCost = new int[nVehicles][nCalls];
+
+        IntStream.range(0, nVehicles * nCalls).forEach(i -> {
+            loadingTime[nodes[i][0] - 1][nodes[i][1] - 1] = nodes[i][2];
+            unloadingTime[nodes[i][0] - 1][nodes[i][1] - 1] = nodes[i][4];
+            portCost[nodes[i][0] - 1][nodes[i][1] - 1] = nodes[i][3] + nodes[i][5];
+        });
+
+        vesselCapacity = new int[nVehicles];
+        firstTravelTime = new int[nVehicles][nNodes];
+        firstTravelCost = new int[nVehicles][nNodes];
+
+        IntStream.range(0, nVehicles).forEach(i -> {
+            vesselCapacity[i] = vehicles[i].capacity;
+            IntStream.range(0, nNodes).forEach(j -> {
+                firstTravelTime[i][j] = travelTime[i][vehicles[i].homeNode - 1][j] + vehicles[i].startingTime;
+                firstTravelCost[i][j] = travelCost[i][vehicles[i].homeNode - 1][j];
             });
+        });
 
-            problemMap.put("nNodes", nNodes);
-            problemMap.put("nVehicles", nVehicles);
-            problemMap.put("nCalls", nCalls);
-            problemMap.put("vesselCapacity", vesselCapacity);
-            problemMap.put("cargo", cargo);
-            problemMap.put("firstTravelTime", firstTravelTime);
-            problemMap.put("firstTravelCost", firstTravelCost);
-            problemMap.put("loadingTime", loadingTime);
-            problemMap.put("unloadingTime", unloadingTime);
-            problemMap.put("vesselCargo", vesselCargo);
-            problemMap.put("portCost", portCost);
-            problemMap.put("travelTime", travelTime);
-            problemMap.put("travelCost", travelCost);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return problemMap;
+        return new Problem(nCalls, nVehicles, nNodes,
+                vesselCapacity, cargo, firstTravelTime,
+                firstTravelCost, loadingTime, unloadingTime,
+                vesselCargo, portCost, travelTime, travelCost,
+                vehicles, calls, travelTimeAndCosts, nodeTimeAndCosts);
     }
 
     public static boolean feasibilityCheck(int[] solution) {
         return feasibilityCheck(solution, problem);
     }
+
     /**
      * @param solution solution to check feasibility of
      * @param problem  problem info
      * @return true if solution is feasible
      */
-    public static boolean feasibilityCheck(int[] solution, Map<String, Object> problem) {
+    public static boolean feasibilityCheck(int[] solution, Problem problem) {
 
-        int nVehicles = (int) problem.get("nVehicles");
-        int[] vesselCapacity = (int[]) problem.get("vesselCapacity");
-        int[][] cargo = (int[][]) problem.get("cargo");
-        int[][] firstTravelTime = (int[][]) problem.get("firstTravelTime");
-        int[][] loadingTime = (int[][]) problem.get("loadingTime");
-        int[][] unloadingTime = (int[][]) problem.get("unloadingTime");
-        int[][] vesselCargo = (int[][]) problem.get("vesselCargo");
-        int[][][] travelTime = (int[][][]) problem.get("travelTime");
+        int nVehicles = problem.nVehicles;
+        int[] vesselCapacity = problem.vesselCapacity;
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelTime = problem.firstTravelTime;
+        int[][] loadingTime = problem.loadingTime;
+        int[][] unloadingTime = problem.unloadingTime;
+        int[][] vesselCargo = problem.vesselCargo;
+        int[][][] travelTime = problem.travelTime;
 
         int[] sol = IntStream.range(0, solution.length + 1).map(i -> i < solution.length ? solution[i] : 0).toArray();
         int[] zeroIndex = IntStream.range(0, sol.length).filter(i -> sol[i] == 0).toArray();
@@ -229,18 +250,22 @@ public class PDPUtils {
         return true;
     }
 
+    public static double costFunction(int[] solution) {
+        return costFunction(solution, problem);
+    }
+
     /**
      * @param solution solution to calculate cost of
      * @param problem  problem info
      * @return cost of solution
      */
-    public static double costFunction(int[] solution, Map<String, Object> problem) {
+    public static double costFunction(int[] solution, Problem problem) {
 
-        int nVehicles = (int) problem.get("nVehicles");
-        int[][] cargo = (int[][]) problem.get("cargo");
-        int[][] firstTravelCost = (int[][]) problem.get("firstTravelCost");
-        int[][] portCost = (int[][]) problem.get("portCost");
-        int[][][] travelCost = (int[][][]) problem.get("travelCost");
+        int nVehicles = problem.nVehicles;
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelCost = problem.firstTravelCost;
+        int[][] portCost = problem.portCost;
+        int[][][] travelCost = problem.travelCost;
 
         double notTransportCost = 0;
         double[] routeTravelCost = new double[nVehicles];
@@ -310,13 +335,29 @@ public class PDPUtils {
         return initSol;
     }
 
+    public static int[] generateInitSolution(int nCalls, int nVehicles) {
+        int[] initSol = new int[2 * nCalls + nVehicles];
+        IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2) / 2);
+        return initSol;
+    }
+
     public static int[] validCallForVehicle(int vehicle) {
-        int[] calls = ((int[][]) problem.get("vesselCargo"))[vehicle - 1];
+        int[] calls = problem.vesselCargo[vehicle - 1];
         return IntStream.range(0, calls.length).filter(call -> calls[call] == 1).toArray();
     }
 
     public static int[] validVehiclesForCall(int call) {
-        int[] vehicles = Arrays.stream((int[][]) problem.get("vesselCargo")).mapToInt(vehicle -> vehicle[call - 1]).toArray();
-        return IntStream.range(0, vehicles.length).filter(vehicle -> vehicles[vehicle] == 1).toArray();
+        int[] vehicles = Arrays.stream(problem.vesselCargo).mapToInt(vehicle -> vehicle[call - 1]).toArray();
+        return IntStream.rangeClosed(0, vehicles.length).filter(vehicle -> vehicle == vehicles.length || vehicles[vehicle] == 1).toArray();
+    }
+
+    public static int[] transportedCalls(int[] solution) {
+        List<Integer> notTransported = Arrays.stream(notTransportedCalls(solution)).boxed().collect(toList());
+        return IntStream.rangeClosed(1, problem.nCalls).filter(i -> !notTransported.contains(i)).toArray();
+    }
+
+    public static int[] notTransportedCalls(int[] solution) {
+        int lastVehicleIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray()[problem.nVehicles - 1];
+        return Arrays.stream(solution).skip(lastVehicleIndex + 1).distinct().toArray();
     }
 }
