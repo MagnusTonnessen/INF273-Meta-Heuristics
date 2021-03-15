@@ -15,20 +15,17 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 import static utils.Constants.random;
+import static utils.Constants.results;
 import static utils.Utils.getInstanceName;
 
 public class PDPUtils {
 
     public static String instanceName;
     public static Problem problem;
-    public static int[] initialSolution;
-    public static double initialCost;
 
     public static void initialize(String filePath) throws Exception {
         instanceName = getInstanceName(filePath);
         problem = loadProblem(filePath);
-        initialSolution = problem.initialSolution;
-        initialCost = problem.initialCost;
     }
 
     /**
@@ -359,5 +356,9 @@ public class PDPUtils {
     public static int[] notTransportedCalls(int[] solution) {
         int lastVehicleIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray()[problem.nVehicles - 1];
         return Arrays.stream(solution).skip(lastVehicleIndex + 1).distinct().toArray();
+    }
+
+    public static Call[] callsFromID(int[] calls) {
+        return Arrays.stream(calls).mapToObj(call -> problem.callsMap.get(call)).toArray(Call[]::new);
     }
 }

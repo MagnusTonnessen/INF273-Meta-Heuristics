@@ -5,8 +5,8 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import static java.util.stream.Collectors.joining;
-import static utils.PDPUtils.initialCost;
 import static utils.PDPUtils.instanceName;
+import static utils.PDPUtils.problem;
 
 public class Utils {
 
@@ -14,7 +14,7 @@ public class Utils {
 
     public static void printRunInfo() {
         System.out.println("\n--- " + instanceName + " ---\n");
-        System.out.printf("Initial cost: %.2f\n\n", initialCost);
+        System.out.printf("Initial cost: %.2f\n\n", problem.initialCost);
 
         System.out.println(
                 rightPad("", pad + 25) +

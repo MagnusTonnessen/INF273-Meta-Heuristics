@@ -11,8 +11,7 @@ import static utils.Constants.ITERATIONS;
 import static utils.Constants.random;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
-import static utils.PDPUtils.initialCost;
-import static utils.PDPUtils.initialSolution;
+import static utils.PDPUtils.problem;
 
 public class SearchingAlgorithms {
 
@@ -20,8 +19,8 @@ public class SearchingAlgorithms {
 
     public int[] randomSearch() {
 
-        int[] bestSolution = initialSolution.clone();
-        double bestCost = initialCost;
+        int[] bestSolution = problem.initialSolution.clone();
+        double bestCost = problem.initialCost;
 
         int[] currentSolution;
         double currentCost;
@@ -47,8 +46,8 @@ public class SearchingAlgorithms {
 
     public int[] localSearch(double P1, double P2) {
 
-        int[] bestSolution = initialSolution.clone();
-        double bestCost = initialCost;
+        int[] bestSolution = problem.initialSolution.clone();
+        double bestCost = problem.initialCost;
 
         int[] currentSolution;
         double currentCost;
@@ -83,8 +82,8 @@ public class SearchingAlgorithms {
 
     public int[] simulatedAnnealing(double P1, double P2, double T0, double a) {
 
-        int[] incumbentSolution = initialSolution.clone();
-        double incumbentCost = initialCost;
+        int[] incumbentSolution = problem.initialSolution.clone();
+        double incumbentCost = problem.initialCost;
 
         int[] bestSolution = incumbentSolution.clone();
         double bestCost = incumbentCost;
@@ -139,8 +138,8 @@ public class SearchingAlgorithms {
 
     public int[] simulatedAnnealingNewOperators(double P1, double P2, double T0, double a) {
 
-        int[] incumbentSolution = initialSolution.clone();
-        double incumbentCost = initialCost;
+        int[] incumbentSolution = problem.initialSolution.clone();
+        double incumbentCost = problem.initialCost;
 
         int[] bestSolution = incumbentSolution.clone();
         double bestCost = incumbentCost;

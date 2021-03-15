@@ -1,6 +1,6 @@
 package objects;
 
-public class Call implements Comparable<Call> {
+public class Call {
 
     public final int callIndex;
     public final int originNode;
@@ -22,11 +22,6 @@ public class Call implements Comparable<Call> {
         this.upperTimePickup = call[6];
         this.lowerTimeDelivery = call[7];
         this.upperTimeDelivery = call[8];
-    }
-
-    @Override
-    public int compareTo(Call o) {
-        return 0;
     }
 
     @Override

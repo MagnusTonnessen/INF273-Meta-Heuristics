@@ -8,13 +8,14 @@ import utils.Results;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static utils.Constants.C7V3;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -26,10 +27,11 @@ import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
 import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.Constants.results;
 import static utils.Constants.searchingAlgorithms;
+import static utils.PDPUtils.callsFromID;
 import static utils.PDPUtils.costFunction;
-import static utils.PDPUtils.initialCost;
-import static utils.PDPUtils.initialSolution;
 import static utils.PDPUtils.initialize;
+import static utils.PDPUtils.notTransportedCalls;
+import static utils.PDPUtils.problem;
 import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
@@ -42,7 +44,11 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        runInstances(Collections.singletonList(SIMULATED_ANNEALING_NEW_OPERATORS));
+        initialize(C7V3);
+        int mostExpensiveCall = Arrays.stream(callsFromID(notTransportedCalls(problem.initialSolution))).max(Comparator.comparingInt(a -> a.costNotTransport)).get().callIndex;
+        System.out.println(mostExpensiveCall);
+        Arrays.stream(problem.calls).forEach(System.out::println);
+        // runAllInstances();
     }
 
     public static void runAllInstances() throws Exception {
@@ -79,8 +85,8 @@ public class Main {
 
         String algorithmName = getAlgorithmName(searchingAlgorithm);
 
-        int[] bestSolution = initialSolution;
-        double bestCost = initialCost;
+        int[] bestSolution = problem.initialSolution;
+        double bestCost = problem.initialCost;
         double totalCost = 0;
         double executionTime = 0;
 
@@ -98,7 +104,7 @@ public class Main {
         }
 
         double averageCost = totalCost / times;
-        double improvement = 100.0 * (initialCost - bestCost) / initialCost;
+        double improvement = 100.0 * (problem.initialCost - bestCost) / problem.initialCost;
         double averageExecutionTime = (executionTime / times) / 1000;
 
         if (writeToPDF) {

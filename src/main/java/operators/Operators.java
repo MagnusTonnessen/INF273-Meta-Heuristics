@@ -1,9 +1,11 @@
 package operators;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.IntStream;
 
 import static utils.Constants.random;
+import static utils.PDPUtils.callsFromID;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.notTransportedCalls;
 import static utils.PDPUtils.problem;
@@ -110,9 +112,12 @@ public class Operators {
             return newSolution;
         }
 
-        int mostExpensiveCall = Arrays.stream(notTransportedCalls(solution)).sorted().sum();
-        int idx = random.nextInt(dummyCallsLength);
-        int callToRelocate = solution[dummyCallIndex + idx];
+        int[] callsSorted = Arrays.stream(callsFromID(notTransportedCalls(solution)))
+                            .sorted(Comparator.comparingInt(call -> -call.costNotTransport))
+                            .mapToInt(call -> call.callIndex)
+                            .toArray();
+
+        int callToRelocate = callsSorted[0];
         int[] feasibleInsertIndexes = findFeasibleInsertIndexes(solution, callToRelocate);
 
         if (feasibleInsertIndexes.length < 1) {

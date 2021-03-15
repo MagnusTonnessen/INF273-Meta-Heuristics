@@ -5,6 +5,10 @@ import objects.NodeTimeAndCost;
 import objects.TravelTimeAndCost;
 import objects.Vehicle;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.generateInitSolution;
 
@@ -26,6 +30,7 @@ public class Problem {
     public final double initialCost;
     public final Vehicle[] vehicles;
     public final Call[] calls;
+    public final Map<Integer, Call> callsMap;
     public final TravelTimeAndCost[] travelTimeAndCosts;
     public final NodeTimeAndCost[] nodeTimeAndCosts;
 
@@ -47,6 +52,7 @@ public class Problem {
         this.calls = calls;
         this.travelTimeAndCosts = travelTimeAndCosts;
         this.nodeTimeAndCosts = nodeTimeAndCosts;
+        this.callsMap = Arrays.stream(calls).collect(Collectors.toMap(c -> c.callIndex, c -> c));
         this.initialSolution = generateInitSolution(nCalls, nVehicles);
         this.initialCost = costFunction(initialSolution, this);
     }
