@@ -63,17 +63,17 @@ public class Operators {
         int vehicleStart = getVehicleStartIndex(solution, vehicleIndex);
         int vehicleEnd = getVehicleEndIndex(solution, vehicleIndex);
 
-        int[] indexes = new int[vehicleEnd - vehicleStart];
+        int[] indexes = new int[solution.length];
+        Arrays.fill(indexes, vehicleStart);
 
         int i = vehicleStart;
         while (i < vehicleEnd) {
-            if (indexes[i - vehicleStart] < i) {
-                swap(newSolution, i % 2 == 0 ? 0 : indexes[i - vehicleStart], i - vehicleStart);
-                System.out.println(Arrays.toString(newSolution));
-                indexes[i - vehicleStart]++;
+            if (indexes[i] < i) {
+                swap(newSolution, i % 2 == vehicleStart % 2 ? vehicleStart : indexes[i], i);
+                indexes[i]++;
                 i = vehicleStart;
             } else {
-                indexes[i - vehicleStart] = 0;
+                indexes[i] = vehicleStart;
                 i++;
             }
         }
@@ -81,9 +81,13 @@ public class Operators {
     }
 
     private static void swap(int[] input, int a, int b) {
+        if (input[a] == input[b]) {
+            return;
+        }
         int tmp = input[a];
         input[a] = input[b];
         input[b] = tmp;
+        System.out.println(Arrays.toString(input));
     }
 
     public static int[] twoExchangeInVehicle(int[] solution) {

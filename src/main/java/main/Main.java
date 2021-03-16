@@ -48,7 +48,7 @@ public class Main {
         Locale.setDefault(Locale.ROOT);
         // runSearches(Arrays.asList(SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS), Arrays.asList(C18V5));
         initialize(C7V3);
-        int[] sol = new int[]{1, 1, 0, 2, 2, 3, 3, 4, 4, 0, 5, 7, 5, 7, 6, 6};
+        int[] sol = new int[]{1, 1, 0, 2, 2, 3, 3, 0, 4, 4, 5, 7, 5, 7, 6, 6};
         Operators.bruteForceVehicle(sol, 1);
     }
 
