@@ -1,7 +1,15 @@
 package algorithms;
 
+import operators.Operators;
+import utils.Utils;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
+import static operators.Operators.bruteForceVehicle;
+import static operators.Operators.fillAllVehicles;
 import static operators.Operators.oneInsert;
 import static operators.Operators.randomSolution;
 import static operators.Operators.reinsertFromMostExpensiveVehicle;
@@ -14,6 +22,7 @@ import static utils.Constants.random;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.problem;
+import static utils.Utils.getEmptyVehicles;
 
 public class SearchingAlgorithms {
 
@@ -153,24 +162,16 @@ public class SearchingAlgorithms {
         double deltaE;
         double p;
 
-        int feasibleSolutionsFound = 0;
-
         for (int i = 0; i < ITERATIONS; i++) {
-
-/*
-            double P3 = 1 - percentageTransported(incumbentSolution) / 2;
-            P1 = (1 - P3) / 2;
-            P2 = (1 - P3) / 2;
-*/
 
             p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = twoExchangeInVehicle(incumbentSolution);
+                currentSolution = bruteForceVehicle(incumbentSolution);
             } else if (p < P1 + P2) {
                 currentSolution = reinsertFromMostExpensiveVehicle(incumbentSolution);
             } else {
-                currentSolution = transportAll(incumbentSolution);
+                currentSolution = getEmptyVehicles(incumbentSolution).length > 0 ? fillAllVehicles(incumbentSolution) : transportAll(incumbentSolution, 0.10); // transportAll(incumbentSolution, 0.10);
             }
 
             currentCost = costFunction(currentSolution);
@@ -180,8 +181,7 @@ public class SearchingAlgorithms {
             boolean currentFeasible = feasibilityCheck(currentSolution);
 
             if (currentFeasible) {
-                feasibleSolutionsFound++;
-                if (deltaE < 0) {
+                if (deltaE <= 0) {
                     incumbentSolution = currentSolution;
                     incumbentCost = currentCost;
 

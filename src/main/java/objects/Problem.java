@@ -24,6 +24,7 @@ public class Problem {
     public final int[] initialSolution;
     public final double initialCost;
     public final Vehicle[] vehicles;
+    public final Map<Integer, Vehicle> vehicleMap;
     public final Call[] calls;
     public final Map<Integer, Call> callsMap;
     public final TravelTimeAndCost[] travelTimeAndCosts;
@@ -48,6 +49,7 @@ public class Problem {
         this.travelTimeAndCosts = travelTimeAndCosts;
         this.nodeTimeAndCosts = nodeTimeAndCosts;
         this.callsMap = Arrays.stream(calls).collect(Collectors.toMap(c -> c.callIndex, c -> c));
+        this.vehicleMap = Arrays.stream(vehicles).collect(Collectors.toMap(v -> v.vehicleIndex, v -> v));
         this.initialSolution = generateInitSolution(nCalls, nVehicles);
         this.initialCost = costFunction(initialSolution, nVehicles, cargo, firstTravelCost, portCost, travelCost);
     }

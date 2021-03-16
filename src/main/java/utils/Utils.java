@@ -2,16 +2,19 @@ package utils;
 
 import objects.Call;
 import objects.Results;
+import operators.Operators;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.instanceName;
@@ -117,19 +120,21 @@ public class Utils {
 
     public static int[] findFeasibleVehiclePermutation(int[] solution, int vehicleIndex, int call) {
 
-        int[] newSolution;
+        int[] newSolution = solution.clone();
 
         if (vehicleIndex == problem.nVehicles) {
-            return moveCall(solution, solution.length - 1, call);
+            return moveCall(newSolution, newSolution.length - 1, call);
         }
 
         int vehicleEnd = getVehicleEndIndex(solution, vehicleIndex);
         int vehicleStart = getVehicleStartIndex(solution, vehicleIndex);
 
+        newSolution = moveCall(solution, vehicleEnd, call);
+
         if (vehicleEnd - vehicleStart == 0) {
-            newSolution = moveCall(solution, vehicleStart, call);
             return feasibilityCheck(newSolution) ? newSolution : solution.clone();
         }
+
         for (int pickupIdx = vehicleStart; pickupIdx < vehicleEnd + 1; pickupIdx++) {
             for (int deliveryIdx = pickupIdx + 1; deliveryIdx < vehicleEnd + 2; deliveryIdx++) {
                 newSolution = solution.clone();
@@ -144,7 +149,7 @@ public class Utils {
     }
 
     public static int[] findFeasibleInsertIndexes(int[] solution, int call) {
-        int[] validVehicles = validVehicleIndexesForCall(call);
+        int[] validVehicles = validVehicleIndexesForCallWithDummy(call);
         return Arrays.stream(validVehicles).filter(vehicleIndex -> {
             int[] newSolution = findFeasibleVehiclePermutation(solution, vehicleIndex, call);
             return !Arrays.equals(newSolution, solution) && feasibilityCheck(newSolution);
@@ -177,9 +182,10 @@ public class Utils {
         return vehicleIndex == 0 ? 0 : IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray()[vehicleIndex - 1] + 1;
     }
 
-    public static int[] validCallForVehicle(int vehicle) {
-        int[] calls = problem.vesselCargo[vehicle - 1];
-        return IntStream.range(0, calls.length).filter(call -> calls[call] == 1).toArray();
+    public static int[] validCallForVehicle(int vehicleIndex) {
+        return problem.vehicleMap.get(vehicleIndex+1).validCalls;
+        // int[] calls = problem.vesselCargo[vehicleIndex];
+        // return Arrays.stream(calls).filter(call -> calls[call] == 1).toArray();
     }
 
     public static int[] validVehicleIndexesForCallWithDummy(int call) {
@@ -193,13 +199,12 @@ public class Utils {
     }
 
     public static int[] transportedCalls(int[] solution) {
-        List<Integer> notTransported = Arrays.stream(notTransportedCalls(solution)).boxed().collect(toList());
+        Set<Integer> notTransported = Arrays.stream(notTransportedCalls(solution)).boxed().collect(toSet());
         return IntStream.rangeClosed(1, problem.nCalls).filter(i -> !notTransported.contains(i)).toArray();
     }
 
     public static int[] notTransportedCalls(int[] solution) {
-        int lastVehicleIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray()[problem.nVehicles - 1];
-        return Arrays.stream(solution).skip(lastVehicleIndex + 1).distinct().toArray();
+        return Arrays.stream(solution).skip(getVehicleStartIndex(solution, problem.nVehicles)).distinct().toArray();
     }
 
     public static Call[] callsFromID(int[] calls) {
@@ -225,8 +230,18 @@ public class Utils {
 
     public static int[] getVehiclesWithNToMCalls(int[] solution, int N, int M) {
         return IntStream.range(0, problem.nVehicles).filter(i -> {
-            int calls = (getVehicleEndIndex(solution, i) - getVehicleStartIndex(solution, i));
+            int calls = (getVehicleEndIndex(solution, i) - getVehicleStartIndex(solution, i)) / 2;
             return N <= calls && calls <= M;
         }).toArray();
+    }
+
+    public static int getVehicleSize(int[] solution, int vehicleIndex) {
+        int startIndex = getVehicleStartIndex(solution, vehicleIndex);
+        int endIndex = getVehicleEndIndex(solution, vehicleIndex);
+        return endIndex - startIndex;
+    }
+
+    public static int[] getEmptyVehicles(int[] solution) {
+        return IntStream.range(0, problem.nVehicles).filter(i -> getVehicleSize(solution, i) == 0).toArray();
     }
 }

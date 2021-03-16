@@ -2,7 +2,6 @@ package main;
 
 import algorithms.SearchingAlgorithms;
 import objects.Results;
-import operators.Operators;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
@@ -15,26 +14,28 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.C130V40;
 import static utils.Constants.C18V5;
 import static utils.Constants.C35V7;
 import static utils.Constants.C7V3;
 import static utils.Constants.C80V20;
+import static utils.Constants.FILL_ALL_VEHICLES_DESCRIPTION;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
-import static utils.Constants.REDUCE_WAIT_TIME_DESCRIPTION;
+import static utils.Constants.REINSERT_FROM_MOST_EXPENSIVE_VEHICLE;
+import static utils.Constants.RESULTS_MAP;
 import static utils.Constants.SEARCHING_ALGORITHMS;
-import static utils.Constants.SIMILAR_CALLS_DESCRIPTION;
 import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
 import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
-import static utils.Constants.results;
 import static utils.Constants.searchingAlgorithms;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.initialize;
 import static utils.PDPUtils.problem;
 import static utils.Utils.getAlgorithmName;
+import static utils.Utils.getEmptyVehicles;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
 import static utils.Utils.printRunResults;
@@ -46,10 +47,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        // runSearches(Arrays.asList(SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS), Arrays.asList(C18V5));
-        initialize(C7V3);
-        int[] sol = new int[]{1, 1, 0, 2, 2, 3, 3, 0, 4, 4, 5, 7, 5, 7, 6, 6};
-        Operators.bruteForceVehicle(sol, 1);
+
+        runSearches(Arrays.asList(SIMULATED_ANNEALING_NEW_OPERATORS), Arrays.asList(INSTANCES));
     }
 
     public static void runAllSearches() throws Exception {
@@ -132,7 +131,7 @@ public class Main {
 
             pdf.newTable(getInstanceName(instance));
 
-            results.get(instance).putIfAbsent(SIMULATED_ANNEALING_NEW_OPERATORS, new HashMap<>());
+            RESULTS_MAP.get(instance).putIfAbsent(SIMULATED_ANNEALING_NEW_OPERATORS, new HashMap<>());
 
             for (String search : Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING)) {
                 pdf.addRow(getAlgorithmName(search),
@@ -147,7 +146,7 @@ public class Main {
             Results searchResults = runSearch(searchingAlgorithm, 10, true);
             System.out.println("\r" + getAlgorithmName(SIMULATED_ANNEALING_NEW_OPERATORS));
 
-            results.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS).putAll(searchResults.asMap());
+            RESULTS_MAP.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS).putAll(searchResults.asMap());
 
             bestSolutions.add(searchResults.bestSolution());
 
@@ -157,12 +156,13 @@ public class Main {
         pdf.addBestSolutions(bestSolutions);
 
         pdf.addTextBlock(TRANSPORT_ALL_DESCRIPTION);
-        pdf.addTextBlock(SIMILAR_CALLS_DESCRIPTION);
-        pdf.addTextBlock(REDUCE_WAIT_TIME_DESCRIPTION);
+        pdf.addTextBlock(REINSERT_FROM_MOST_EXPENSIVE_VEHICLE);
+        pdf.addTextBlock(BRUTE_FORCE_VEHICLE_DESCRIPTION);
+        pdf.addTextBlock(FILL_ALL_VEHICLES_DESCRIPTION);
 
         pdf.closeDocument();
 
-        json.save(results);
+        json.save(RESULTS_MAP);
     }
 
     public static void assignment3() throws Exception {
