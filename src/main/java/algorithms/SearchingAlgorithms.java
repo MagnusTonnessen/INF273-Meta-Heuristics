@@ -4,9 +4,11 @@ import static java.lang.Math.E;
 import static java.lang.Math.pow;
 import static operators.Operators.oneInsert;
 import static operators.Operators.randomSolution;
+import static operators.Operators.reinsertFromMostExpensiveVehicle;
 import static operators.Operators.threeExchange;
 import static operators.Operators.transportAll;
 import static operators.Operators.twoExchange;
+import static operators.Operators.twoExchangeInVehicle;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.random;
 import static utils.PDPUtils.costFunction;
@@ -151,20 +153,22 @@ public class SearchingAlgorithms {
         double deltaE;
         double p;
 
+        int feasibleSolutionsFound = 0;
+
         for (int i = 0; i < ITERATIONS; i++) {
 
-            /*
-            double P3 = 1 - Operators.percentageTransported(incumbentSolution) / 2;
+/*
+            double P3 = 1 - percentageTransported(incumbentSolution) / 2;
             P1 = (1 - P3) / 2;
             P2 = (1 - P3) / 2;
-            */
+*/
 
             p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = twoExchange(incumbentSolution);
+                currentSolution = twoExchangeInVehicle(incumbentSolution);
             } else if (p < P1 + P2) {
-                currentSolution = threeExchange(incumbentSolution);
+                currentSolution = reinsertFromMostExpensiveVehicle(incumbentSolution);
             } else {
                 currentSolution = transportAll(incumbentSolution);
             }
@@ -175,17 +179,20 @@ public class SearchingAlgorithms {
 
             boolean currentFeasible = feasibilityCheck(currentSolution);
 
-            if (currentFeasible && deltaE < 0) {
-                incumbentSolution = currentSolution;
-                incumbentCost = currentCost;
+            if (currentFeasible) {
+                feasibleSolutionsFound++;
+                if (deltaE < 0) {
+                    incumbentSolution = currentSolution;
+                    incumbentCost = currentCost;
 
-                if (incumbentCost < bestCost) {
-                    bestSolution = incumbentSolution;
-                    bestCost = incumbentCost;
+                    if (incumbentCost < bestCost) {
+                        bestSolution = incumbentSolution;
+                        bestCost = incumbentCost;
+                    }
+                } else if (random.nextDouble() < pow(E, -deltaE / T)) {
+                    incumbentSolution = currentSolution;
+                    incumbentCost = currentCost;
                 }
-            } else if (currentFeasible && random.nextDouble() < pow(E, -deltaE / T)) {
-                incumbentSolution = currentSolution;
-                incumbentCost = currentCost;
             }
             T *= a;
         }

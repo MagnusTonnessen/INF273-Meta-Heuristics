@@ -5,12 +5,20 @@ import java.util.Comparator;
 import java.util.stream.IntStream;
 
 import static utils.Constants.random;
-import static utils.PDPUtils.callsFromID;
-import static utils.PDPUtils.feasibilityCheck;
-import static utils.PDPUtils.notTransportedCalls;
 import static utils.PDPUtils.problem;
 import static utils.PDPUtils.shuffle;
-import static utils.PDPUtils.validVehiclesForCall;
+import static utils.Utils.callsFromID;
+import static utils.Utils.findFeasibleInsertIndexes;
+import static utils.Utils.getCallsInVehicle;
+import static utils.Utils.getVehicleEndIndex;
+import static utils.Utils.getVehicleStartIndex;
+import static utils.Utils.getVehiclesWithAtLeastNCalls;
+import static utils.Utils.getVehiclesWithNToMCalls;
+import static utils.Utils.leastExpensiveVehicle;
+import static utils.Utils.mostExpensiveVehicle;
+import static utils.Utils.moveCall;
+import static utils.Utils.notTransportedCalls;
+import static utils.Utils.validVehicleIndexesForCall;
 
 public class Operators {
 
@@ -20,14 +28,13 @@ public class Operators {
         shuffle(pickup);
 
         int[] solution = new int[2 * problem.nCalls + problem.nVehicles];
-        int[] zeroIndex = IntStream.range(0, pickup.length + 1).filter(i -> i >= pickup.length || pickup[i] == 0).toArray();
         int idx = 0;
 
         for (int i = 0; i < problem.nVehicles + 1; i++) {
-            int[] vehicle = Arrays.stream(pickup, idx, zeroIndex[i]).mapToObj(j -> new int[]{j, j}).flatMapToInt(Arrays::stream).toArray();
+            int[] vehicle = Arrays.stream(pickup, idx, getVehicleEndIndex(solution, i)).mapToObj(j -> new int[]{j, j}).flatMapToInt(Arrays::stream).toArray();
             shuffle(vehicle);
             System.arraycopy(vehicle, 0, solution, idx * 2 - i, vehicle.length);
-            idx = zeroIndex[i] + 1;
+            idx = getVehicleEndIndex(solution, i) + 1;
         }
 
         return solution;
@@ -35,13 +42,11 @@ public class Operators {
 
     public static int[] oneInsert(int[] solution) {
 
-        int[] newSolution = solution.clone();
-
         int callToRelocate = random.nextInt(problem.nCalls) + 1;
         int[] feasibleInsertIndexes = findFeasibleInsertIndexes(solution, callToRelocate);
 
         if (feasibleInsertIndexes.length < 1) {
-            return newSolution;
+            return solution.clone();
         }
 
         int insertIndex = feasibleInsertIndexes[random.nextInt(feasibleInsertIndexes.length)];
@@ -49,24 +54,85 @@ public class Operators {
         return moveCall(solution, insertIndex, callToRelocate);
     }
 
+    public static int[] bruteForceVehicle(int[] solution, int index) {
+
+        int[] newSolution = solution.clone();
+
+        int[] vehicles = getVehiclesWithNToMCalls(solution, 2, 3);
+        int vehicleIndex = index; //random.nextInt(vehicles.length);
+        int vehicleStart = getVehicleStartIndex(solution, vehicleIndex);
+        int vehicleEnd = getVehicleEndIndex(solution, vehicleIndex);
+
+        int[] indexes = new int[vehicleEnd - vehicleStart];
+
+        int i = vehicleStart;
+        while (i < vehicleEnd) {
+            if (indexes[i - vehicleStart] < i) {
+                swap(newSolution, i % 2 == 0 ? 0 : indexes[i - vehicleStart], i - vehicleStart);
+                System.out.println(Arrays.toString(newSolution));
+                indexes[i - vehicleStart]++;
+                i = vehicleStart;
+            } else {
+                indexes[i - vehicleStart] = 0;
+                i++;
+            }
+        }
+        return newSolution;
+    }
+
+    private static void swap(int[] input, int a, int b) {
+        int tmp = input[a];
+        input[a] = input[b];
+        input[b] = tmp;
+    }
+
+    public static int[] twoExchangeInVehicle(int[] solution) {
+
+        int[] newSolution = solution.clone();
+
+        int[] vehiclesWithTwoCalls = getVehiclesWithAtLeastNCalls(solution, 2);
+
+        for (int vehicleIndex : vehiclesWithTwoCalls) {
+
+            int[] calls = getCallsInVehicle(solution, vehicleIndex);
+            int firstCall = calls[random.nextInt(calls.length)];
+            int secondCall = calls[random.nextInt(calls.length)];
+
+            if (firstCall == secondCall) {
+                continue;
+            }
+
+            int[] firstCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstCall).toArray();
+            int[] secondCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondCall).toArray();
+
+            newSolution[firstCallIndex[0]] = secondCall;
+            newSolution[firstCallIndex[1]] = secondCall;
+            newSolution[secondCallIndex[0]] = firstCall;
+            newSolution[secondCallIndex[1]] = firstCall;
+
+            return newSolution;
+        }
+        return newSolution;
+    }
+
     public static int[] twoExchange(int[] solution) {
 
         int[] newSolution = solution.clone();
 
-        int firstValue = random.nextInt(problem.nCalls) + 1;
-        int secondValue = random.nextInt(problem.nCalls) + 1;
+        int firstCall = random.nextInt(problem.nCalls) + 1;
+        int secondCall = random.nextInt(problem.nCalls) + 1;
 
-        if (firstValue == secondValue) {
+        if (firstCall == secondCall) {
             return newSolution;
         }
 
-        int[] firstValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstValue).toArray();
-        int[] secondValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondValue).toArray();
+        int[] firstCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstCall).toArray();
+        int[] secondCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondCall).toArray();
 
-        newSolution[firstValueIndex[0]] = secondValue;
-        newSolution[firstValueIndex[1]] = secondValue;
-        newSolution[secondValueIndex[0]] = firstValue;
-        newSolution[secondValueIndex[1]] = firstValue;
+        newSolution[firstCallIndex[0]] = secondCall;
+        newSolution[firstCallIndex[1]] = secondCall;
+        newSolution[secondCallIndex[0]] = firstCall;
+        newSolution[secondCallIndex[1]] = firstCall;
 
         return newSolution;
     }
@@ -75,58 +141,94 @@ public class Operators {
 
         int[] newSolution = solution.clone();
 
-        int firstValue = random.nextInt(problem.nCalls) + 1;
-        int secondValue = random.nextInt(problem.nCalls) + 1;
-        int thirdValue = random.nextInt(problem.nCalls) + 1;
+        int firstCall = random.nextInt(problem.nCalls) + 1;
+        int secondCall = random.nextInt(problem.nCalls) + 1;
+        int thirdCall = random.nextInt(problem.nCalls) + 1;
 
 
-        if (firstValue == secondValue || secondValue == thirdValue || firstValue == thirdValue) {
+        if (firstCall == secondCall || secondCall == thirdCall || firstCall == thirdCall) {
             return newSolution;
         }
 
+        int[] firstCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstCall).toArray();
+        int[] secondCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondCall).toArray();
+        int[] thirdCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == thirdCall).toArray();
 
-        int[] firstValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstValue).toArray();
-        int[] secondValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondValue).toArray();
-        int[] thirdValueIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == thirdValue).toArray();
-
-        newSolution[firstValueIndex[0]] = thirdValue;
-        newSolution[firstValueIndex[1]] = thirdValue;
-        newSolution[secondValueIndex[0]] = firstValue;
-        newSolution[secondValueIndex[1]] = firstValue;
-        newSolution[thirdValueIndex[0]] = secondValue;
-        newSolution[thirdValueIndex[1]] = secondValue;
+        newSolution[firstCallIndex[0]] = thirdCall;
+        newSolution[firstCallIndex[1]] = thirdCall;
+        newSolution[secondCallIndex[0]] = firstCall;
+        newSolution[secondCallIndex[1]] = firstCall;
+        newSolution[thirdCallIndex[0]] = secondCall;
+        newSolution[thirdCallIndex[1]] = secondCall;
 
         return newSolution;
     }
 
-    // Not transporting is most expensive
+    // Move most expensive call from dummy to least expensive valid vehicle
     public static int[] transportAll(int[] solution) {
 
         int[] newSolution = solution.clone();
 
-        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
-        int dummyCallIndex = zeroIndexes[zeroIndexes.length - 1] + 1;
-        int dummyCallsLength = (solution.length - dummyCallIndex);
+        int dummyCallIndex = getVehicleStartIndex(solution, problem.nVehicles);
 
         if (dummyCallIndex == solution.length) {
             return newSolution;
         }
 
         int[] callsSorted = Arrays.stream(callsFromID(notTransportedCalls(solution)))
-                            .sorted(Comparator.comparingInt(call -> -call.costNotTransport))
-                            .mapToInt(call -> call.callIndex)
-                            .toArray();
+                .sorted(Comparator.comparingInt(call -> -call.costNotTransport))
+                .mapToInt(call -> call.callIndex)
+                .toArray();
 
-        int callToRelocate = callsSorted[0];
-        int[] feasibleInsertIndexes = findFeasibleInsertIndexes(solution, callToRelocate);
+        int[] firstThree = Arrays.copyOf(callsSorted, 3);
+        shuffle(firstThree);
+        System.arraycopy(firstThree, 0, callsSorted, 0, 3);
 
-        if (feasibleInsertIndexes.length < 1) {
+        for (int callToRelocate : callsSorted) {
+            int[] validVehicles = validVehicleIndexesForCall(callToRelocate);
+            int[] feasibleInsertIndexes = findFeasibleInsertIndexes(solution, callToRelocate);
+
+            if (validVehicles.length < 1) {
+                continue;
+            }
+
+            // int insertIndex = feasibleInsertIndexes[random.nextInt(feasibleInsertIndexes.length)];
+            int insertIndex = leastExpensiveVehicle(solution, validVehicles);
+
+            return moveCall(solution, insertIndex, callToRelocate);
+        }
+
+        return newSolution;
+    }
+
+    // Move random call from most expensive vehicle to least expensive valid vehicle
+    public static int[] reinsertFromMostExpensiveVehicle(int[] solution) {
+
+        int[] newSolution = solution.clone();
+
+        // Find most expensive vehicle
+        int mostExpensiveVehicle = mostExpensiveVehicle(solution);
+        int[] calls = getCallsInVehicle(solution, mostExpensiveVehicle);
+
+        if (calls.length < 1) {
+            return newSolution;
+        }
+        // Select random call from vehicle
+        int callToRelocate = calls[random.nextInt(calls.length)];
+
+        // Find valid vehicles for that call
+        int[] validVehicles = validVehicleIndexesForCall(callToRelocate);
+
+        // Find least expensive vehicle among the valid vehicles
+        int leastExpensiveVehicle = leastExpensiveVehicle(solution, validVehicles);
+
+        // If only possible insert vehicle is current vehicle, do nothing
+        if (leastExpensiveVehicle == mostExpensiveVehicle) {
             return newSolution;
         }
 
-        int insertIndex = feasibleInsertIndexes[random.nextInt(feasibleInsertIndexes.length)];
-
-        return moveCall(solution, insertIndex, callToRelocate);
+        // Move call to least expensive vehicle
+        return moveCall(solution, getVehicleEndIndex(solution, leastExpensiveVehicle), callToRelocate);
     }
 
     // Calls with similar origin node and destination node
@@ -138,91 +240,4 @@ public class Operators {
     public static int[] reduceWaitTime(int[] solution) {
         return solution;
     }
-
-
-    public static int[] moveCall(int[] solution, int insertIndex, int call) {
-        int[] callIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == call).toArray();
-        return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < callIndexes[0] && i >= insertIndex && i <= callIndexes[1]) {
-                return i - 1 <= insertIndex ? call : solution[i - ((i - 2) < callIndexes[0] ? 1 : 0) - ((i - 2) < callIndexes[1] ? 1 : 0)];
-            } else if (i >= callIndexes[0] && i < insertIndex) {
-                return i + 2 >= insertIndex ? call : solution[i + 1 + (i + 1 >= callIndexes[1] ? 1 : 0)];
-            }
-            return solution[i];
-        }).toArray();
-    }
-
-    public static int[] movePickup(int[] solution, int insertIndex, int call) {
-        int pickupIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == call).sorted().toArray()[0];
-        return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < pickupIndex && i >= insertIndex && i <= pickupIndex) {
-                return i == insertIndex ? call : solution[i - ((i - 2) < pickupIndex ? 1 : 0)];
-            } else if (i >= pickupIndex && i < insertIndex) {
-                return i + 2 == insertIndex ? call : solution[i + 1];
-            }
-            return solution[i];
-        }).toArray();
-    }
-
-    public static int[] moveDelivery(int[] solution, int insertIndex, int call) {
-        int deliveryIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == call).sorted().toArray()[1];
-        return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < deliveryIndex && i >= insertIndex && i <= deliveryIndex) {
-                return i == insertIndex ? call : solution[i - ((i - 2) < deliveryIndex ? 1 : 0)];
-            } else if (i >= deliveryIndex && i < insertIndex) {
-                return i + 2 == insertIndex ? call : solution[i + 1];
-            }
-            return solution[i];
-        }).toArray();
-    }
-
-    public static int[] findFeasibleVehiclePermutation(int[] solution, int vehicleIndex, int call) {
-
-        int[] newSolution;
-
-        if (vehicleIndex == problem.nVehicles) {
-            return moveCall(solution, solution.length - 1, call);
-        }
-
-        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
-        int vehicleEnd = zeroIndexes[vehicleIndex];
-        int vehicleStart = vehicleIndex > 0 ? zeroIndexes[vehicleIndex - 1] + 1 : 0;
-
-        if (vehicleEnd - vehicleStart == 0) {
-            newSolution = moveCall(solution, vehicleStart, call);
-            return feasibilityCheck(newSolution) ? newSolution : solution.clone();
-        }
-        for (int pickupIdx = vehicleStart; pickupIdx < vehicleEnd + 1; pickupIdx++) {
-            for (int deliveryIdx = pickupIdx + 1; deliveryIdx < vehicleEnd + 2; deliveryIdx++) {
-                newSolution = solution.clone();
-                newSolution = movePickup(newSolution, pickupIdx, call);
-                newSolution = moveDelivery(newSolution, deliveryIdx, call);
-                if (feasibilityCheck(newSolution)) {
-                    return newSolution;
-                }
-            }
-        }
-        return solution.clone();
-    }
-
-    public static int[] findFeasibleInsertIndexes(int[] solution, int call) {
-        int[] validVehicles = validVehiclesForCall(call);
-        return Arrays.stream(validVehicles).filter(vehicleIndex -> {
-            int[] newSolution = findFeasibleVehiclePermutation(solution, vehicleIndex, call);
-            return !Arrays.equals(newSolution, solution) && feasibilityCheck(newSolution);
-        }).toArray();
-    }
-
-    public static double percentageTransported(int[] solution) {
-        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
-        int totalCalls = (solution.length - zeroIndexes.length) / 2;
-        int callsNotTransported = (solution.length - (zeroIndexes[zeroIndexes.length - 1] + 1)) / 2;
-        int callsTransported = totalCalls - callsNotTransported;
-        return (double) callsTransported / totalCalls;
-    }
-
-    public static int[] similarCalls(int call) {
-        return new int[0];
-    }
-
 }

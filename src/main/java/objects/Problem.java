@@ -1,9 +1,4 @@
-package utils;
-
-import objects.Call;
-import objects.NodeTimeAndCost;
-import objects.TravelTimeAndCost;
-import objects.Vehicle;
+package objects;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -54,6 +49,6 @@ public class Problem {
         this.nodeTimeAndCosts = nodeTimeAndCosts;
         this.callsMap = Arrays.stream(calls).collect(Collectors.toMap(c -> c.callIndex, c -> c));
         this.initialSolution = generateInitSolution(nCalls, nVehicles);
-        this.initialCost = costFunction(initialSolution, this);
+        this.initialCost = costFunction(initialSolution, nVehicles, cargo, firstTravelCost, portCost, travelCost);
     }
 }

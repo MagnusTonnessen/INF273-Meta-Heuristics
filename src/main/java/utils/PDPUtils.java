@@ -2,6 +2,7 @@ package utils;
 
 import objects.Call;
 import objects.NodeTimeAndCost;
+import objects.Problem;
 import objects.TravelTimeAndCost;
 import objects.Vehicle;
 
@@ -10,12 +11,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toList;
 import static utils.Constants.random;
-import static utils.Constants.results;
 import static utils.Utils.getInstanceName;
 
 public class PDPUtils {
@@ -172,16 +170,11 @@ public class PDPUtils {
                 vehicles, calls, travelTimeAndCosts, nodeTimeAndCosts);
     }
 
-    public static boolean feasibilityCheck(int[] solution) {
-        return feasibilityCheck(solution, problem);
-    }
-
     /**
      * @param solution solution to check feasibility of
-     * @param problem  problem info
      * @return true if solution is feasible
      */
-    public static boolean feasibilityCheck(int[] solution, Problem problem) {
+    public static boolean feasibilityCheck(int[] solution) {
 
         int nVehicles = problem.nVehicles;
         int[] vesselCapacity = problem.vesselCapacity;
@@ -247,22 +240,59 @@ public class PDPUtils {
         return true;
     }
 
-    public static double costFunction(int[] solution) {
-        return costFunction(solution, problem);
-    }
-
     /**
      * @param solution solution to calculate cost of
-     * @param problem  problem info
      * @return cost of solution
      */
-    public static double costFunction(int[] solution, Problem problem) {
+    public static double costFunction(int[] solution) {
 
         int nVehicles = problem.nVehicles;
         int[][] cargo = problem.cargo;
         int[][] firstTravelCost = problem.firstTravelCost;
         int[][] portCost = problem.portCost;
         int[][][] travelCost = problem.travelCost;
+
+        double notTransportCost = 0;
+        double[] routeTravelCost = new double[nVehicles];
+        double[] costInPorts = new double[nVehicles];
+
+        int[] sol = IntStream.range(0, solution.length + 1).map(i -> i < solution.length ? solution[i] : 0).toArray();
+        int[] zeroIndex = IntStream.range(0, sol.length).filter(i -> sol[i] == 0).toArray();
+        int tempIdx = 0;
+
+        for (int i = 0; i < nVehicles + 1; i++) {
+            int finalI = i;
+
+            int[] currentVPlan = Arrays.stream(sol, tempIdx, zeroIndex[i]).map(j -> j - 1).toArray();
+            int noDoubleCallOnVehicle = currentVPlan.length;
+            tempIdx = zeroIndex[i] + 1;
+
+            if (i == nVehicles) {
+                notTransportCost = Arrays.stream(currentVPlan).map(j -> cargo[j][3]).sum() / 2.0;
+            } else {
+                if (noDoubleCallOnVehicle > 0) {
+                    int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
+                    int[] index = argSort(argSort(currentVPlan));
+
+                    int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(j -> cargo[sortRoute[j]][j % 2]).toArray();
+                    int[] portIndex = IntStream.range(0, sortRoute.length).map(j -> portIndexSorted[index[j]] - 1).toArray();
+                    int[] diag = IntStream.range(0, portIndex.length - 1).map(j -> travelCost[finalI][portIndex[j]][portIndex[j + 1]]).toArray();
+
+                    int firstVisitCost = firstTravelCost[finalI][cargo[currentVPlan[0]][0] - 1];
+
+                    routeTravelCost[i] = firstVisitCost + Arrays.stream(diag).sum();
+                    costInPorts[i] = Arrays.stream(currentVPlan).map(j -> portCost[finalI][j]).sum() / 2.0;
+                }
+            }
+        }
+        return notTransportCost + Arrays.stream(routeTravelCost).sum() + Arrays.stream(costInPorts).sum();
+    }
+
+    /**
+     * @param solution solution to calculate cost of
+     * @return cost of solution
+     */
+    public static double costFunction(int[] solution, int nVehicles, int[][] cargo, int[][] firstTravelCost, int[][] portCost, int[][][] travelCost) {
 
         double notTransportCost = 0;
         double[] routeTravelCost = new double[nVehicles];
@@ -324,41 +354,9 @@ public class PDPUtils {
         return Arrays.stream(indexes).mapToInt(i -> i).toArray();
     }
 
-    public static int[] generateInitSolution(Map<String, Object> problem) {
-        int nCalls = (int) problem.get("nCalls");
-        int nVehicles = (int) problem.get("nVehicles");
-        int[] initSol = new int[2 * nCalls + nVehicles];
-        IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2) / 2);
-        return initSol;
-    }
-
     public static int[] generateInitSolution(int nCalls, int nVehicles) {
         int[] initSol = new int[2 * nCalls + nVehicles];
         IntStream.range(0, nCalls * 2).forEach(i -> initSol[i + nVehicles] = (i + 2) / 2);
         return initSol;
-    }
-
-    public static int[] validCallForVehicle(int vehicle) {
-        int[] calls = problem.vesselCargo[vehicle - 1];
-        return IntStream.range(0, calls.length).filter(call -> calls[call] == 1).toArray();
-    }
-
-    public static int[] validVehiclesForCall(int call) {
-        int[] vehicles = Arrays.stream(problem.vesselCargo).mapToInt(vehicle -> vehicle[call - 1]).toArray();
-        return IntStream.rangeClosed(0, vehicles.length).filter(vehicle -> vehicle == vehicles.length || vehicles[vehicle] == 1).toArray();
-    }
-
-    public static int[] transportedCalls(int[] solution) {
-        List<Integer> notTransported = Arrays.stream(notTransportedCalls(solution)).boxed().collect(toList());
-        return IntStream.rangeClosed(1, problem.nCalls).filter(i -> !notTransported.contains(i)).toArray();
-    }
-
-    public static int[] notTransportedCalls(int[] solution) {
-        int lastVehicleIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray()[problem.nVehicles - 1];
-        return Arrays.stream(solution).skip(lastVehicleIndex + 1).distinct().toArray();
-    }
-
-    public static Call[] callsFromID(int[] calls) {
-        return Arrays.stream(calls).mapToObj(call -> problem.callsMap.get(call)).toArray(Call[]::new);
     }
 }

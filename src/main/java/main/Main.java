@@ -1,21 +1,25 @@
 package main;
 
 import algorithms.SearchingAlgorithms;
+import objects.Results;
+import operators.Operators;
 import utils.JSONCreator;
 import utils.PDFCreator;
-import utils.Results;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static utils.Constants.C130V40;
+import static utils.Constants.C18V5;
+import static utils.Constants.C35V7;
 import static utils.Constants.C7V3;
+import static utils.Constants.C80V20;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -27,10 +31,8 @@ import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
 import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.Constants.results;
 import static utils.Constants.searchingAlgorithms;
-import static utils.PDPUtils.callsFromID;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.initialize;
-import static utils.PDPUtils.notTransportedCalls;
 import static utils.PDPUtils.problem;
 import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
@@ -44,19 +46,18 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
+        // runSearches(Arrays.asList(SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS), Arrays.asList(C18V5));
         initialize(C7V3);
-        int mostExpensiveCall = Arrays.stream(callsFromID(notTransportedCalls(problem.initialSolution))).max(Comparator.comparingInt(a -> a.costNotTransport)).get().callIndex;
-        System.out.println(mostExpensiveCall);
-        Arrays.stream(problem.calls).forEach(System.out::println);
-        // runAllInstances();
+        int[] sol = new int[]{1, 1, 0, 2, 2, 3, 3, 4, 4, 0, 5, 7, 5, 7, 6, 6};
+        Operators.bruteForceVehicle(sol, 1);
     }
 
-    public static void runAllInstances() throws Exception {
-        runInstances(Arrays.asList(SEARCHING_ALGORITHMS));
+    public static void runAllSearches() throws Exception {
+        runSearches(Arrays.asList(SEARCHING_ALGORITHMS), Arrays.asList(C7V3, C18V5, C35V7, C80V20, C130V40));
     }
 
-    public static void runInstances(List<String> algorithms) throws Exception {
-        for (String filePath : INSTANCES) {
+    public static void runSearches(List<String> algorithms, List<String> instances) throws Exception {
+        for (String filePath : instances) {
 
             initialize(filePath);
 
@@ -67,7 +68,7 @@ public class Main {
             for (String search : algorithms) {
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
 
-                Results searchResults = runInstance(searchingAlgorithm, 10, false);
+                Results searchResults = runSearch(searchingAlgorithm, 10, false);
 
                 bestSolutions.add(searchResults.bestSolution());
 
@@ -81,7 +82,7 @@ public class Main {
         }
     }
 
-    public static Results runInstance(Method searchingAlgorithm, int times, boolean writeToPDF) throws Exception {
+    public static Results runSearch(Method searchingAlgorithm, int times, boolean writeToPDF) throws Exception {
 
         String algorithmName = getAlgorithmName(searchingAlgorithm);
 
@@ -143,7 +144,7 @@ public class Main {
 
             Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(SIMULATED_ANNEALING_NEW_OPERATORS);
 
-            Results searchResults = runInstance(searchingAlgorithm, 10, true);
+            Results searchResults = runSearch(searchingAlgorithm, 10, true);
             System.out.println("\r" + getAlgorithmName(SIMULATED_ANNEALING_NEW_OPERATORS));
 
             results.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS).putAll(searchResults.asMap());
@@ -183,7 +184,7 @@ public class Main {
                 System.out.println("\n" + getAlgorithmName(search));
                 Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(search);
 
-                Results searchResults = runInstance(searchingAlgorithm, 10, true);
+                Results searchResults = runSearch(searchingAlgorithm, 10, true);
 
                 bestSolutions.add(searchResults.bestSolution());
             }
@@ -213,7 +214,7 @@ public class Main {
             System.out.println("\n" + getAlgorithmName(RANDOM_SEARCH));
             Method searchingAlgorithm = SearchingAlgorithms.class.getMethod(RANDOM_SEARCH);
 
-            Results searchResults = runInstance(searchingAlgorithm, 10, true);
+            Results searchResults = runSearch(searchingAlgorithm, 10, true);
 
             bestSolutions.add(searchResults.bestSolution());
 
