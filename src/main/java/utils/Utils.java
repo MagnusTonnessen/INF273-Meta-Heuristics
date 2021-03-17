@@ -166,8 +166,16 @@ public class Utils {
         return Arrays.stream(vehicleIndexes).boxed().min(comparingDouble(v -> vehicleCost(solution, v))).get();
     }
 
+    public static int[] getLeastNExpensiveVehicles(int[] solution, int[] validVehicles, int N) {
+        return Arrays.stream(validVehicles).boxed().sorted(comparingDouble(v -> vehicleCost(solution, v))).limit(N).mapToInt(i -> i).toArray();
+    }
+
     public static int mostExpensiveVehicle(int[] solution) {
         return IntStream.range(0, problem.nVehicles).boxed().max(comparingDouble(v -> vehicleCost(solution, v))).get();
+    }
+
+    public static int[] getNMostExpensiveVehicles(int[] solution, int N) {
+        return IntStream.range(0, problem.nVehicles).boxed().sorted(comparingDouble(v -> -vehicleCost(solution, v))).limit(N).mapToInt(i -> i).toArray();
     }
 
     public static double vehicleCost(int[] solution, int vehicleIndex) {
@@ -226,6 +234,13 @@ public class Utils {
 
     public static int[] getVehiclesWithAtLeastNCalls(int[] solution, int N) {
         return IntStream.range(0, problem.nVehicles).filter(i -> getVehicleEndIndex(solution, i) - getVehicleStartIndex(solution, i) >= 2 * N).toArray();
+    }
+
+    public static int[] getVehiclesWithNCalls(int[] solution, int N) {
+        return IntStream.range(0, problem.nVehicles).filter(i -> {
+            int calls = (getVehicleEndIndex(solution, i) - getVehicleStartIndex(solution, i)) / 2;
+            return N == calls;
+        }).toArray();
     }
 
     public static int[] getVehiclesWithNToMCalls(int[] solution, int N, int M) {

@@ -16,13 +16,13 @@ import static operators.Operators.reinsertFromMostExpensiveVehicle;
 import static operators.Operators.threeExchange;
 import static operators.Operators.transportAll;
 import static operators.Operators.twoExchange;
-import static operators.Operators.twoExchangeInVehicle;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.random;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.problem;
 import static utils.Utils.getEmptyVehicles;
+import static utils.Utils.percentageTransported;
 
 public class SearchingAlgorithms {
 
@@ -162,6 +162,10 @@ public class SearchingAlgorithms {
         double deltaE;
         double p;
 
+        double P3 = (1 - percentageTransported(incumbentSolution)) / 2;
+        P2 = (1 - P3) / 2;
+        P1 = (1 - P3) / 2;
+
         for (int i = 0; i < ITERATIONS; i++) {
 
             p = random.nextDouble();
@@ -171,7 +175,7 @@ public class SearchingAlgorithms {
             } else if (p < P1 + P2) {
                 currentSolution = reinsertFromMostExpensiveVehicle(incumbentSolution);
             } else {
-                currentSolution = getEmptyVehicles(incumbentSolution).length > 0 ? fillAllVehicles(incumbentSolution) : transportAll(incumbentSolution, 0.10); // transportAll(incumbentSolution, 0.10);
+                currentSolution = transportAll(incumbentSolution); // getEmptyVehicles(incumbentSolution).length > 0 ? fillAllVehicles(incumbentSolution) :
             }
 
             currentCost = costFunction(currentSolution);

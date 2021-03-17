@@ -1,26 +1,30 @@
 package operators;
 
+import utils.Utils;
+
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 import static utils.Constants.random;
+import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.problem;
 import static utils.PDPUtils.shuffle;
-import static utils.Utils.callsFromID;
-import static utils.Utils.findFeasibleInsertIndexes;
 import static utils.Utils.getCallsInVehicle;
 import static utils.Utils.getEmptyVehicles;
+import static utils.Utils.getLeastNExpensiveVehicles;
+import static utils.Utils.getNMostExpensiveVehicles;
 import static utils.Utils.getVehicleEndIndex;
-import static utils.Utils.getVehicleSize;
 import static utils.Utils.getVehicleStartIndex;
-import static utils.Utils.getVehiclesWithAtLeastNCalls;
 import static utils.Utils.getVehiclesWithNToMCalls;
-import static utils.Utils.mostExpensiveVehicle;
+import static utils.Utils.leastExpensiveVehicle;
 import static utils.Utils.moveCall;
 import static utils.Utils.notTransportedCalls;
 import static utils.Utils.validCallForVehicle;
@@ -110,79 +114,42 @@ public class Operators {
         return newSolution;
     }
 
-    public static int[] twoExchangeInVehicle(int[] solution) {
+    public static int[] transportAll(int[] solution) {
 
-        int[] newSolution = solution.clone();
+        // All calls are transported, return solution
 
-        int[] vehiclesWithTwoCalls = getVehiclesWithAtLeastNCalls(solution, 2);
-
-        for (int vehicleIndex : vehiclesWithTwoCalls) {
-
-            int[] calls = getCallsInVehicle(solution, vehicleIndex);
-            int firstCall = calls[random.nextInt(calls.length)];
-            int secondCall = calls[random.nextInt(calls.length)];
-
-            if (firstCall == secondCall) {
-                continue;
-            }
-
-            int[] firstCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == firstCall).toArray();
-            int[] secondCallIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == secondCall).toArray();
-
-            newSolution[firstCallIndex[0]] = secondCall;
-            newSolution[firstCallIndex[1]] = secondCall;
-            newSolution[secondCallIndex[0]] = firstCall;
-            newSolution[secondCallIndex[1]] = firstCall;
-
-            return newSolution;
-        }
-        return newSolution;
-    }
-
-    // Move most expensive call from dummy to least expensive valid vehicle
-    public static int[] transportAll(int[] solution, double mostExpensiveProbability) {
-
-        int[] newSolution = solution.clone();
-
-        int dummyCallIndex = getVehicleStartIndex(solution, problem.nVehicles);
-
-        if (dummyCallIndex == solution.length) {
-            return newSolution;
+        if (getVehicleStartIndex(solution, problem.nVehicles) == solution.length) {
+            return solution.clone();
         }
 
-        int[] calls;
-        double P = random.nextDouble();
+        for (int n = 1; n <= problem.nVehicles; n++) {
+            int finalN = n;
 
-        if (P > mostExpensiveProbability) {
-            calls = notTransportedCalls(solution);
+            // Get all calls with N valid vehicles
+
+            int[] calls = Arrays.stream(notTransportedCalls(solution)).boxed().filter(call -> validVehicleIndexesForCall(call).length == finalN).mapToInt(i -> i).toArray();
             shuffle(calls);
-        } else {
-            int[] callsSorted = Arrays.stream(callsFromID(notTransportedCalls(solution)))
-                    .sorted(Comparator.comparingInt(call -> -call.costNotTransport))
-                    .mapToInt(call -> call.callIndex)
-                    .toArray();
 
-            int[] firstThree = Arrays.copyOf(callsSorted, Math.min(3, callsSorted.length));
-            shuffle(firstThree);
-            System.arraycopy(firstThree, 0, callsSorted, 0, Math.min(3, callsSorted.length));
-            calls = callsSorted;
-        }
+            // Iterate in random order
 
-        for (int callToRelocate : calls) {
-            int[] validVehicles = validVehicleIndexesForCall(callToRelocate);
-            int[] feasibleInsertIndexes = findFeasibleInsertIndexes(solution, callToRelocate);
+            for (int call : calls) {
 
-            if (feasibleInsertIndexes.length < 1) {
-                continue;
+                // Get all valid vehicles for call
+
+                int[] vehicles = validVehicleIndexesForCall(call);
+                if (vehicles.length > 0) {
+                    shuffle(vehicles);
+
+                    // Move call to random valid vehicle and return if feasible
+
+                    int[] newSolution = moveCall(solution, getVehicleEndIndex(solution, vehicles[0]), call);
+                    if (feasibilityCheck(newSolution)) {
+                        return newSolution;
+                    }
+                }
             }
-
-            int insertIndex = feasibleInsertIndexes[random.nextInt(feasibleInsertIndexes.length)];
-            // int insertIndex = leastExpensiveVehicle(solution, validVehicles);
-
-            return moveCall(solution, insertIndex, callToRelocate);
         }
-
-        return newSolution;
+        return solution.clone();
     }
 
     // Move random call from most expensive vehicle to least expensive valid vehicle
@@ -191,17 +158,52 @@ public class Operators {
         int[] newSolution = solution.clone();
 
         // Find most expensive vehicle
+        int[] mostExpensiveVehicles = getNMostExpensiveVehicles(solution, 3);
+        shuffle(mostExpensiveVehicles);
+
+        for (int vehicle : mostExpensiveVehicles) {
+
+            int[] calls = getCallsInVehicle(solution, vehicle);
+
+            if (calls.length < 1) {
+                return newSolution;
+            }
+
+            // Select random call from vehicle
+            int callToRelocate = calls[random.nextInt(calls.length)];
+
+            // Find valid vehicles for that call
+            int[] validVehicles = validVehicleIndexesForCallWithDummy(callToRelocate);
+
+            // Find least expensive vehicle among the valid vehicles
+            int[] leastExpensiveVehicles = getLeastNExpensiveVehicles(solution, validVehicles, 3);
+            // int leastExpensiveVehicle = leastExpensiveVehicle(solution, validVehicles); //validVehicles[random.nextInt(validVehicles.length)];
+
+            int leastExpensiveVehicle = leastExpensiveVehicles[random.nextInt(leastExpensiveVehicles.length)];
+
+            // If only possible insert vehicle is current vehicle, do nothing
+            if (leastExpensiveVehicle == vehicle) {
+                return newSolution;
+            }
+
+            // Move call to least expensive vehicle
+            return moveCall(solution, getVehicleEndIndex(solution, leastExpensiveVehicle), callToRelocate);
+        }
+        return solution.clone();
+
+        /*
         int mostExpensiveVehicle = mostExpensiveVehicle(solution);
         int[] calls = getCallsInVehicle(solution, mostExpensiveVehicle);
 
         if (calls.length < 1) {
             return newSolution;
         }
+
         // Select random call from vehicle
         int callToRelocate = calls[random.nextInt(calls.length)];
 
         // Find valid vehicles for that call
-        int[] validVehicles = validVehicleIndexesForCall(callToRelocate);
+        int[] validVehicles = validVehicleIndexesForCallWithDummy(callToRelocate);
 
         // Find least expensive vehicle among the valid vehicles
         int leastExpensiveVehicle = validVehicles[random.nextInt(validVehicles.length)]; //leastExpensiveVehicle(solution, validVehicles);
@@ -213,23 +215,100 @@ public class Operators {
 
         // Move call to least expensive vehicle
         return moveCall(solution, getVehicleEndIndex(solution, leastExpensiveVehicle), callToRelocate);
+        */
+    }
+
+    public static int[] reinsertFromMostExpensiveVehicl(int[] solution) {
+
+        // Find most expensive vehicle
+        int[] mostExpensiveVehicles = getNMostExpensiveVehicles(solution, 3);
+
+        shuffle(mostExpensiveVehicles);
+
+        for (int vehicle : mostExpensiveVehicles) {
+
+            int[] calls = getCallsInVehicle(solution, vehicle);
+
+            if (calls.length < 1) {
+                continue;
+            }
+
+            shuffle(calls);
+
+            for (int call : calls) {
+
+                // Find valid vehicles for that call
+                int[] validVehicles = validVehicleIndexesForCallWithDummy(call);
+
+                // Find least expensive vehicle among the valid vehicles
+                int[] leastExpensiveVehicles = getLeastNExpensiveVehicles(solution, validVehicles, 3);
+                // int leastExpensiveVehicle = leastExpensiveVehicle(solution, validVehicles); //validVehicles[random.nextInt(validVehicles.length)];
+
+                if (leastExpensiveVehicles.length < 1) {
+                    continue;
+                }
+
+                for (int insertVehicle : leastExpensiveVehicles) {
+                    if (insertVehicle == vehicle) {
+                        continue;
+                    }
+                    int[] newSolution = moveCall(solution, getVehicleEndIndex(solution, insertVehicle), call);
+                    if (feasibilityCheck(newSolution)) {
+                        return newSolution;
+                    }
+                }
+            }
+        }
+        return solution.clone();
+
+        /*
+        int mostExpensiveVehicle = mostExpensiveVehicle(solution);
+        int[] calls = getCallsInVehicle(solution, mostExpensiveVehicle);
+
+        if (calls.length < 1) {
+            return newSolution;
+        }
+
+        // Select random call from vehicle
+        int callToRelocate = calls[random.nextInt(calls.length)];
+
+        // Find valid vehicles for that call
+        int[] validVehicles = validVehicleIndexesForCallWithDummy(callToRelocate);
+
+        // Find least expensive vehicle among the valid vehicles
+        int leastExpensiveVehicle = validVehicles[random.nextInt(validVehicles.length)]; //leastExpensiveVehicle(solution, validVehicles);
+
+        // If only possible insert vehicle is current vehicle, do nothing
+        if (leastExpensiveVehicle == mostExpensiveVehicle) {
+            return newSolution;
+        }
+
+        // Move call to least expensive vehicle
+        return moveCall(solution, getVehicleEndIndex(solution, leastExpensiveVehicle), callToRelocate);
+        */
     }
 
     public static int[] bruteForceVehicle(int[] solution) {
+
+        int[] vehicles = getVehiclesWithNToMCalls(solution, 2, 4);
+
+        if (vehicles.length < 1) {
+            return solution.clone();
+        }
+
+        int vehicle = vehicles[random.nextInt(vehicles.length)];
+
+        return bruteForceVehicle(solution, vehicle);
+    }
+
+    public static int[] bruteForceVehicle(int[] solution, int vehicle) {
 
         int[] newSolution = solution.clone();
         int[] bestSolution = solution.clone();
         double bestObjective = costFunction(bestSolution);
 
-        int[] vehicles = getVehiclesWithNToMCalls(solution, 2, 3);
-
-        if (vehicles.length < 1) {
-            return newSolution;
-        }
-
-        int vehicleIndex = vehicles[random.nextInt(vehicles.length)];
-        int vehicleStart = getVehicleStartIndex(solution, vehicleIndex);
-        int vehicleEnd = getVehicleEndIndex(solution, vehicleIndex);
+        int vehicleStart = getVehicleStartIndex(solution, vehicle);
+        int vehicleEnd = getVehicleEndIndex(solution, vehicle);
 
         int[] indexes = IntStream.range(0, solution.length).map(i -> vehicleStart).toArray();
 
@@ -237,10 +316,15 @@ public class Operators {
         while (i < vehicleEnd) {
             if (indexes[i] < i) {
                 if (swap(newSolution, i % 2 == vehicleStart % 2 ? vehicleStart : indexes[i], i)) {
-                    double newObjective = costFunction(newSolution);
-                    if (newObjective < bestObjective) {
-                        bestSolution = newSolution.clone();
-                        bestObjective = newObjective;
+                    if (feasibilityCheck(newSolution)) {
+                        double newObjective = costFunction(newSolution);
+                        if (newObjective < bestObjective) {
+                            return newSolution;
+                            /*
+                            bestSolution = newSolution.clone();
+                            bestObjective = newObjective;
+                            */
+                        }
                     }
                 }
                 indexes[i]++;
@@ -267,13 +351,18 @@ public class Operators {
 
         int[] emptyVehicles = getEmptyVehicles(solution); // Arrays.stream(getEmptyVehicles(solution)).boxed().sorted(Comparator.comparingInt(v -> problem.vehicleMap.get(v+1).validCalls.length)).mapToInt(i -> i).toArray();
         shuffle(emptyVehicles);
+
         Set<Integer> notTransported = Arrays.stream(notTransportedCalls(solution)).boxed().collect(toSet());
 
         for (int vehicleIndex : emptyVehicles) {
+            Map<Integer, List<Integer>> valid = Arrays.stream(validCallForVehicle(vehicleIndex)).filter(notTransported::contains).boxed().collect(groupingBy(call -> validVehicleIndexesForCall(call).length));
             int[] validCalls = Arrays.stream(validCallForVehicle(vehicleIndex)).filter(notTransported::contains).boxed().sorted(Comparator.comparingInt(call -> validVehicleIndexesForCall(call).length)).mapToInt(i -> i).toArray();
             if (validCalls.length > 0) {
-                shuffle(validCalls);
-                return moveCall(solution, vehicleIndex, validCalls[0]);
+                // shuffle(validCalls);
+                int[] newSolution = moveCall(solution, vehicleIndex, validCalls[0]);
+                if (feasibilityCheck(newSolution)) {
+                    return newSolution;
+                }
             }
         }
         return solution.clone();

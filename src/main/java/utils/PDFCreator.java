@@ -71,9 +71,23 @@ public class PDFCreator {
         newParagraph();
     }
 
-    public void addTextBlock(String text) throws Exception {
+    public void newPage() throws Exception {
+        newParagraph();
+        document.newPage();
+    }
+
+    public void addTitle(String title) throws Exception {
+        Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, 14, BaseColor.BLACK);
         Phrase phrase = new Phrase();
-        phrase.add(new Chunk(text));
+        phrase.add(new Chunk(title, font));
+        paragraph.add(phrase);
+        newParagraph();
+    }
+
+    public void addTextBlock(String text) throws Exception {
+        Font font = FontFactory.getFont(FontFactory.TIMES, 12, BaseColor.BLACK);
+        Phrase phrase = new Phrase();
+        phrase.add(new Chunk(text, font));
         paragraph.add(phrase);
         paragraph.setAlignment(Element.ALIGN_LEFT);
         newParagraph();
@@ -81,14 +95,15 @@ public class PDFCreator {
 
     public void addBestSolutions(List<int[]> bestSolutions) throws Exception {
         IntStream.range(0, bestSolutions.size()).forEach(i -> {
+
+            Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, 12, BaseColor.BLACK);
+            Paragraph subParagraph = new Paragraph();
+            subParagraph.add(new Chunk("Best solution found for " + getInstanceName(INSTANCES[i]) + "\n", font));
+            subParagraph.add(new Chunk(Arrays.toString(bestSolutions.get(i))));
+
+            subParagraph.setAlignment(Element.ALIGN_CENTER);
+            paragraph.add(subParagraph);
             addEmptyLine(1);
-
-            Font font = FontFactory.getFont(FontFactory.TIMES, 12, BaseColor.BLACK);
-            Phrase phrase = new Phrase();
-            phrase.add(new Chunk("Best solution found for " + getInstanceName(INSTANCES[i]) + "\n", font));
-            phrase.add(new Chunk(Arrays.toString(bestSolutions.get(i)), font));
-
-            paragraph.add(phrase);
         });
         paragraph.setAlignment(Element.ALIGN_CENTER);
         newParagraph();
@@ -98,6 +113,7 @@ public class PDFCreator {
         addEmptyLine(1);
         document.add(paragraph);
         paragraph = new Paragraph();
+        paragraph.setAlignment(Element.ALIGN_CENTER);
     }
 
     public void newTable(String instanceName) {
