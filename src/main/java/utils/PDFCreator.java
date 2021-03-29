@@ -1,5 +1,6 @@
 package utils;
 
+import algorithms.SearchingAlgorithm;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static utils.Constants.INSTANCES;
-import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 
 /**
@@ -46,7 +46,7 @@ public class PDFCreator {
         document.open();
     }
 
-    public void addTableAndBestSolution(List<int[]> bestSolutions, String[] algorithmNames) throws Exception {
+    public void addTableAndBestSolution(List<int[]> bestSolutions, List<SearchingAlgorithm> algorithmNames) throws Exception {
 
         paragraph.add(table);
 
@@ -55,7 +55,7 @@ public class PDFCreator {
 
             Font font = FontFactory.getFont(FontFactory.TIMES, 12, BaseColor.BLACK);
             Phrase phrase = new Phrase();
-            phrase.add(new Chunk("Best solution found with " + getAlgorithmName(algorithmNames[i]) + "\n", font));
+            phrase.add(new Chunk("Best solution found with " + algorithmNames.get(i).getName() + "\n", font));
             phrase.add(new Chunk(Arrays.toString(bestSolutions.get(i)), font));
 
             paragraph.add(phrase);

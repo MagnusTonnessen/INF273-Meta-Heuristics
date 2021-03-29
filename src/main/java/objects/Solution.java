@@ -3,42 +3,44 @@ package objects;
 import operators.Operator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparingInt;
+import static main.Main.problem;
 import static utils.Constants.random;
-import static utils.PDPUtils.costFunction;
-import static utils.PDPUtils.feasibilityCheck;
+import static utils.Utils.costFunction;
+import static utils.Utils.feasibilityCheck;
 
 public class Solution extends ArrayList<Vehicle> {
 
-    public Solution(int nCalls, List<Vehicle> vehicles) {
-        setInitialSolution(nCalls, vehicles);
+    public Solution() {
+        addAll(problem.vehicles.stream().sorted(comparingInt(vehicle -> vehicle.vehicleIndex)).collect(Collectors.toList()));
+        add(Vehicle.dummyVehicle(problem.nCalls));
+        get(size() - 1).addAll(IntStream.range(0, problem.nCalls).flatMap(i -> IntStream.of(i, i)).boxed().sorted(comparingInt(call -> call)).collect(Collectors.toList()));
     }
 
-    public void setInitialSolution(int nCalls, List<Vehicle> vehicles) {
-        addAll(vehicles.stream().sorted(comparingInt(vehicle -> vehicle.vehicleIndex)).toList());
-        add(Vehicle.dummyVehicle(nCalls));
-        get(size() - 1).addAll(IntStream.range(0, nCalls).flatMap(i -> IntStream.of(i, i)).boxed().sorted(comparingInt(call -> call)).toList());
+    public Solution(Solution solution) {
+        super(solution.stream().map(Vehicle::copy).collect(Collectors.toList()));
     }
 
-    /*
-    public List<List<Integer>> splitVehicles() {
-        modified = false;
-        List<Integer> zeroIndexes = IntStream.range(0, size()).filter(i -> get(i) == 0).boxed().toList();
-        return IntStream
-                .rangeClosed(0, problem.nVehicles)
-                .mapToObj(i -> subList(i == 0 ? 0 : zeroIndexes.get(i-1)+1, i == problem.nVehicles ? size() : zeroIndexes.get(i)))
-                .toList();
-    }
-     */
     public int getVehicleSize(int vehicle) {
         return get(vehicle).size();
     }
 
-    public Vehicle getVehicle(int vehicle) {
-        return get(vehicle);
+    public Vehicle getVehicleFromCall(int call) {
+        for (Vehicle vehicle : this) {
+            if (vehicle.contains(call)) {
+                return vehicle;
+            }
+        }
+        return getDummy();
+    }
+
+    public Vehicle getDummy() {
+        return get(size() - 1);
     }
 
     public void removePickupCall(int call) {
@@ -55,12 +57,13 @@ public class Solution extends ArrayList<Vehicle> {
 
     public void moveCall(int call, int toVehicle, int index1, int index2) {
         removeCall(call);
-        getVehicle(toVehicle).add(index1, call);
-        getVehicle(toVehicle).add(index2, call);
+        get(toVehicle).add(index1, call);
+        get(toVehicle).add(index2, call);
     }
 
     public void moveCalls(int call, int vehicle) {
-        int index1 = random.nextInt(getVehicleSize(vehicle) + 2);
+        removeCall(call);
+        int index1 = random.nextInt(getVehicleSize(vehicle) + 1);
         int index2 = random.nextInt(getVehicleSize(vehicle) + 2);
         moveCall(call, vehicle, index1, index2);
     }
@@ -70,11 +73,7 @@ public class Solution extends ArrayList<Vehicle> {
     }
 
     public List<Vehicle> getVehiclesWithNToMCalls(int N, int M) {
-        return stream().filter(vehicle -> N <= vehicle.size() && vehicle.size() <= M).toList();
-    }
-
-    public List<Vehicle> copy() {
-        return (List<Vehicle>) this.clone();
+        return stream().filter(vehicle -> N <= vehicle.size() && vehicle.size() <= M).collect(Collectors.toList());
     }
 
     public boolean isFeasible() {
@@ -86,6 +85,15 @@ public class Solution extends ArrayList<Vehicle> {
     }
 
     public int[] asArray() {
-        return stream().flatMapToInt(vehicle -> IntStream.concat(vehicle.stream().mapToInt(i -> i), IntStream.of(0))).toArray();
+        return stream().flatMapToInt(vehicle -> IntStream.concat(vehicle.stream().mapToInt(i -> i), IntStream.of(-1))).toArray();
+    }
+
+    public Solution copy() {
+        return new Solution(this);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(asArray());
     }
 }

@@ -1,21 +1,19 @@
 package utils;
 
-import objects.Call;
 import objects.Results;
+import objects.Solution;
+import objects.Vehicle;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Comparator;
 import java.util.stream.IntStream;
 
-import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
-import static utils.PDPUtils.costFunction;
-import static utils.PDPUtils.feasibilityCheck;
-import static utils.PDPUtils.instanceName;
-import static utils.PDPUtils.problem;
+import static main.Main.initialCost;
+import static main.Main.instanceName;
+import static main.Main.problem;
 
 public class Utils {
 
@@ -24,7 +22,7 @@ public class Utils {
     // Print tools
     public static void printRunInfo() {
         System.out.println("\n--- " + instanceName + " ---\n");
-        System.out.printf("Initial cost: %.2f\n\n", problem.initialCost);
+        System.out.printf("Initial cost: %.2f\n\n", initialCost);
 
         System.out.println(
                 rightPad("", pad + 25) +
@@ -78,210 +76,319 @@ public class Utils {
                 .replace(".txt", "");
     }
 
-    // Operator tools
-    public static int[] moveCall(int[] solution, int insertIndex, int call) {
-        int[] callIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == call).toArray();
-        return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < callIndexes[0] && i >= insertIndex && i <= callIndexes[1]) {
-                return i - 1 <= insertIndex ? call : solution[i - ((i - 2) < callIndexes[0] ? 1 : 0) - ((i - 2) < callIndexes[1] ? 1 : 0)];
-            } else if (i >= callIndexes[0] && i < insertIndex) {
-                return i + 2 >= insertIndex ? call : solution[i + 1 + (i + 1 >= callIndexes[1] ? 1 : 0)];
-            }
-            return solution[i];
-        }).toArray();
-    }
+    // PDP tools
 
-    /*
-    public static int[] moveCallRandomInsert(int[] solution, int vehicle, int call) {
-        int[] callIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == call).toArray();
-        int vehicleSize = getVehicleSize(solution, vehicle);
-        int vehicleStart = getVehicleStartIndex(solution, vehicle);
-        int insertIndex1 = vehicleStart + random.nextInt(vehicleSize + 2);
-        int insertIndex2;
-        do { insertIndex2 = vehicleStart + random.nextInt(vehicleSize + 2); } while (insertIndex1 == insertIndex2);
+    /**
+     * @param solution solution to check feasibility of
+     * @return true if solution is feasible
+     */
+    public static boolean feasibilityCheck(int[] solution) {
 
-        return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < callIndexes[0] && i >= insertIndex && i <= callIndexes[1]) {
-                return i - 1 <= insertIndex ? call : solution[i - ((i - 2) < callIndexes[0] ? 1 : 0) - ((i - 2) < callIndexes[1] ? 1 : 0)];
-            } else if (i >= callIndexes[0] && i < insertIndex) {
-                return i + 2 >= insertIndex ? call : solution[i + 1 + (i + 1 >= callIndexes[1] ? 1 : 0)];
-            }
-            return solution[i];
-        }).toArray();
-    }
-*/
-    public static int[] movePickup(int[] solution, int insertIndex, int call) {
-        int pickupIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == call).sorted().toArray()[0];
-        return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < pickupIndex && i >= insertIndex && i <= pickupIndex) {
-                return i == insertIndex ? call : solution[i - ((i - 2) < pickupIndex ? 1 : 0)];
-            } else if (i >= pickupIndex && i < insertIndex) {
-                return i + 2 == insertIndex ? call : solution[i + 1];
-            }
-            return solution[i];
-        }).toArray();
-    }
+        int nVehicles = problem.nVehicles;
+        int[] vesselCapacity = problem.vesselCapacity;
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelTime = problem.firstTravelTime;
+        int[][] loadingTime = problem.loadingTime;
+        int[][] unloadingTime = problem.unloadingTime;
+        int[][] vesselCargo = problem.vesselCargo;
+        int[][][] travelTime = problem.travelTime;
 
-    public static int[] moveDelivery(int[] solution, int insertIndex, int call) {
-        int deliveryIndex = IntStream.range(0, solution.length).filter(i -> solution[i] == call).sorted().toArray()[1];
-        return IntStream.range(0, solution.length).map(i -> {
-            if (insertIndex < deliveryIndex && i >= insertIndex && i <= deliveryIndex) {
-                return i == insertIndex ? call : solution[i - ((i - 2) < deliveryIndex ? 1 : 0)];
-            } else if (i >= deliveryIndex && i < insertIndex) {
-                return i + 2 == insertIndex ? call : solution[i + 1];
-            }
-            return solution[i];
-        }).toArray();
-    }
+        int[] sol = IntStream.range(0, solution.length + 1).map(i -> i < solution.length ? solution[i] : 0).toArray();
+        int[] zeroIndex = IntStream.range(0, sol.length).filter(i -> sol[i] == 0).toArray();
 
-    public static int[] findFeasibleVehiclePermutation(int[] solution, int vehicleIndex, int call) {
+        int tempIdx = 0;
 
-        int[] newSolution = solution.clone();
+        for (int i = 0; i < nVehicles; i++) {
+            int finalI = i;
 
-        if (vehicleIndex == problem.nVehicles) {
-            return moveCall(newSolution, newSolution.length - 1, call);
-        }
+            int[] currentVPlan = Arrays.stream(sol, tempIdx, zeroIndex[i]).map(j -> j - 1).toArray();
+            int noDoubleCallOnVehicle = currentVPlan.length;
+            tempIdx = zeroIndex[i] + 1;
 
-        int vehicleEnd = getVehicleEndIndex(solution, vehicleIndex);
-        int vehicleStart = getVehicleStartIndex(solution, vehicleIndex);
+            if (noDoubleCallOnVehicle > 0) {
+                if (Arrays.stream(currentVPlan).anyMatch(j -> vesselCargo[finalI][j] == 0)) {
+                    return false;
+                } else {
+                    int currentTime = 0;
+                    int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
+                    int[] index = argSort(argSort(currentVPlan));
 
-        newSolution = moveCall(solution, vehicleEnd, call);
+                    int[] loadSizeSorted = IntStream.range(0, sortRoute.length).map(j -> (j % 2 == 1 ? -1 : 1) * cargo[sortRoute[j]][2]).toArray();
+                    int[] loadSize = IntStream.range(0, sortRoute.length).map(j -> loadSizeSorted[index[j]]).toArray();
 
-        if (vehicleEnd - vehicleStart == 0) {
-            return feasibilityCheck(newSolution) ? newSolution : solution.clone();
-        }
+                    Arrays.parallelPrefix(loadSize, Integer::sum);
+                    if (IntStream.range(0, loadSize.length).anyMatch(j -> vesselCapacity[finalI] - loadSize[j] < 0)) {
+                        return false;
+                    }
 
-        for (int pickupIdx = vehicleStart; pickupIdx < vehicleEnd + 1; pickupIdx++) {
-            for (int deliveryIdx = pickupIdx + 1; deliveryIdx < vehicleEnd + 2; deliveryIdx++) {
-                newSolution = solution.clone();
-                newSolution = movePickup(newSolution, pickupIdx, call);
-                newSolution = moveDelivery(newSolution, deliveryIdx, call);
-                if (feasibilityCheck(newSolution)) {
-                    return newSolution;
+                    int[][] timeWindowsSorted = IntStream.range(0, 2).mapToObj(j -> IntStream.range(0, sortRoute.length).map(k -> cargo[sortRoute[k]][(k % 2 == 0 ? 4 : 6) + j]).toArray()).toArray(int[][]::new);
+                    int[][] timeWindows = IntStream.range(0, 2).mapToObj(j -> IntStream.range(0, sortRoute.length).map(k -> timeWindowsSorted[j][index[k]]).toArray()).toArray(int[][]::new);
+
+                    int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(j -> cargo[sortRoute[j]][j % 2]).toArray();
+                    int[] portIndex = IntStream.range(0, sortRoute.length).map(j -> portIndexSorted[index[j]] - 1).toArray();
+
+                    int[] LUTimeSorted = IntStream.range(0, sortRoute.length).map(j -> (j % 2 == 0 ? loadingTime : unloadingTime)[finalI][sortRoute[j]]).toArray();
+                    int[] LUTime = IntStream.range(0, sortRoute.length).map(j -> LUTimeSorted[index[j]]).toArray();
+
+                    int[] diag = IntStream.range(0, portIndex.length - 1).map(j -> travelTime[finalI][portIndex[j]][portIndex[j + 1]]).toArray();
+                    int firstVisitTime = firstTravelTime[finalI][cargo[currentVPlan[0]][0] - 1];
+                    int[] routeTravelTime = IntStream.range(0, diag.length + 1).map(j -> (j > 0 ? diag[j - 1] : firstVisitTime)).toArray();
+
+                    int[] arriveTime = new int[noDoubleCallOnVehicle];
+                    for (int j = 0; j < noDoubleCallOnVehicle; j++) {
+                        arriveTime[j] = Math.max(currentTime + routeTravelTime[j], timeWindows[0][j]);
+                        if (arriveTime[j] > timeWindows[1][j]) {
+                            return false;
+                        }
+                        currentTime = arriveTime[j] + LUTime[j];
+                    }
                 }
             }
         }
-        return solution.clone();
+        return true;
     }
 
-    public static int[] findFeasibleInsertIndexes(int[] solution, int call) {
-        int[] validVehicles = validVehiclesForCallWithDummy(call);
-        return Arrays.stream(validVehicles).filter(vehicleIndex -> {
-            int[] newSolution = findFeasibleVehiclePermutation(solution, vehicleIndex, call);
-            return !Arrays.equals(newSolution, solution) && feasibilityCheck(newSolution);
-        }).toArray();
+    public static boolean feasibilityCheck(Solution solution) {
+
+        int nVehicles = problem.nVehicles;
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelTime = problem.firstTravelTime;
+        int[][] loadingTime = problem.loadingTime;
+        int[][] unloadingTime = problem.unloadingTime;
+        int[][][] travelTime = problem.travelTime;
+
+        for (int VIdx = 0; VIdx < nVehicles; VIdx++) {
+
+            Vehicle vehicle = solution.get(VIdx);
+
+            int[] currentVPlan = vehicle.asArray();
+            int noDoubleCallOnVehicle = currentVPlan.length;
+
+            if (noDoubleCallOnVehicle > 0) {
+                int finalVehicle = VIdx;
+                if (!Arrays.stream(currentVPlan).allMatch(vehicle.validCalls::contains)) {
+                    return false;
+                } else {
+                    int currentTime = 0;
+                    int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
+                    int[] index = argSort(argSort(currentVPlan));
+
+                    int[] loadSizeSorted = IntStream.range(0, sortRoute.length).map(j -> (j % 2 == 1 ? -1 : 1) * cargo[sortRoute[j]][2]).toArray();
+                    int[] loadSize = IntStream.range(0, sortRoute.length).map(j -> loadSizeSorted[index[j]]).toArray();
+
+                    Arrays.parallelPrefix(loadSize, Integer::sum);
+                    if (IntStream.range(0, loadSize.length).anyMatch(j -> vehicle.capacity - loadSize[j] < 0)) {
+                        return false;
+                    }
+
+                    int[][] timeWindowsSorted = IntStream.range(0, 2).mapToObj(j -> IntStream.range(0, sortRoute.length).map(k -> cargo[sortRoute[k]][(k % 2 == 0 ? 4 : 6) + j]).toArray()).toArray(int[][]::new);
+                    int[][] timeWindows = IntStream.range(0, 2).mapToObj(j -> IntStream.range(0, sortRoute.length).map(k -> timeWindowsSorted[j][index[k]]).toArray()).toArray(int[][]::new);
+
+                    int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(j -> cargo[sortRoute[j]][j % 2]).toArray();
+                    int[] portIndex = IntStream.range(0, sortRoute.length).map(j -> portIndexSorted[index[j]] - 1).toArray();
+
+                    int[] LUTimeSorted = IntStream.range(0, sortRoute.length).map(j -> (j % 2 == 0 ? loadingTime : unloadingTime)[finalVehicle][sortRoute[j]]).toArray();
+                    int[] LUTime = IntStream.range(0, sortRoute.length).map(j -> LUTimeSorted[index[j]]).toArray();
+
+                    int[] diag = IntStream.range(0, portIndex.length - 1).map(j -> travelTime[finalVehicle][portIndex[j]][portIndex[j + 1]]).toArray();
+                    int firstVisitTime = firstTravelTime[finalVehicle][cargo[currentVPlan[0]][0] - 1];
+                    int[] routeTravelTime = IntStream.range(0, diag.length + 1).map(j -> (j > 0 ? diag[j - 1] : firstVisitTime)).toArray();
+
+                    int[] arriveTime = new int[noDoubleCallOnVehicle];
+                    for (int j = 0; j < noDoubleCallOnVehicle; j++) {
+                        arriveTime[j] = Math.max(currentTime + routeTravelTime[j], timeWindows[0][j]);
+                        if (arriveTime[j] > timeWindows[1][j]) {
+                            return false;
+                        }
+                        currentTime = arriveTime[j] + LUTime[j];
+                    }
+                }
+            }
+        }
+        return true;
     }
 
-    public static double percentageTransported(int[] solution) {
-        int callsNotTransported = solution.length - getVehicleStartIndex(solution, problem.nVehicles);
-        int callsTransported = problem.nCalls - callsNotTransported;
-        return (double) callsTransported / problem.nCalls;
+    public static boolean feasibilityCheck(Vehicle vehicle) {
+
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelTime = problem.firstTravelTime;
+        int[][] loadingTime = problem.loadingTime;
+        int[][] unloadingTime = problem.unloadingTime;
+        int[][][] travelTime = problem.travelTime;
+
+        int[] currentVPlan = vehicle.asArray();
+        int calls = vehicle.size();
+
+        if (calls > 0) {
+            int finalVehicle = vehicle.vehicleIndex;
+            if (!Arrays.stream(currentVPlan).allMatch(vehicle.validCalls::contains)) {
+                return false;
+            } else {
+                int currentTime = 0;
+                int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
+                int[] index = argSort(argSort(currentVPlan));
+
+                int[] loadSizeSorted = IntStream.range(0, sortRoute.length).map(j -> (j % 2 == 1 ? -1 : 1) * cargo[sortRoute[j]][2]).toArray();
+                int[] loadSize = IntStream.range(0, sortRoute.length).map(j -> loadSizeSorted[index[j]]).toArray();
+
+                Arrays.parallelPrefix(loadSize, Integer::sum);
+                if (IntStream.range(0, loadSize.length).anyMatch(j -> vehicle.capacity - loadSize[j] < 0)) {
+                    return false;
+                }
+
+                int[][] timeWindowsSorted = IntStream.range(0, 2).mapToObj(j -> IntStream.range(0, sortRoute.length).map(k -> cargo[sortRoute[k]][(k % 2 == 0 ? 4 : 6) + j]).toArray()).toArray(int[][]::new);
+                int[][] timeWindows = IntStream.range(0, 2).mapToObj(j -> IntStream.range(0, sortRoute.length).map(k -> timeWindowsSorted[j][index[k]]).toArray()).toArray(int[][]::new);
+
+                int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(j -> cargo[sortRoute[j]][j % 2]).toArray();
+                int[] portIndex = IntStream.range(0, sortRoute.length).map(j -> portIndexSorted[index[j]] - 1).toArray();
+
+                int[] LUTimeSorted = IntStream.range(0, sortRoute.length).map(j -> (j % 2 == 0 ? loadingTime : unloadingTime)[finalVehicle][sortRoute[j]]).toArray();
+                int[] LUTime = IntStream.range(0, sortRoute.length).map(j -> LUTimeSorted[index[j]]).toArray();
+
+                int[] diag = IntStream.range(0, portIndex.length - 1).map(j -> travelTime[finalVehicle][portIndex[j]][portIndex[j + 1]]).toArray();
+                int firstVisitTime = firstTravelTime[finalVehicle][cargo[currentVPlan[0]][0] - 1];
+                int[] routeTravelTime = IntStream.range(0, diag.length + 1).map(j -> (j > 0 ? diag[j - 1] : firstVisitTime)).toArray();
+
+                int[] arriveTime = new int[calls];
+                for (int call = 0; call < calls; call++) {
+                    arriveTime[call] = Math.max(currentTime + routeTravelTime[call], timeWindows[0][call]);
+                    if (arriveTime[call] > timeWindows[1][call]) {
+                        return false;
+                    }
+                    currentTime = arriveTime[call] + LUTime[call];
+                }
+            }
+        }
+        return true;
     }
 
-    public static int leastExpensiveVehicle(int[] solution, int[] vehicleIndexes) {
-        return Arrays.stream(vehicleIndexes).boxed().min(comparingDouble(v -> vehicleCost(solution, v))).get();
+    /**
+     * @param solution solution to calculate cost of
+     * @return cost of solution
+     */
+    public static double costFunction(int[] solution) {
+
+        int nVehicles = problem.nVehicles;
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelCost = problem.firstTravelCost;
+        int[][] portCost = problem.portCost;
+        int[][][] travelCost = problem.travelCost;
+
+        double notTransportCost = 0;
+        double[] routeTravelCost = new double[nVehicles];
+        double[] costInPorts = new double[nVehicles];
+
+        int[] sol = IntStream.range(0, solution.length + 1).map(i -> i < solution.length ? solution[i] : 0).toArray();
+        int[] zeroIndex = IntStream.range(0, sol.length).filter(i -> sol[i] == 0).toArray();
+        int tempIdx = 0;
+
+        for (int i = 0; i < nVehicles + 1; i++) {
+            int finalI = i;
+
+            int[] currentVPlan = Arrays.stream(sol, tempIdx, zeroIndex[i]).map(j -> j - 1).toArray();
+            int noDoubleCallOnVehicle = currentVPlan.length;
+            tempIdx = zeroIndex[i] + 1;
+
+            if (i == nVehicles) {
+                notTransportCost = Arrays.stream(currentVPlan).map(j -> cargo[j][3]).sum() / 2.0;
+            } else {
+                if (noDoubleCallOnVehicle > 0) {
+                    int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
+                    int[] index = argSort(argSort(currentVPlan));
+
+                    int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(j -> cargo[sortRoute[j]][j % 2]).toArray();
+                    int[] portIndex = IntStream.range(0, sortRoute.length).map(j -> portIndexSorted[index[j]] - 1).toArray();
+                    int[] diag = IntStream.range(0, portIndex.length - 1).map(j -> travelCost[finalI][portIndex[j]][portIndex[j + 1]]).toArray();
+
+                    int firstVisitCost = firstTravelCost[finalI][cargo[currentVPlan[0]][0] - 1];
+
+                    routeTravelCost[i] = firstVisitCost + Arrays.stream(diag).sum();
+                    costInPorts[i] = Arrays.stream(currentVPlan).map(j -> portCost[finalI][j]).sum() / 2.0;
+                }
+            }
+        }
+        return notTransportCost + Arrays.stream(routeTravelCost).sum() + Arrays.stream(costInPorts).sum();
     }
 
-    public static int[] getLeastNExpensiveVehicles(int[] solution, int[] validVehicles, int N) {
-        return Arrays.stream(validVehicles).boxed().sorted(comparingDouble(v -> vehicleCost(solution, v))).limit(N).mapToInt(i -> i).toArray();
+    public static double costFunction(Solution solution) {
+
+        int nVehicles = problem.nVehicles;
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelCost = problem.firstTravelCost;
+        int[][] portCost = problem.portCost;
+        int[][][] travelCost = problem.travelCost;
+
+        double notTransportCost = 0;
+        double[] routeTravelCost = new double[nVehicles];
+        double[] costInPorts = new double[nVehicles];
+
+        for (int VIdx = 0; VIdx < nVehicles + 1; VIdx++) {
+            Vehicle vehicle = solution.get(VIdx);
+
+            int[] currentVPlan = vehicle.asArray();
+
+            if (VIdx == nVehicles) {
+                notTransportCost = Arrays.stream(currentVPlan).map(j -> cargo[j][3]).sum() / 2.0;
+            } else {
+                if (vehicle.size() > 0) {
+                    int finalVIdx = VIdx;
+                    int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
+                    int[] index = argSort(argSort(currentVPlan));
+
+                    int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(j -> cargo[sortRoute[j]][j % 2]).toArray();
+                    int[] portIndex = IntStream.range(0, sortRoute.length).map(j -> portIndexSorted[index[j]] - 1).toArray();
+                    int[] diag = IntStream.range(0, portIndex.length - 1).map(j -> travelCost[finalVIdx][portIndex[j]][portIndex[j + 1]]).toArray();
+
+                    int firstVisitCost = firstTravelCost[finalVIdx][cargo[currentVPlan[0]][0] - 1];
+
+                    routeTravelCost[VIdx] = firstVisitCost + Arrays.stream(diag).sum();
+                    costInPorts[VIdx] = Arrays.stream(currentVPlan).map(j -> portCost[finalVIdx][j]).sum() / 2.0;
+                }
+            }
+        }
+        return notTransportCost + Arrays.stream(routeTravelCost).sum() + Arrays.stream(costInPorts).sum();
     }
 
-    public static int mostExpensiveVehicle(int[] solution) {
-        return IntStream.range(0, problem.nVehicles).boxed().max(comparingDouble(v -> vehicleCost(solution, v))).get();
+    public static double costFunction(Vehicle vehicle) {
+
+        int[][] cargo = problem.cargo;
+        int[][] firstTravelCost = problem.firstTravelCost;
+        int[][] portCost = problem.portCost;
+        int[][][] travelCost = problem.travelCost;
+
+        double routeTravelCost = 0;
+        double costInPorts = 0;
+
+        int[] currentVPlan = vehicle.asArray();
+
+        if (vehicle.vehicleIndex == -1) {
+            return Arrays.stream(currentVPlan).map(call -> problem.calls.get(call).costNotTransport).sum() / 2.0;
+        } else {
+            if (vehicle.size() > 0) {
+                int VIdx = vehicle.vehicleIndex;
+                int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
+                int[] index = argSort(argSort(currentVPlan));
+
+                int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(call -> cargo[sortRoute[call]][call % 2]).toArray();
+                int[] portIndex = IntStream.range(0, sortRoute.length).map(call -> portIndexSorted[index[call]] - 1).toArray();
+                int[] diag = IntStream.range(0, portIndex.length - 1).map(call -> travelCost[VIdx][portIndex[call]][portIndex[call + 1]]).toArray();
+
+                int firstVisitCost = firstTravelCost[VIdx][cargo[currentVPlan[0]][0] - 1];
+
+                routeTravelCost = firstVisitCost + Arrays.stream(diag).sum();
+                costInPorts = Arrays.stream(currentVPlan).map(call -> portCost[VIdx][call]).sum() / 2.0;
+            }
+            return routeTravelCost + costInPorts;
+        }
     }
 
-    public static int[] getNMostExpensiveVehicles(int[] solution, int N) {
-        return IntStream.range(0, problem.nVehicles).boxed().sorted(comparingDouble(v -> -vehicleCost(solution, v))).limit(N).mapToInt(i -> i).toArray();
+    /**
+     * @param array array to get shuffle indices from
+     * @return Indices of element after sort
+     */
+    private static int[] argSort(final int[] array) {
+        Integer[] indexes = IntStream.range(0, array.length).boxed().toArray(Integer[]::new);
+        Arrays.sort(indexes, Comparator.comparingInt(i -> array[i]));
+        return Arrays.stream(indexes).mapToInt(i -> i).toArray();
     }
-
-    public static double vehicleCost(int[] solution, int vehicleIndex) {
-        return costFunction(getCallsInVehicleWithZeros(solution, vehicleIndex));
-    }
-
-    public static int getVehicleEndIndex(int[] solution, int vehicleIndex) {
-        return IntStream.rangeClosed(0, solution.length).filter(i -> i == solution.length || solution[i] == 0).toArray()[vehicleIndex];
-    }
-
-    public static int getVehicleStartIndex(int[] solution, int vehicleIndex) {
-        return vehicleIndex == 0 ? 0 : IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray()[vehicleIndex - 1] + 1;
-    }
-
-    public static int[] validCallForVehicle(int vehicle) {
-        return problem.vehicles.get(vehicle).validCalls.stream().mapToInt(i -> i).toArray();
-    }
-
-    public static int[] validVehiclesForCallWithDummy(int call) {
-        return problem.calls.get(call).validVehicles;
-    }
-
-    public static int[] validVehicleIndexesForCall(int call) {
-        int[] vehicles = Arrays.stream(problem.vesselCargo).mapToInt(vehicle -> vehicle[call - 1]).toArray();
-        return IntStream.range(0, vehicles.length).filter(vehicle -> vehicles[vehicle] == 1).toArray();
-    }
-
-    public static int[] transportedCalls(int[] solution) {
-        Set<Integer> notTransported = Arrays.stream(notTransportedCalls(solution)).boxed().collect(toSet());
-        return IntStream.rangeClosed(1, problem.nCalls).filter(i -> !notTransported.contains(i)).toArray();
-    }
-
-    public static int[] notTransportedCalls(int[] solution) {
-        return Arrays.stream(solution).skip(getVehicleStartIndex(solution, problem.nVehicles)).distinct().toArray();
-    }
-
-    public static Call[] callsFromID(int[] calls) {
-        return Arrays.stream(calls).mapToObj(call -> problem.calls.get(call)).toArray(Call[]::new);
-    }
-
-    public static int[] getCallsInVehicle(int[] solution, int vehicleIndex) {
-        int[] zeroIndexes = IntStream.range(0, solution.length).filter(i -> solution[i] == 0).toArray();
-        return Arrays.stream(solution).skip(vehicleIndex == 0 ? 0 : zeroIndexes[vehicleIndex - 1] + 1).takeWhile(c -> c != 0).toArray();
-    }
-
-    public static int[] getCallsInVehicleWithZeros(int[] solution, int vehicleIndex) {
-        int startIndex = getVehicleStartIndex(solution, vehicleIndex);
-        int endIndex = getVehicleEndIndex(solution, vehicleIndex);
-        int[] vehicleWithZeros = new int[endIndex - startIndex + problem.nVehicles];
-        System.arraycopy(solution, startIndex, vehicleWithZeros, vehicleIndex, endIndex - startIndex);
-        return vehicleWithZeros;
-    }
-
-    public static int[] getVehiclesWithAtLeastNCalls(int[] solution, int N) {
-        return IntStream.range(0, problem.nVehicles).filter(i -> getVehicleEndIndex(solution, i) - getVehicleStartIndex(solution, i) >= 2 * N).toArray();
-    }
-
-    public static int[] getVehiclesWithNCalls(int[] solution, int N) {
-        return IntStream.range(0, problem.nVehicles).filter(i -> {
-            int calls = (getVehicleEndIndex(solution, i) - getVehicleStartIndex(solution, i)) / 2;
-            return N == calls;
-        }).toArray();
-    }
-
-    public static int[] getVehiclesWithNToMCalls(int[] solution, int N, int M) {
-        return IntStream.range(0, problem.nVehicles).filter(i -> {
-            int calls = (getVehicleEndIndex(solution, i) - getVehicleStartIndex(solution, i)) / 2;
-            return N <= calls && calls <= M;
-        }).toArray();
-    }
-
-    public static int getVehicleSize(int[] solution, int vehicleIndex) {
-        int startIndex = getVehicleStartIndex(solution, vehicleIndex);
-        int endIndex = getVehicleEndIndex(solution, vehicleIndex);
-        return endIndex - startIndex;
-    }
-
-    public static int[] getEmptyVehicles(int[] solution) {
-        return IntStream.range(0, problem.nVehicles).filter(i -> getVehicleSize(solution, i) == 0).toArray();
-    }
-
-    /*
-    public static int[][] solutionArrayToLists(int[] solutionArray) {
-        int[] zeroIndexes = IntStream.range(0, problem.nVehicles).filter(i -> solutionArray[i] == 0).toArray();
-        return IntStream
-                .rangeClosed(0, problem.nVehicles)
-                .map(v -> IntStream.range(v == 0 ? 0 : zeroIndexes[v-1]+1, ))
-    }
-
-    public static int[] solutionListsToArray(int[][] solutionList) {
-
-    }*/
 }

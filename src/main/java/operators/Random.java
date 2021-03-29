@@ -1,0 +1,24 @@
+package operators;
+
+import objects.Solution;
+
+import java.util.Collections;
+
+import static main.Main.problem;
+import static utils.Constants.random;
+
+public class Random implements Operator {
+    @Override
+    public Solution operate(Solution solution) {
+
+        return new Solution(solution) {{
+            for (int call = 0; call < problem.nCalls; call++) {
+                moveCalls(call, random.nextInt(problem.nVehicles + 1));
+            }
+
+            for (int vehicle = 0; vehicle < problem.nVehicles; vehicle++) {
+                Collections.shuffle(get(vehicle));
+            }
+        }};
+    }
+}

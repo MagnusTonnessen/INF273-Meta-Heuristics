@@ -10,8 +10,8 @@ public class TravelTimeAndCost {
 
     public TravelTimeAndCost(int[] travel) {
         this.vehicle = travel[0] - 1;
-        this.originNode = travel[1];
-        this.destinationNode = travel[2];
+        this.originNode = travel[1] - 1;
+        this.destinationNode = travel[2] - 1;
         this.travelTime = travel[3];
         this.travelCost = travel[4];
     }
