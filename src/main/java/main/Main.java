@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.groupingBy;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_TITLE;
 import static utils.Constants.C130V40;
@@ -51,7 +50,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        A4();
+        initialize(C7V3);
     }
 
     public static void runAllSearches() throws Exception {

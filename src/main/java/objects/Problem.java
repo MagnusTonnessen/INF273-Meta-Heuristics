@@ -1,8 +1,7 @@
 package objects;
 
 import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.generateInitSolution;
@@ -23,14 +22,12 @@ public class Problem {
     public final int[][][] travelCost;
     public final int[] initialSolution;
     public final double initialCost;
-    public final Vehicle[] vehicles;
-    public final Map<Integer, Vehicle> vehicleMap;
-    public final Call[] calls;
-    public final Map<Integer, Call> callsMap;
+    public final List<Vehicle> vehicles;
+    public final List<Call> calls;
     public final TravelTimeAndCost[] travelTimeAndCosts;
     public final NodeTimeAndCost[] nodeTimeAndCosts;
 
-    public Problem(int nCalls, int nVehicles, int nNodes, int[] vesselCapacity, int[][] cargo, int[][] firstTravelTime, int[][] firstTravelCost, int[][] loadingTime, int[][] unloadingTime, int[][] vesselCargo, int[][] portCost, int[][][] travelTime, int[][][] travelCost, Vehicle[] vehicles, Call[] calls, TravelTimeAndCost[] travelTimeAndCosts, NodeTimeAndCost[] nodeTimeAndCosts) {
+    public Problem(int nCalls, int nVehicles, int nNodes, int[] vesselCapacity, int[][] cargo, int[][] firstTravelTime, int[][] firstTravelCost, int[][] loadingTime, int[][] unloadingTime, int[][] vesselCargo, int[][] portCost, int[][][] travelTime, int[][][] travelCost, List<Vehicle> vehicles, List<Call> calls, TravelTimeAndCost[] travelTimeAndCosts, NodeTimeAndCost[] nodeTimeAndCosts) {
         this.nCalls = nCalls;
         this.nVehicles = nVehicles;
         this.nNodes = nNodes;
@@ -48,9 +45,17 @@ public class Problem {
         this.calls = calls;
         this.travelTimeAndCosts = travelTimeAndCosts;
         this.nodeTimeAndCosts = nodeTimeAndCosts;
-        this.callsMap = Arrays.stream(calls).collect(Collectors.toMap(c -> c.callIndex, c -> c));
-        this.vehicleMap = Arrays.stream(vehicles).collect(Collectors.toMap(v -> v.vehicleIndex, v -> v));
         this.initialSolution = generateInitSolution(nCalls, nVehicles);
         this.initialCost = costFunction(initialSolution, nVehicles, cargo, firstTravelCost, portCost, travelCost);
+    }
+
+    @Override
+    public String toString() {
+        return "Problem{" +
+                "vehicles=" + vehicles +
+                ", calls=" + calls +
+                ", travelTimeAndCosts=" + Arrays.toString(travelTimeAndCosts) +
+                ", nodeTimeAndCosts=" + Arrays.toString(nodeTimeAndCosts) +
+                '}';
     }
 }

@@ -10,8 +10,8 @@ public class NodeTimeAndCost {
     public final int destinationNodeCosts;
 
     public NodeTimeAndCost(int[] node) {
-        this.vehicle = node[0];
-        this.call = node[1];
+        this.vehicle = node[0] - 1;
+        this.call = node[1] - 1;
         this.originNodeTime = node[2];
         this.originNodeCost = node[3];
         this.destinationNodeTime = node[4];

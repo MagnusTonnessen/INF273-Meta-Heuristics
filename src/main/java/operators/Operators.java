@@ -1,7 +1,5 @@
 package operators;
 
-import utils.Utils;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +10,6 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 import static utils.Constants.random;
-import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.PDPUtils.costFunction;
 import static utils.PDPUtils.feasibilityCheck;
 import static utils.PDPUtils.problem;
@@ -24,12 +21,11 @@ import static utils.Utils.getNMostExpensiveVehicles;
 import static utils.Utils.getVehicleEndIndex;
 import static utils.Utils.getVehicleStartIndex;
 import static utils.Utils.getVehiclesWithNToMCalls;
-import static utils.Utils.leastExpensiveVehicle;
 import static utils.Utils.moveCall;
 import static utils.Utils.notTransportedCalls;
 import static utils.Utils.validCallForVehicle;
 import static utils.Utils.validVehicleIndexesForCall;
-import static utils.Utils.validVehicleIndexesForCallWithDummy;
+import static utils.Utils.validVehiclesForCallWithDummy;
 
 public class Operators {
 
@@ -54,7 +50,7 @@ public class Operators {
     public static int[] oneInsert(int[] solution) {
 
         int callToRelocate = random.nextInt(problem.nCalls) + 1;
-        int[] feasibleInsertIndexes = validVehicleIndexesForCallWithDummy(callToRelocate); // findFeasibleInsertIndexes(solution, callToRelocate);
+        int[] feasibleInsertIndexes = validVehiclesForCallWithDummy(callToRelocate); // findFeasibleInsertIndexes(solution, callToRelocate);
 
         if (feasibleInsertIndexes.length < 1) {
             return solution.clone();
@@ -173,7 +169,7 @@ public class Operators {
             int callToRelocate = calls[random.nextInt(calls.length)];
 
             // Find valid vehicles for that call
-            int[] validVehicles = validVehicleIndexesForCallWithDummy(callToRelocate);
+            int[] validVehicles = validVehiclesForCallWithDummy(callToRelocate);
 
             // Find least expensive vehicle among the valid vehicles
             int[] leastExpensiveVehicles = getLeastNExpensiveVehicles(solution, validVehicles, 3);
@@ -203,7 +199,7 @@ public class Operators {
         int callToRelocate = calls[random.nextInt(calls.length)];
 
         // Find valid vehicles for that call
-        int[] validVehicles = validVehicleIndexesForCallWithDummy(callToRelocate);
+        int[] validVehicles = validVehiclesForCallWithDummy(callToRelocate);
 
         // Find least expensive vehicle among the valid vehicles
         int leastExpensiveVehicle = validVehicles[random.nextInt(validVehicles.length)]; //leastExpensiveVehicle(solution, validVehicles);
@@ -238,7 +234,7 @@ public class Operators {
             for (int call : calls) {
 
                 // Find valid vehicles for that call
-                int[] validVehicles = validVehicleIndexesForCallWithDummy(call);
+                int[] validVehicles = validVehiclesForCallWithDummy(call);
 
                 // Find least expensive vehicle among the valid vehicles
                 int[] leastExpensiveVehicles = getLeastNExpensiveVehicles(solution, validVehicles, 3);
@@ -273,7 +269,7 @@ public class Operators {
         int callToRelocate = calls[random.nextInt(calls.length)];
 
         // Find valid vehicles for that call
-        int[] validVehicles = validVehicleIndexesForCallWithDummy(callToRelocate);
+        int[] validVehicles = validVehiclesForCallWithDummy(callToRelocate);
 
         // Find least expensive vehicle among the valid vehicles
         int leastExpensiveVehicle = validVehicles[random.nextInt(validVehicles.length)]; //leastExpensiveVehicle(solution, validVehicles);

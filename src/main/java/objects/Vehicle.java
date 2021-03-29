@@ -1,21 +1,36 @@
 package objects;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class Vehicle {
+public class Vehicle extends ArrayList<Integer> {
 
     public final int vehicleIndex;
     public final int homeNode;
     public final int startingTime;
     public final int capacity;
-    public final int[] validCalls;
+    public final Set<Integer> validCalls;
 
-    public Vehicle(int[] vehicle, int[] validCalls) {
-        this.vehicleIndex = vehicle[0];
+    public Vehicle(int[] vehicle, Set<Integer> validCalls) {
+        this.vehicleIndex = vehicle[0] - 1;
         this.homeNode = vehicle[1];
         this.startingTime = vehicle[2];
         this.capacity = vehicle[3];
         this.validCalls = validCalls;
+    }
+
+    public void removeCall(int call) {
+        removeIf(c -> c == call);
+    }
+
+    public int[] asArray() {
+        return stream().mapToInt(c -> c).toArray();
+    }
+
+    public static Vehicle dummyVehicle(int nCalls) {
+        return new Vehicle(new int[]{0, -1, -1, -1}, IntStream.range(0, nCalls).boxed().collect(Collectors.toSet()));
     }
 
     @Override
@@ -25,7 +40,8 @@ public class Vehicle {
                 ", homeNode=" + homeNode +
                 ", startingTime=" + startingTime +
                 ", capacity=" + capacity +
-                ", validCalls=" + Arrays.toString(validCalls) +
+                ", validCalls=" + validCalls +
+                ", currentCalls=" + super.toString() +
                 '}';
     }
 }
