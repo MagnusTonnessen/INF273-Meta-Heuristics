@@ -33,11 +33,11 @@ public class LocalSearch implements SearchingAlgorithm {
             double p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = bestSolution.applyOperator(oneInsert);
+                currentSolution = oneInsert.operate(bestSolution);
             } else if (p < P1 + P2) {
-                currentSolution = bestSolution.applyOperator(twoExchange);
+                currentSolution = twoExchange.operate(bestSolution);
             } else {
-                currentSolution = bestSolution.applyOperator(threeExchange);
+                currentSolution = threeExchange.operate(bestSolution);
             }
 
             currentCost = currentSolution.cost();

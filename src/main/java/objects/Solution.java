@@ -1,7 +1,5 @@
 package objects;
 
-import operators.Operator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,10 +64,6 @@ public class Solution extends ArrayList<Vehicle> {
         int index1 = random.nextInt(getVehicleSize(vehicle) + 1);
         int index2 = random.nextInt(getVehicleSize(vehicle) + 2);
         moveCall(call, vehicle, index1, index2);
-    }
-
-    public Solution applyOperator(Operator operator) {
-        return operator.operate(this);
     }
 
     public List<Vehicle> getVehiclesWithNToMCalls(int N, int M) {

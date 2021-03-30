@@ -22,7 +22,7 @@ public class RandomSearch implements SearchingAlgorithm {
 
         for (int i = 0; i < ITERATIONS; i++) {
 
-            currentSolution = currentSolution.applyOperator(random);
+            currentSolution = random.operate(currentSolution);
             currentCost = currentSolution.cost();
 
             if (currentSolution.isFeasible() && currentCost < bestCost) {
