@@ -8,7 +8,7 @@ public class TravelTimeAndCost {
     public final int travelTime;
     public final int travelCost;
 
-    public TravelTimeAndCost(int[] travel) {
+    public TravelTimeAndCost(Integer[] travel) {
         this.vehicle = travel[0] - 1;
         this.originNode = travel[1] - 1;
         this.destinationNode = travel[2] - 1;

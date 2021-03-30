@@ -26,7 +26,7 @@ public class Vehicle extends ArrayList<Integer> {
     }
 
     public static Vehicle dummyVehicle(int nCalls) {
-        return new Vehicle(new int[]{0, -1, -1, -1}, IntStream.range(0, nCalls).boxed().collect(Collectors.toSet()));
+        return new Vehicle(new int[]{nCalls+1, -1, -1, -1}, IntStream.range(0, nCalls).boxed().collect(Collectors.toSet()));
     }
 
     public void removeCall(int call) {
@@ -51,6 +51,10 @@ public class Vehicle extends ArrayList<Integer> {
 
     public List<Integer> indexes(int call) {
         return IntStream.range(0, size()).filter(c -> get(c) == call).boxed().collect(Collectors.toList());
+    }
+
+    public List<Integer> currentCalls() {
+        return this;
     }
 
     @Override
