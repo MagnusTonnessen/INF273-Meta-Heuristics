@@ -4,9 +4,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 public class Problem {
@@ -26,6 +31,7 @@ public class Problem {
     public final List<Vehicle> vehicles;
     public final List<Call> calls;
     public final TravelTimeAndCost[] travelTimeAndCosts;
+    public final Map<Integer, Map<Integer, Map<Integer, TravelTimeAndCost>>> travel;
     public final NodeTimeAndCost[] nodeTimeAndCosts;
 
     public Problem(String filePath) throws Exception {
@@ -93,12 +99,20 @@ public class Problem {
                     travelCost[arr[0] - 1][arr[1] - 1][arr[2] - 1] = arr[4];
                 });
 
+        travel = IntStream
+                .range(0, nNodes * nNodes * nVehicles)
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
+                        .map(Integer::parseInt)
+                        .toArray(Integer[]::new))
+                .collect(groupingBy(vehicle -> vehicle[0] - 1, groupingBy(vehicle -> vehicle[1] - 1, toMap(vehicle -> vehicle[2] - 1, TravelTimeAndCost::new))));
+
         travelTimeAndCosts = IntStream
                 .range(0, nNodes * nNodes * nVehicles)
                 .mapToObj(i -> Arrays
                         .stream(input.get(1 + 2 * nVehicles + nCalls + 9 + i).split(","))
-                        .mapToInt(Integer::parseInt)
-                        .toArray())
+                        .map(Integer::parseInt)
+                        .toArray(Integer[]::new))
                 .map(TravelTimeAndCost::new)
                 .toArray(TravelTimeAndCost[]::new);
 

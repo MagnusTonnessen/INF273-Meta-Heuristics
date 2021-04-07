@@ -70,6 +70,10 @@ public class Solution extends ArrayList<Vehicle> {
         return stream().filter(vehicle -> N <= vehicle.size() && vehicle.size() <= M).collect(Collectors.toList());
     }
 
+    public List<Vehicle> getNotEmptyVehicles() {
+        return stream().filter(vehicle -> !vehicle.isEmpty()).collect(Collectors.toList());
+    }
+
     public boolean isFeasible() {
         return feasibilityCheck(this);
     }
