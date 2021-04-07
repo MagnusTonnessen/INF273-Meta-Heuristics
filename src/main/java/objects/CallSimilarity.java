@@ -9,7 +9,7 @@ import static main.Main.problem;
 
 public class CallSimilarity {
 
-    public static Map<Integer, Map<Integer, Double>> calculateCallSimilarities() {
+    public Map<Integer, Map<Integer, Double>> calculateCallSimilarities() {
         Map<Integer, Map<Integer, Double>> similarities = IntStream.range(0, problem.calls.size()).boxed().collect(toMap(i -> i, i -> new HashMap<>()));
         for (int call1 = 0; call1 < problem.calls.size() - 1; call1++) {
             for (int call2 = call1 + 1; call2 < problem.nCalls; call2++) {
@@ -22,10 +22,10 @@ public class CallSimilarity {
     }
 
     public double getSimilarity(int call1, int call2) {
-        return
+        return 0.0;
     }
 
     public double getCallDistance(int call1, int call2) {
-
+        return 0.0;
     }
 }
