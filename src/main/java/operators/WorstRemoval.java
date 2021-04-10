@@ -9,7 +9,7 @@ import java.util.Vector;
 
 import static utils.Constants.random;
 
-public class WorstRemoval implements Operator {
+public class WorstRemoval extends Operator {
     @Override
     public Solution operate(Solution solution) {
 
@@ -17,7 +17,7 @@ public class WorstRemoval implements Operator {
 
         Vehicle vehicle1 = notEmptyVehicles.get(random.nextInt(notEmptyVehicles.size()));
 
-        notEmptyVehicles.stream().forEach(vehicle -> {
+        notEmptyVehicles.forEach(vehicle -> {
             System.out.println("Vehicle: " + vehicle.currentCalls());
             double c = vehicle.cost();
             vehicle.stream().distinct().forEach(call -> {

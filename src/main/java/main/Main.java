@@ -5,8 +5,7 @@ import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
-import operators.Random;
-import operators.WorstRemoval;
+import operators.escapeOperators.EscapeOperator;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
@@ -20,7 +19,7 @@ import java.util.stream.IntStream;
 
 import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_TITLE;
-import static utils.Constants.C7V3;
+import static utils.Constants.C35V7;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -49,14 +48,17 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        initialize(C7V3);
+        initialize(C35V7);
         RandomSearch random = new RandomSearch();
         Solution solution = random.search();
         System.out.println(solution);
+        System.out.println(solution.isFeasible());
+        System.out.println(solution.cost());
 
-        solution = new WorstRemoval().operate(solution);
+        solution = new EscapeOperator().operate(solution);
         System.out.println(solution);
-
+        System.out.println(solution.isFeasible());
+        System.out.println(solution.cost());
 //        System.out.println("Solution cost: " + solution.cost());
 //        solution.forEach(vehicle -> System.out.println("Vehicle " + vehicle.vehicleIndex + ": " + vehicle.cost()));
 //        System.out.println("Vehicle costs: " + solution.stream().reduce(0.0, (sum, vehicle) -> sum + vehicle.cost(), Double::sum));
