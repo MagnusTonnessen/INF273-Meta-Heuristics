@@ -3,18 +3,18 @@ package operators;
 import objects.Solution;
 import objects.Vehicle;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import static utils.Constants.random;
 
-public class WorstRemoval extends Operator {
-    @Override
-    public Solution operate(Solution solution) {
+public class WorstRemoval {
+
+    public List<Integer> operate(Solution solution, int q) {
 
         List<Vehicle> notEmptyVehicles = solution.getNotEmptyVehicles();
 
+        List<Integer> transportedCalls = solution;
         Vehicle vehicle1 = notEmptyVehicles.get(random.nextInt(notEmptyVehicles.size()));
 
         notEmptyVehicles.forEach(vehicle -> {
@@ -40,6 +40,6 @@ public class WorstRemoval extends Operator {
         }).get();
 
         System.out.println(mostExpensive);
-        return solution;
+        return new ArrayList<>();
     }
 }

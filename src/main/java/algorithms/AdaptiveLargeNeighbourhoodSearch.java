@@ -2,13 +2,13 @@ package algorithms;
 
 import objects.Solution;
 import operators.BruteForce;
-import operators.escapeOperators.EscapeOperator;
 import operators.OneInsert;
 import operators.Operator;
 import operators.ThreeExchange;
 import operators.TransportAll;
 import operators.TwoExchange;
 import operators.WorstRemoval;
+import operators.escapeOperators.EscapeOperator;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -65,12 +65,17 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             } else {
                 iterationsSinceLastImprovement++;
             }
-            if (accept(newSolution, solution)) {
+            if (newCost < cost) {
                 solution = newSolution;
+                cost = newCost;
             }
             updateOperators(operators);
         }
         return bestSolution;
+    }
+
+    private void rateOperator(Operator operator, int value) {
+
     }
 
     private Operator selectInsertionOperator(Solution newSolution) {
