@@ -361,7 +361,7 @@ public class Utils {
 
         int[] currentVPlan = vehicle.asArray();
 
-        if (vehicle.vehicleIndex == -1) {
+        if (vehicle.vehicleIndex == problem.nVehicles) {
             return Arrays.stream(currentVPlan).map(call -> problem.calls.get(call).costNotTransport).sum() / 2.0;
         } else {
             if (vehicle.size() > 0) {

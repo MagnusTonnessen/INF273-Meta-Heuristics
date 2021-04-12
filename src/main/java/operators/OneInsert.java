@@ -1,6 +1,9 @@
 package operators;
 
 import objects.Solution;
+import objects.Vehicle;
+
+import java.util.List;
 
 import static main.Main.problem;
 import static utils.Constants.random;
@@ -11,14 +14,14 @@ public class OneInsert extends Operator {
     public Solution operate(Solution solution) {
 
         int call = random.nextInt(problem.nCalls);
-        int[] validVehicles = problem.calls.get(call).validVehicles;
+        List<Vehicle> validVehicles = problem.calls.get(call).getValidVehicles();
 
-        if (validVehicles.length < 1) {
+        if (validVehicles.isEmpty()) {
             return solution.copy();
         }
 
         return new Solution(solution) {{
-            moveCalls(call, validVehicles[random.nextInt(validVehicles.length)]);
+            moveCalls(call, validVehicles.get(random.nextInt(validVehicles.size())));
         }};
     }
 }

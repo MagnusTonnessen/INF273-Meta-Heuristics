@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static utils.Constants.random;
 import static utils.Utils.costFunction;
 import static utils.Utils.feasibilityCheck;
 
@@ -25,8 +26,15 @@ public class Vehicle extends ArrayList<Integer> {
         this.validCalls = validCalls;
     }
 
-    public static Vehicle dummyVehicle(int nCalls) {
-        return new Vehicle(new int[]{nCalls+1, -1, -1, -1}, IntStream.range(0, nCalls).boxed().collect(Collectors.toSet()));
+    public static Vehicle dummyVehicle(int nVehicles) {
+        return new Vehicle(new int[]{nVehicles+1, -1, -1, -1}, IntStream.range(0, nVehicles).boxed().collect(Collectors.toSet()));
+    }
+
+    public void randomInsert(int call) {
+        int index1 = random.nextInt(size() + 1);
+        int index2 = random.nextInt(size() + 2);
+        add(index1, call);
+        add(index2, call);
     }
 
     public void removeCall(int call) {

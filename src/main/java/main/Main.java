@@ -1,11 +1,15 @@
 package main;
 
+import algorithms.LocalSearch;
 import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
 import operators.escapeOperators.EscapeOperator;
+import operators.insertionOperators.GreedyInsertion;
+import operators.removalOperators.RandomRemoval;
+import operators.removalOperators.WorstRemoval;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
@@ -19,6 +23,7 @@ import java.util.stream.IntStream;
 
 import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_TITLE;
+import static utils.Constants.C18V5;
 import static utils.Constants.C35V7;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
@@ -31,6 +36,7 @@ import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
 import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.Constants.TRANSPORT_ALL_TITLE;
+import static utils.Constants.random;
 import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
@@ -49,20 +55,23 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         initialize(C35V7);
-        RandomSearch random = new RandomSearch();
-        Solution solution = random.search();
+        LocalSearch local = new LocalSearch();
+        Solution solution = local.search();
         System.out.println(solution);
         System.out.println(solution.isFeasible());
-        System.out.println(solution.cost());
+        System.out.println(solution.cost() + "\n");
 
-        solution = new EscapeOperator().operate(solution);
+        List<Integer> removedCalls = new WorstRemoval().remove(solution, random.nextInt(5)+1);
+        solution.removeCalls(removedCalls);
+
+        System.out.println("Removed calls: " + removedCalls);
+
+        solution = new GreedyInsertion().insert(solution, removedCalls);
+
+        System.out.println();
         System.out.println(solution);
         System.out.println(solution.isFeasible());
         System.out.println(solution.cost());
-//        System.out.println("Solution cost: " + solution.cost());
-//        solution.forEach(vehicle -> System.out.println("Vehicle " + vehicle.vehicleIndex + ": " + vehicle.cost()));
-//        System.out.println("Vehicle costs: " + solution.stream().reduce(0.0, (sum, vehicle) -> sum + vehicle.cost(), Double::sum));
-//        runAllSearches();
     }
 
     public static void runAllSearches() throws Exception {

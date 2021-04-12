@@ -80,10 +80,7 @@ public class Problem {
                         .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
                         .mapToInt(Integer::parseInt)
                         .toArray())
-                .map(call -> {
-                    int[] validVehicles = IntStream.range(0, nVehicles).filter(vehicle -> Arrays.stream(validCalls[vehicle]).anyMatch(c -> c == call[0] - 1)).toArray();
-                    return new Call(call, validVehicles);
-                })
+                .map(call -> new Call(call, IntStream.range(0, nVehicles).filter(vehicle -> Arrays.stream(validCalls[vehicle]).anyMatch(c -> c == call[0] - 1)).mapToObj(vehicles::get).collect(toList())))
                 .collect(Collectors.toList());
 
         travelCost = new int[nVehicles][nNodes][nNodes];

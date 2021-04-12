@@ -1,6 +1,7 @@
 package operators;
 
 import objects.Solution;
+import objects.Vehicle;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +25,7 @@ public class TransportAll extends Operator {
 
             // Get all calls with N valid vehicles
 
-            List<Integer> calls = solution.getDummy().stream().filter(call -> problem.calls.get(call).validVehicles.length == finalN).distinct().collect(toList());
+            List<Integer> calls = solution.getDummy().stream().filter(call -> problem.calls.get(call).getValidVehicles().size() == finalN).distinct().collect(toList());
             Collections.shuffle(calls);
 
             // Iterate in random order
@@ -33,7 +34,7 @@ public class TransportAll extends Operator {
 
                 // Get all valid vehicles for call
 
-                List<Integer> vehicles = Arrays.stream(problem.calls.get(call).validVehicles).boxed().collect(toList());
+                List<Vehicle> vehicles = problem.calls.get(call).getValidVehicles();
                 if (vehicles.size() > 0) {
                     Collections.shuffle(vehicles);
 

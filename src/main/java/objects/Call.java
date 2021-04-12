@@ -1,5 +1,6 @@
 package objects;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Call {
@@ -13,9 +14,9 @@ public class Call {
     public final int upperTimePickup;
     public final int lowerTimeDelivery;
     public final int upperTimeDelivery;
-    public final int[] validVehicles;
+    public final List<Vehicle> validVehicles;
 
-    public Call(int[] call, int[] validVehicles) {
+    public Call(int[] call, List<Vehicle> validVehicles) {
         this.callIndex = call[0] - 1;
         this.originNode = call[1] - 1;
         this.destinationNode = call[2] - 1;
@@ -41,6 +42,10 @@ public class Call {
                 ", lowerTimeDelivery=" + lowerTimeDelivery +
                 ", upperTimeDelivery=" + upperTimeDelivery +
                 '}';
+    }
+
+    public List<Vehicle> getValidVehicles() {
+        return validVehicles;
     }
 
     @Override

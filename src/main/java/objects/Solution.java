@@ -2,6 +2,7 @@ package objects;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -16,7 +17,7 @@ public class Solution extends ArrayList<Vehicle> {
 
     public Solution() {
         addAll(problem.vehicles.stream().sorted(comparingInt(vehicle -> vehicle.vehicleIndex)).collect(Collectors.toList()));
-        add(Vehicle.dummyVehicle(problem.nCalls));
+        add(Vehicle.dummyVehicle(problem.nVehicles));
         get(size() - 1).addAll(IntStream.range(0, problem.nCalls).flatMap(i -> IntStream.of(i, i)).boxed().sorted(comparingInt(call -> call)).collect(Collectors.toList()));
     }
 
@@ -53,6 +54,10 @@ public class Solution extends ArrayList<Vehicle> {
         forEach(vehicle -> vehicle.removeIf(c -> c == call));
     }
 
+    public void removeCalls(List<Integer> calls) {
+        calls.forEach(this::removeCall);
+    }
+
     public void moveCall(int call, int toVehicle, int index1, int index2) {
         removeCall(call);
         get(toVehicle).add(index1, call);
@@ -66,12 +71,20 @@ public class Solution extends ArrayList<Vehicle> {
         moveCall(call, vehicle, index1, index2);
     }
 
+    public void moveCalls(int call, Vehicle vehicle) {
+        moveCalls(call, vehicle.vehicleIndex);
+    }
+
     public List<Vehicle> getVehiclesWithNToMCalls(int N, int M) {
         return stream().filter(vehicle -> N <= vehicle.size() && vehicle.size() <= M).collect(Collectors.toList());
     }
 
     public List<Vehicle> getNotEmptyVehicles() {
         return stream().filter(vehicle -> !vehicle.isEmpty()).collect(Collectors.toList());
+    }
+
+    public List<Integer> getTransportedCalls() {
+        return stream().filter(vehicle -> vehicle.vehicleIndex != problem.nVehicles).flatMap(Collection::stream).distinct().collect(Collectors.toList());
     }
 
     public boolean isFeasible() {
