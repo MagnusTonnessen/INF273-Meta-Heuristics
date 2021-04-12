@@ -8,7 +8,7 @@ import java.util.List;
 
 import static utils.Constants.random;
 
-public class BruteForce implements Operator {
+public class BruteForce extends Operator {
     @Override
     public Solution operate(Solution solution) {
         Solution newSolution = solution.copy();

@@ -8,7 +8,7 @@ import java.util.List;
 import static main.Main.problem;
 import static utils.Constants.random;
 
-public class ThreeExchange implements Operator {
+public class ThreeExchange extends Operator {
     @Override
     public Solution operate(Solution solution) {
 

@@ -5,7 +5,7 @@ import objects.Solution;
 import static main.Main.problem;
 import static utils.Constants.random;
 
-public class OneInsert implements Operator {
+public class OneInsert extends Operator {
 
     @Override
     public Solution operate(Solution solution) {

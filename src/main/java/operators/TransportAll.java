@@ -9,7 +9,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 import static main.Main.problem;
 
-public class TransportAll implements Operator {
+public class TransportAll extends Operator {
 
     @Override
     public Solution operate(Solution solution) {

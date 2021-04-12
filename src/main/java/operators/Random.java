@@ -7,7 +7,7 @@ import java.util.Collections;
 import static main.Main.problem;
 import static utils.Constants.random;
 
-public class Random implements Operator {
+public class Random extends Operator {
     @Override
     public Solution operate(Solution solution) {
 

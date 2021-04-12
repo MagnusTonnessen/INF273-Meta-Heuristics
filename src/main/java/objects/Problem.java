@@ -3,6 +3,7 @@ package objects;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -154,6 +155,10 @@ public class Problem {
                 firstTravelCost[i][j] = travelCost[i][vehicles.get(i).homeNode - 1][j];
             });
         });
+    }
+
+    public Call getCallFromIndex(int call) {
+        return calls.get(call);
     }
 
     @Override
