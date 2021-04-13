@@ -15,11 +15,11 @@ public class RandomRemoval implements RemovalHeuristic {
                 .flatMap(Collection::stream)
                 .distinct()
                 .collect(Collectors.collectingAndThen(
-                    Collectors.toList(),
-                    list -> {
-                        Collections.shuffle(list);
-                        return list;
-                    }))
+                        Collectors.toList(),
+                        list -> {
+                            Collections.shuffle(list);
+                            return list;
+                        }))
                 .stream()
                 .limit(number)
                 .collect(Collectors.toList());

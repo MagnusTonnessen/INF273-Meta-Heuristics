@@ -1,15 +1,11 @@
 package main;
 
 import algorithms.LocalSearch;
-import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
-import operators.BruteForce;
-import operators.escapeOperators.EscapeOperator;
 import operators.insertionOperators.GreedyInsertion;
-import operators.removalOperators.RandomRemoval;
 import operators.removalOperators.WorstRemoval;
 import utils.JSONCreator;
 import utils.PDFCreator;
@@ -25,8 +21,6 @@ import java.util.stream.IntStream;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_TITLE;
 import static utils.Constants.C18V5;
-import static utils.Constants.C35V7;
-import static utils.Constants.C7V3;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -49,31 +43,13 @@ public class Main {
     public static Problem problem;
     public static Solution initialSolution;
     public static double initialCost;
-    public static Solution solution;
     public static String instanceName;
     static PDFCreator pdf;
     static JSONCreator json;
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        initialize(C18V5);
-        SearchingAlgorithm search = new LocalSearch();
-        Solution solution = search.search();
-        System.out.println(solution);
-        System.out.println(solution.isFeasible());
-        System.out.println(solution.cost() + "\n");
-
-        List<Integer> removedCalls = new WorstRemoval().remove(solution, random.nextInt(5)+1);
-        solution.removeCalls(removedCalls);
-        System.out.println(solution);
-        System.out.println("Removed calls: " + removedCalls);
-
-        solution = new GreedyInsertion().insert(solution, removedCalls);
-
-        System.out.println();
-        System.out.println(solution);
-        System.out.println(solution.isFeasible());
-        System.out.println(solution.cost());
+        runAllSearches();
     }
 
     public static void runAllSearches() throws Exception {
@@ -263,6 +239,5 @@ public class Main {
         problem = new Problem(filePath);
         initialSolution = new Solution();
         initialCost = initialSolution.cost();
-        solution = new Solution();
     }
 }

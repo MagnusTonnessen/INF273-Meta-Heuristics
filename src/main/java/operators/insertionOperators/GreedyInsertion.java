@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 public class GreedyInsertion implements InsertionHeuristic {
     @Override
     public Solution insert(Solution solution, List<Integer> calls) {
-        List<double[]> best =  calls.stream().map(call -> bestInsert(solution, call)).collect(Collectors.toList());
+        List<double[]> best = calls.stream().map(call -> bestInsert(solution, call)).collect(Collectors.toList());
         for (int i = 0; i < calls.size(); i++) {
             best.stream().min(Comparator.comparingDouble(call -> call[4])).ifPresent(call -> {
                 solution.moveCall((int) call[0], (int) call[1], (int) call[2], (int) call[3]);
@@ -30,7 +30,7 @@ public class GreedyInsertion implements InsertionHeuristic {
         for (Vehicle vehicle : solution) {
             if (!vehicle.isDummy) {
                 for (int i = 0; i < vehicle.size() + 1; i++) {
-                    for (int j = i+1; j < vehicle.size() + 2; j++) {
+                    for (int j = i + 1; j < vehicle.size() + 2; j++) {
                         Vehicle copy = vehicle.copy();
                         copy.add(i, call);
                         copy.add(j, call);
@@ -45,6 +45,6 @@ public class GreedyInsertion implements InsertionHeuristic {
                 }
             }
         }
-        return new double[] {call, cheapestInsert.vehicleIndex, insert1, insert2, minCost};
+        return new double[]{call, cheapestInsert.vehicleIndex, insert1, insert2, minCost};
     }
 }

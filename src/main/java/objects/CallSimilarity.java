@@ -47,6 +47,6 @@ public class CallSimilarity {
     }
 
     private static double normalize(double num, double max, double min) {
-        return max == min ? 0.5 : (num - min)/(max - min);
+        return max == min ? 0.5 : (num - min) / (max - min);
     }
 }

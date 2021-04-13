@@ -1,5 +1,6 @@
 package utils;
 
+import algorithms.AdaptiveLargeNeighbourhoodSearch;
 import algorithms.LocalSearch;
 import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
@@ -34,10 +35,8 @@ public class Constants {
     public static final SearchingAlgorithm LOCAL_SEARCH = new LocalSearch();
     public static final SearchingAlgorithm SIMULATED_ANNEALING = new SimulatedAnnealing();
     public static final SearchingAlgorithm SIMULATED_ANNEALING_NEW_OPERATORS = new SimulatedAnnealingNewOperators();
-    public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS);
-    public static final RemovalHeuristic RANDOM_REMOVAL = new RandomRemoval();
-    public static final RemovalHeuristic WORST_REMOVAL = new WorstRemoval();
-    public static final RemovalHeuristic RELATED_REMOVAL = new RelatedRemoval();
+    public static final SearchingAlgorithm ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH = new AdaptiveLargeNeighbourhoodSearch();
+    public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
 
     // NUMBER OF ITERATIONS PER SEARCH
     public static final int ITERATIONS = 10000;

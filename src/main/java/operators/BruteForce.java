@@ -23,16 +23,15 @@ public class BruteForce extends Operator {
         Solution newSolution = solution.copy();
 
         List<Vehicle> vehicles = newSolution
-                                    .getVehiclesWithNToMCalls(2, 7)
-                                    .stream()
-                                    .sorted(Comparator.comparingDouble(vehicle -> -vehicle.cost()))
-                                    .collect(Collectors.toList());
+                .getVehiclesWithNToMCalls(2, 5)
+                .stream()
+                .sorted(Comparator.comparingDouble(vehicle -> -vehicle.cost()))
+                .collect(Collectors.toList());
         if (vehicles.size() < 1) {
             return newSolution;
         }
 
         Vehicle bestVehicle = vehicles.get(random.nextInt(Math.min(4, vehicles.size())));
-        System.out.println("Before brute force: " + bestVehicle);
         Vehicle copy = bestVehicle.copy();
 
         double bestObjective = bestVehicle.cost();
@@ -57,7 +56,6 @@ public class BruteForce extends Operator {
                 i++;
             }
         }
-        System.out.println("After brute force: " + bestVehicle);
         newSolution.set(bestVehicle.vehicleIndex, bestVehicle);
         return newSolution;
     }

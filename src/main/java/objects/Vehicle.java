@@ -29,7 +29,7 @@ public class Vehicle extends ArrayList<Integer> {
     }
 
     public static Vehicle dummyVehicle(int nVehicles) {
-        return new Vehicle(new int[]{nVehicles+1, -1, -1, -1}, IntStream.range(0, nVehicles).boxed().collect(Collectors.toSet()), true);
+        return new Vehicle(new int[]{nVehicles + 1, -1, -1, -1}, IntStream.range(0, nVehicles).boxed().collect(Collectors.toSet()), true);
     }
 
     public void randomInsert(int call) {

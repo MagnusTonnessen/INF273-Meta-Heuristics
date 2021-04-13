@@ -1,24 +1,21 @@
 package algorithms;
 
 import objects.Solution;
-import operators.BruteForce;
-import operators.OneInsert;
 import operators.Operator;
-import operators.ThreeExchange;
-import operators.TransportAll;
-import operators.TwoExchange;
-import operators.removalOperators.WorstRemoval;
 import operators.escapeOperators.EscapeOperator;
+import operators.insertionOperators.GreedyInsertion;
+import operators.insertionOperators.InsertionHeuristic;
+import operators.insertionOperators.RegretKInsertion;
+import operators.removalOperators.RandomRemoval;
+import operators.removalOperators.RemovalHeuristic;
+import operators.removalOperators.WorstRemoval;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
-import static main.Main.solution;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.random;
 
@@ -42,29 +39,31 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     public Solution ALNS() {
         EscapeOperator escape = new EscapeOperator();
+        // TODO: Create Map<Double, RemovalHeuristic> with score
+        List<RemovalHeuristic> removal = Arrays.asList(new RandomRemoval(), new WorstRemoval()); // new RelatedRemoval
+        List<InsertionHeuristic> insertion = Arrays.asList(new GreedyInsertion()); // new RegretKInsertion()
 
         Solution bestSolution = initialSolution;
         double bestCost = initialCost;
 
-        Solution solution = initialSolution.copy();
-        double cost = initialCost;
+        Solution currSolution = initialSolution.copy();
+        double currCost = initialCost;
 
         int iterationsSinceLastImprovement = 0;
-        for (int i = 0; i < ITERATIONS; i++) {
+        for (int iteration = 0; iteration < ITERATIONS; iteration++) {
 
             if (iterationsSinceLastImprovement > 500) {
-                solution = escape.operate(solution);
+                currSolution = escape.operate(currSolution);
                 iterationsSinceLastImprovement = 0;
             }
 
-            Solution newSolution = solution.copy();
+            Solution newSolution = currSolution.copy();
 
-            Operator removal = selectRemovalOperator(newSolution);
-            Operator insertion = selectInsertionOperator(newSolution);
-            int callsToRelocate = (int) Math.floor(Math.random() * 5 + 1); // Remove 1 to 5 calls from solution
+            int callsToRelocate = random.nextInt(4) + 1; // Remove 1 to 5 calls from currSolution
 
-            //List<Integer> removedCalls = removal.operate(newSolution);
-            newSolution = insertion.operate(newSolution);
+            List<Integer> removedCalls = removal.get(0).remove(newSolution, callsToRelocate);
+            newSolution.removeCalls(removedCalls);
+            newSolution = insertion.get(0).insert(newSolution, removedCalls);
 
             double newCost = newSolution.cost();
 
@@ -75,42 +74,14 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 iterationsSinceLastImprovement++;
             }
             // TODO: Greedy accept
-            if (newCost < cost) {
-                solution = newSolution;
-                cost = newCost;
+            if (newCost < currCost) {
+                currSolution = newSolution;
+                currCost = newCost;
             }
-            // updateOperators(operators);
+            if (iteration % UPDATE_SEGMENT == 0) {
+                // updateOperators(operators);
+            }
         }
         return bestSolution;
-    }
-
-    private void rateOperator(Operator operator, int value) {
-
-    }
-
-    private Operator selectInsertionOperator(Solution newSolution) {
-        return null;
-    }
-
-    private Operator selectRemovalOperator(Solution newSolution) {
-        return null;
-    }
-
-    private void updateOperators(List<Operator> operators) {
-
-    }
-
-    private boolean accept(Solution newSolution, Solution solution) {
-        return false;
-    }
-
-    private Operator selectOperator(List<Operator> operators) {
-        double probability = random.nextDouble();
-        return operators
-                .stream()
-                .sorted(Comparator.comparingDouble(Operator::getCumulativeProbability))
-                .dropWhile(op -> op.getProbability() < probability)
-                .findFirst()
-                .orElse(operators.get(0));
     }
 }
