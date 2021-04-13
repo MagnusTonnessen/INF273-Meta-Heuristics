@@ -71,6 +71,10 @@ public class Solution extends ArrayList<Vehicle> {
         moveCall(call, vehicle, index1, index2);
     }
 
+    public Vehicle getVehicle(int call) {
+        return stream().filter(vehicle -> vehicle.contains(call)).findFirst().orElse(getDummy());
+    }
+
     public void moveCalls(int call, Vehicle vehicle) {
         moveCalls(call, vehicle.vehicleIndex);
     }

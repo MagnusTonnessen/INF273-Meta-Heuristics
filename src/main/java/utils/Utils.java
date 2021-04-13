@@ -349,20 +349,20 @@ public class Utils {
         return notTransportCost + Arrays.stream(routeTravelCost).sum() + Arrays.stream(costInPorts).sum();
     }
 
-    public static double costFunction(Vehicle vehicle) {
+    public static int costFunction(Vehicle vehicle) {
 
         int[][] cargo = problem.cargo;
         int[][] firstTravelCost = problem.firstTravelCost;
         int[][] portCost = problem.portCost;
         int[][][] travelCost = problem.travelCost;
 
-        double routeTravelCost = 0;
-        double costInPorts = 0;
+        int routeTravelCost = 0;
+        int costInPorts = 0;
 
         int[] currentVPlan = vehicle.asArray();
 
         if (vehicle.vehicleIndex == problem.nVehicles) {
-            return Arrays.stream(currentVPlan).map(call -> problem.calls.get(call).costNotTransport).sum() / 2.0;
+            return Arrays.stream(currentVPlan).map(call -> problem.calls.get(call).costNotTransport).sum() / 2;
         } else {
             if (vehicle.size() > 0) {
                 int VIdx = vehicle.vehicleIndex;
@@ -376,7 +376,7 @@ public class Utils {
                 int firstVisitCost = firstTravelCost[VIdx][cargo[currentVPlan[0]][0] - 1];
 
                 routeTravelCost = firstVisitCost + Arrays.stream(diag).sum();
-                costInPorts = Arrays.stream(currentVPlan).map(call -> portCost[VIdx][call]).sum() / 2.0;
+                costInPorts = Arrays.stream(currentVPlan).map(call -> portCost[VIdx][call]).sum() / 2;
             }
             return routeTravelCost + costInPorts;
         }

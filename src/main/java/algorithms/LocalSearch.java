@@ -14,7 +14,7 @@ import static utils.Constants.random;
 public class LocalSearch implements SearchingAlgorithm {
     @Override
     public Solution search() {
-        return localSearch(0.33, 0.33);
+        return localSearch(0.50, 0.25);
     }
 
     public Solution localSearch(double P1, double P2) {

@@ -3,14 +3,12 @@ package objects;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -59,7 +57,7 @@ public class Problem {
                 .mapToObj(i -> new Vehicle(Arrays
                         .stream(input.get(1 + 4 + i).split(","))
                         .mapToInt(Integer::parseInt)
-                        .toArray(), Arrays.stream(validCalls[i]).boxed().collect(toSet())))
+                        .toArray(), Arrays.stream(validCalls[i]).boxed().collect(toSet()), false))
                 .collect(Collectors.toList());
 
         vesselCargo = new int[nVehicles][nCalls];

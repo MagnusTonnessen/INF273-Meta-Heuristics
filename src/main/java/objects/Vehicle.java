@@ -17,17 +17,19 @@ public class Vehicle extends ArrayList<Integer> {
     public final int startingTime;
     public final int capacity;
     public final Set<Integer> validCalls;
+    public final boolean isDummy;
 
-    public Vehicle(int[] vehicle, Set<Integer> validCalls) {
+    public Vehicle(int[] vehicle, Set<Integer> validCalls, boolean isDummy) {
         this.vehicleIndex = vehicle[0] - 1;
         this.homeNode = vehicle[1];
         this.startingTime = vehicle[2];
         this.capacity = vehicle[3];
         this.validCalls = validCalls;
+        this.isDummy = isDummy;
     }
 
     public static Vehicle dummyVehicle(int nVehicles) {
-        return new Vehicle(new int[]{nVehicles+1, -1, -1, -1}, IntStream.range(0, nVehicles).boxed().collect(Collectors.toSet()));
+        return new Vehicle(new int[]{nVehicles+1, -1, -1, -1}, IntStream.range(0, nVehicles).boxed().collect(Collectors.toSet()), true);
     }
 
     public void randomInsert(int call) {
@@ -41,7 +43,7 @@ public class Vehicle extends ArrayList<Integer> {
         removeIf(c -> c == call);
     }
 
-    public double cost() {
+    public int cost() {
         return costFunction(this);
     }
 

@@ -6,6 +6,7 @@ import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
+import operators.BruteForce;
 import operators.escapeOperators.EscapeOperator;
 import operators.insertionOperators.GreedyInsertion;
 import operators.removalOperators.RandomRemoval;
@@ -25,6 +26,7 @@ import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_TITLE;
 import static utils.Constants.C18V5;
 import static utils.Constants.C35V7;
+import static utils.Constants.C7V3;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -54,16 +56,16 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        initialize(C35V7);
-        LocalSearch local = new LocalSearch();
-        Solution solution = local.search();
+        initialize(C18V5);
+        SearchingAlgorithm search = new LocalSearch();
+        Solution solution = search.search();
         System.out.println(solution);
         System.out.println(solution.isFeasible());
         System.out.println(solution.cost() + "\n");
 
         List<Integer> removedCalls = new WorstRemoval().remove(solution, random.nextInt(5)+1);
         solution.removeCalls(removedCalls);
-
+        System.out.println(solution);
         System.out.println("Removed calls: " + removedCalls);
 
         solution = new GreedyInsertion().insert(solution, removedCalls);
