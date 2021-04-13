@@ -39,7 +39,7 @@ public class Constants {
 
     public static final int ITERATIONS = 10000;
 
-    public static final int SEARCH_TIMES = 10;
+    public static final int SEARCH_TIMES = 1;
 
     public static final double RUN_TIME_C7V3 = 10 * 0.999;
 
@@ -79,7 +79,7 @@ public class Constants {
                     ===================================
                                 
                     Early searchingAlgorithm this operator is fast, because there are many feasible solutions in the neighbourhood.
-                    Late searchingAlgorithm it is very slow, because it has to check all combinations of 
+                    Late searchingAlgorithm it is very slow, because it has to check all combinations of
                     not transported calls and valid vehicles and will probably return the original solution.
                                 
                     I think this operator leads to diversification,
@@ -96,7 +96,7 @@ public class Constants {
                     This operator aims to reduce objective of solution
                     by moving a call from one of the three most expensive vehicles to one of the three least expensive vehicles
                     To prevent getting stuck, the operator:
-                        1. shuffles the order of the three most expensive vehicles before iterating, 
+                        1. shuffles the order of the three most expensive vehicles before iterating,
                         2. shuffles the order of the the calls in that vehicle
                         3. shuffles the order of the three least expensive valid vehicles
                                 
@@ -124,7 +124,7 @@ public class Constants {
                     because it will move calls random between vehicles, and not necessarily result in a better solution.
                     Late game the operator is time expensive, but can reduce objective of solution a lot.
                                 
-                    This operator leads to diversification of the solution, 
+                    This operator leads to diversification of the solution,
                     because it moves a call from one vehicle to another.
                                 
                     Potential for improvement:
@@ -148,7 +148,7 @@ public class Constants {
                                 
                     check objective for all permutations of calls in vehicle
                                 
-                    return solution with best objective  
+                    return solution with best objective
                     =========================================
                                 
                     Early searchingAlgorithm will this operator often return the original solution,

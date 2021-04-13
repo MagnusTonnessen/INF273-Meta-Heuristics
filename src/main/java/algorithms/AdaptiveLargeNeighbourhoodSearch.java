@@ -91,6 +91,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             if (iteration % UPDATE_SEGMENT == 0) {
                 // updateOperators(operators);
             }
+            iteration++;
         }
         /*
         for (int iteration = 0; iteration < ITERATIONS; iteration++) {
@@ -139,6 +140,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         */
         // System.out.println("\nTime removing: " + timeRemoving/1000.0);
         // System.out.println("Time inserting: " + timeInserting/1000.0);
+        // System.out.println("\nIterations done: " + iteration);
         return bestSolution;
     }
 }

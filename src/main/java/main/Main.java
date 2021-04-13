@@ -9,12 +9,14 @@ import utils.PDFCreator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static utils.Constants.ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_TITLE;
 import static utils.Constants.C130V40;
@@ -39,7 +41,6 @@ import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
 import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.Constants.TRANSPORT_ALL_TITLE;
-import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
 import static utils.Utils.printRunResults;
@@ -55,11 +56,15 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
-        runAllSearches();
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
     }
 
     public static void runAllSearches() throws Exception {
         runSearches(SEARCHING_ALGORITHMS, INSTANCES);
+    }
+
+    public static void runSearches(SearchingAlgorithm algorithm, List<String> instances) throws Exception {
+        runSearches(Collections.singletonList(algorithm), instances);
     }
 
     public static void runSearches(List<SearchingAlgorithm> algorithms, List<String> instances) throws Exception {
@@ -77,7 +82,7 @@ public class Main {
 
                 bestSolutions.add(searchResults.bestSolution());
 
-                printRunResults(searchingAlgorithm.getClass().getSimpleName(), searchResults);
+                printRunResults(searchingAlgorithm.getName(), searchResults);
             }
 
             IntStream.range(0, algorithms.size()).forEach(i -> {
@@ -145,7 +150,7 @@ public class Main {
             RESULTS_MAP.get(filePath).putIfAbsent(SIMULATED_ANNEALING_NEW_OPERATORS.getName(), new HashMap<>());
 
             for (SearchingAlgorithm search : Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING)) {
-                pdf.addRow(getAlgorithmName(search.getName()),
+                pdf.addRow(search.getName(),
                         (double) resultsA3.get(filePath).get(search.getName()).get("Average objective"),
                         (double) resultsA3.get(filePath).get(search.getName()).get("Best objective"),
                         (double) resultsA3.get(filePath).get(search.getName()).get("Improvement"),
