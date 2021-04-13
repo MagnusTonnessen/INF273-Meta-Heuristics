@@ -1,4 +1,4 @@
-package operators.insertionOperators;
+package operators.insertionHeuristics;
 
 import objects.Solution;
 

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public interface SearchingAlgorithm {
 
-    Solution search();
+    Solution search(double runtime);
 
     default String getName() {
         return Arrays

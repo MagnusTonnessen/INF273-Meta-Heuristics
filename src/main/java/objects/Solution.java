@@ -100,7 +100,7 @@ public class Solution extends ArrayList<Vehicle> {
     }
 
     public int[] asArray() {
-        return stream().flatMapToInt(vehicle -> IntStream.concat(vehicle.stream().mapToInt(i -> i), IntStream.of(-1))).toArray();
+        return stream().flatMapToInt(vehicle -> IntStream.concat(IntStream.of(-1), vehicle.stream().mapToInt(i -> i))).skip(1).toArray();
     }
 
     public Solution copy() {

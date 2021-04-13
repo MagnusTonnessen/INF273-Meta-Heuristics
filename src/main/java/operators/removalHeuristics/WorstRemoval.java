@@ -1,4 +1,4 @@
-package operators.removalOperators;
+package operators.removalHeuristics;
 
 import objects.Solution;
 import objects.Vehicle;

@@ -1,4 +1,4 @@
-package operators.insertionOperators;
+package operators.insertionHeuristics;
 
 import objects.Solution;
 import objects.Vehicle;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+// TODO: This shit is time expensive af
 public class GreedyInsertion implements InsertionHeuristic {
     @Override
     public Solution insert(Solution solution, List<Integer> calls) {
@@ -15,7 +16,7 @@ public class GreedyInsertion implements InsertionHeuristic {
         for (int i = 0; i < calls.size(); i++) {
             best.stream().min(Comparator.comparingDouble(call -> call[4])).ifPresent(call -> {
                 solution.moveCall((int) call[0], (int) call[1], (int) call[2], (int) call[3]);
-                best.removeIf(c -> c[1] == call[1]);
+                best.removeIf(c -> c[0] == call[0]);
                 IntStream.range(0, best.size()).filter(j -> best.get(j)[1] == call[1]).forEach(j -> best.set(j, bestInsert(solution, (int) best.get(j)[0])));
             });
         }

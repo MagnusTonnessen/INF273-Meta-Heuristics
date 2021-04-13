@@ -6,10 +6,6 @@ import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
 import algorithms.SimulatedAnnealing;
 import algorithms.SimulatedAnnealingNewOperators;
-import operators.removalOperators.RandomRemoval;
-import operators.removalOperators.RelatedRemoval;
-import operators.removalOperators.RemovalHeuristic;
-import operators.removalOperators.WorstRemoval;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,9 +24,10 @@ public class Constants {
     public static final String C35V7 = "src/main/resources/Call_35_Vehicle_7.txt";
     public static final String C80V20 = "src/main/resources/Call_80_Vehicle_20.txt";
     public static final String C130V40 = "src/main/resources/Call_130_Vehicle_40.txt";
-    public static final String[] INSTANCES = new String[]{C7V3, C18V5, C35V7, C80V20, C130V40};
+    public static final List<String> INSTANCES = Arrays.asList(C7V3, C18V5, C35V7, C80V20, C130V40);
 
     // SEARCHING ALGORITHMS
+
     public static final SearchingAlgorithm RANDOM_SEARCH = new RandomSearch();
     public static final SearchingAlgorithm LOCAL_SEARCH = new LocalSearch();
     public static final SearchingAlgorithm SIMULATED_ANNEALING = new SimulatedAnnealing();
@@ -39,7 +36,20 @@ public class Constants {
     public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
 
     // NUMBER OF ITERATIONS PER SEARCH
+
     public static final int ITERATIONS = 10000;
+
+    public static final int SEARCH_TIMES = 10;
+
+    public static final double RUN_TIME_C7V3 = 10 * 0.999;
+
+    public static final double RUN_TIME_C18V5 = 30 * 0.999;
+
+    public static final double RUN_TIME_C35V7 = 80 * 0.999;
+
+    public static final double RUN_TIME_C80V20 = 140 * 0.999;
+
+    public static final double RUN_TIME_C130V40 = 340 * 0.999;
 
     public static final Random random = new Random();
 
@@ -155,7 +165,7 @@ public class Constants {
                     """;
 
 
-    public static final Map<String, Map<String, Map<String, Object>>> RESULTS_MAP = Arrays.stream(INSTANCES).collect(toMap(i -> i, i -> new HashMap<>()));
+    public static final Map<String, Map<String, Map<String, Object>>> RESULTS_MAP = INSTANCES.stream().collect(toMap(i -> i, i -> new HashMap<>()));
 }
 /*
 Diversification is the method of identifying diverse promising regions

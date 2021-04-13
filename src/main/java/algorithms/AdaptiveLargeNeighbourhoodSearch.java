@@ -1,22 +1,18 @@
 package algorithms;
 
 import objects.Solution;
-import operators.Operator;
 import operators.escapeOperators.EscapeOperator;
-import operators.insertionOperators.GreedyInsertion;
-import operators.insertionOperators.InsertionHeuristic;
-import operators.insertionOperators.RegretKInsertion;
-import operators.removalOperators.RandomRemoval;
-import operators.removalOperators.RemovalHeuristic;
-import operators.removalOperators.WorstRemoval;
+import operators.insertionHeuristics.GreedyInsertion;
+import operators.insertionHeuristics.InsertionHeuristic;
+import operators.removalHeuristics.RandomRemoval;
+import operators.removalHeuristics.RemovalHeuristic;
+import operators.removalHeuristics.WorstRemoval;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
-import static utils.Constants.ITERATIONS;
 import static utils.Constants.random;
 
 /*
@@ -33,14 +29,18 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
     private final int UPDATE_SEGMENT = 250;
 
     @Override
-    public Solution search() {
-        return ALNS();
+    public Solution search(double runtime) {
+        return ALNS(runtime);
     }
 
-    public Solution ALNS() {
+    public Solution ALNS(double runtime) {
+
+        long timeRemoving = 0;
+        long timeInserting = 0;
+
         EscapeOperator escape = new EscapeOperator();
         // TODO: Create Map<Double, RemovalHeuristic> with score
-        List<RemovalHeuristic> removal = Arrays.asList(new RandomRemoval(), new WorstRemoval()); // new RelatedRemoval
+        List<RemovalHeuristic> removal = Arrays.asList(new WorstRemoval(), new RandomRemoval()); // new RelatedRemoval
         List<InsertionHeuristic> insertion = Arrays.asList(new GreedyInsertion()); // new RegretKInsertion()
 
         Solution bestSolution = initialSolution;
@@ -50,7 +50,11 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         double currCost = initialCost;
 
         int iterationsSinceLastImprovement = 0;
-        for (int iteration = 0; iteration < ITERATIONS; iteration++) {
+        int iteration = 0;
+
+        double endTime = System.currentTimeMillis() + runtime * 1000L;
+
+        while (System.currentTimeMillis() < endTime) {
 
             if (iterationsSinceLastImprovement > 500) {
                 currSolution = escape.operate(currSolution);
@@ -59,11 +63,17 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
             Solution newSolution = currSolution.copy();
 
-            int callsToRelocate = random.nextInt(4) + 1; // Remove 1 to 5 calls from currSolution
+            int callsToRelocate = random.nextInt(4) + 1; // Remove 1 to 4 calls from currSolution
 
-            List<Integer> removedCalls = removal.get(0).remove(newSolution, callsToRelocate);
+            long startTime = System.currentTimeMillis();
+            List<Integer> removedCalls = removal.get(random.nextInt(3) / 2).remove(newSolution, callsToRelocate);
+            timeRemoving += System.currentTimeMillis() - startTime;
+
             newSolution.removeCalls(removedCalls);
+
+            startTime = System.currentTimeMillis();
             newSolution = insertion.get(0).insert(newSolution, removedCalls);
+            timeInserting += System.currentTimeMillis() - startTime;
 
             double newCost = newSolution.cost();
 
@@ -82,6 +92,53 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 // updateOperators(operators);
             }
         }
+        /*
+        for (int iteration = 0; iteration < ITERATIONS; iteration++) {
+
+            if (iterationsSinceLastImprovement > 500) {
+                currSolution = escape.operate(currSolution);
+                iterationsSinceLastImprovement = 0;
+            }
+
+            Solution newSolution = currSolution.copy();
+
+            int callsToRelocate = random.nextInt(4) + 1; // Remove 1 to 4 calls from currSolution
+
+            long startTime = System.currentTimeMillis();
+            List<Integer> removedCalls = removal.get(random.nextInt(3)/2).remove(newSolution, callsToRelocate);
+            timeRemoving += System.currentTimeMillis() - startTime;
+
+            newSolution.removeCalls(removedCalls);
+
+            startTime = System.currentTimeMillis();
+            newSolution = insertion.get(0).insert(newSolution, removedCalls);
+            timeInserting += System.currentTimeMillis() - startTime;
+
+            double newCost = newSolution.cost();
+
+            if (newCost < bestCost) {
+                bestSolution = newSolution;
+                bestCost = newCost;
+            } else {
+                iterationsSinceLastImprovement++;
+            }
+            // TODO: Greedy accept
+            if (newCost < currCost) {
+                currSolution = newSolution;
+                currCost = newCost;
+            }
+            if (iteration % UPDATE_SEGMENT == 0) {
+                // updateOperators(operators);
+            }
+            if (!bestSolution.isFeasible()) {
+                System.out.println("Iteration: " + iteration);
+                System.out.println("Best solution: " + bestSolution);
+                break;
+            }
+        }
+        */
+        // System.out.println("\nTime removing: " + timeRemoving/1000.0);
+        // System.out.println("Time inserting: " + timeInserting/1000.0);
         return bestSolution;
     }
 }

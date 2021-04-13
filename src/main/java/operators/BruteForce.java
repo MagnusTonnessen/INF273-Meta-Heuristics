@@ -20,16 +20,19 @@ import static utils.Constants.random;
 public class BruteForce extends Operator {
     @Override
     public Solution operate(Solution solution) {
-        Solution newSolution = solution.copy();
 
-        List<Vehicle> vehicles = newSolution
-                .getVehiclesWithNToMCalls(2, 5)
+
+        List<Vehicle> vehicles = solution
+                .getVehiclesWithNToMCalls(2, 6)
                 .stream()
                 .sorted(Comparator.comparingDouble(vehicle -> -vehicle.cost()))
                 .collect(Collectors.toList());
-        if (vehicles.size() < 1) {
-            return newSolution;
+
+        if (vehicles.isEmpty()) {
+            return solution.copy();
         }
+
+        Solution newSolution = solution.copy();
 
         Vehicle bestVehicle = vehicles.get(random.nextInt(Math.min(4, vehicles.size())));
         Vehicle copy = bestVehicle.copy();

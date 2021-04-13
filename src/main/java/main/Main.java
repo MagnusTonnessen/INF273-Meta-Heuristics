@@ -1,12 +1,9 @@
 package main;
 
-import algorithms.LocalSearch;
 import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
-import operators.insertionOperators.GreedyInsertion;
-import operators.removalOperators.WorstRemoval;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
@@ -20,19 +17,28 @@ import java.util.stream.IntStream;
 
 import static utils.Constants.BRUTE_FORCE_VEHICLE_DESCRIPTION;
 import static utils.Constants.BRUTE_FORCE_VEHICLE_TITLE;
+import static utils.Constants.C130V40;
 import static utils.Constants.C18V5;
+import static utils.Constants.C35V7;
+import static utils.Constants.C7V3;
+import static utils.Constants.C80V20;
 import static utils.Constants.INSTANCES;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
 import static utils.Constants.REINSERT_MOST_EXPENSIVE_DESCRIPTION;
 import static utils.Constants.REINSERT_MOST_EXPENSIVE_TITLE;
 import static utils.Constants.RESULTS_MAP;
+import static utils.Constants.RUN_TIME_C130V40;
+import static utils.Constants.RUN_TIME_C18V5;
+import static utils.Constants.RUN_TIME_C35V7;
+import static utils.Constants.RUN_TIME_C7V3;
+import static utils.Constants.RUN_TIME_C80V20;
 import static utils.Constants.SEARCHING_ALGORITHMS;
+import static utils.Constants.SEARCH_TIMES;
 import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
 import static utils.Constants.TRANSPORT_ALL_DESCRIPTION;
 import static utils.Constants.TRANSPORT_ALL_TITLE;
-import static utils.Constants.random;
 import static utils.Utils.getAlgorithmName;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
@@ -53,7 +59,7 @@ public class Main {
     }
 
     public static void runAllSearches() throws Exception {
-        runSearches(SEARCHING_ALGORITHMS, Arrays.asList(INSTANCES));
+        runSearches(SEARCHING_ALGORITHMS, INSTANCES);
     }
 
     public static void runSearches(List<SearchingAlgorithm> algorithms, List<String> instances) throws Exception {
@@ -67,7 +73,7 @@ public class Main {
 
             for (SearchingAlgorithm searchingAlgorithm : algorithms) {
 
-                Results searchResults = runSearch(searchingAlgorithm, 10, false);
+                Results searchResults = runSearch(searchingAlgorithm, getRuntime(filePath), SEARCH_TIMES, false);
 
                 bestSolutions.add(searchResults.bestSolution());
 
@@ -81,7 +87,7 @@ public class Main {
         }
     }
 
-    public static Results runSearch(SearchingAlgorithm searchingAlgorithm, int times, boolean writeToPDF) {
+    public static Results runSearch(SearchingAlgorithm searchingAlgorithm, double runtime, int times, boolean writeToPDF) {
 
         String algorithmName = searchingAlgorithm.getName();
 
@@ -95,7 +101,7 @@ public class Main {
             System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times);
 
             long startTime = System.currentTimeMillis();
-            Solution solution = searchingAlgorithm.search();
+            Solution solution = searchingAlgorithm.search(runtime);
             executionTime += System.currentTimeMillis() - startTime;
 
             double cost = solution.cost();
@@ -127,31 +133,31 @@ public class Main {
 
         Map<String, Map<String, Map<String, Object>>> resultsA3 = new JSONCreator("src/main/results/Assignment3.json").read();
 
-        for (String instance : INSTANCES) {
+        for (String filePath : INSTANCES) {
 
-            System.out.println("\n" + getInstanceName(instance) + "\n");
+            System.out.println("\n" + getInstanceName(filePath) + "\n");
 
-            initialize(instance);
+            initialize(filePath);
             printRunInfo();
 
-            pdf.newTable(getInstanceName(instance));
+            pdf.newTable(getInstanceName(filePath));
 
-            RESULTS_MAP.get(instance).putIfAbsent(SIMULATED_ANNEALING_NEW_OPERATORS.getName(), new HashMap<>());
+            RESULTS_MAP.get(filePath).putIfAbsent(SIMULATED_ANNEALING_NEW_OPERATORS.getName(), new HashMap<>());
 
             for (SearchingAlgorithm search : Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING)) {
                 pdf.addRow(getAlgorithmName(search.getName()),
-                        (double) resultsA3.get(instance).get(search.getName()).get("Average objective"),
-                        (double) resultsA3.get(instance).get(search.getName()).get("Best objective"),
-                        (double) resultsA3.get(instance).get(search.getName()).get("Improvement"),
-                        (double) resultsA3.get(instance).get(search.getName()).get("Average run time"));
+                        (double) resultsA3.get(filePath).get(search.getName()).get("Average objective"),
+                        (double) resultsA3.get(filePath).get(search.getName()).get("Best objective"),
+                        (double) resultsA3.get(filePath).get(search.getName()).get("Improvement"),
+                        (double) resultsA3.get(filePath).get(search.getName()).get("Average run time"));
             }
 
 
-            Results searchResults = runSearch(SIMULATED_ANNEALING_NEW_OPERATORS, 10, true);
+            Results searchResults = runSearch(SIMULATED_ANNEALING_NEW_OPERATORS, getRuntime(filePath), SEARCH_TIMES, true);
 
             printRunResults(SIMULATED_ANNEALING_NEW_OPERATORS.getName(), searchResults);
 
-            RESULTS_MAP.get(instance).get(SIMULATED_ANNEALING_NEW_OPERATORS.getName()).putAll(searchResults.asMap());
+            RESULTS_MAP.get(filePath).get(SIMULATED_ANNEALING_NEW_OPERATORS.getName()).putAll(searchResults.asMap());
 
             bestSolutions.add(searchResults.bestSolution());
 
@@ -194,7 +200,7 @@ public class Main {
             for (SearchingAlgorithm search : Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING)) {
                 System.out.println("\n" + search.getName());
 
-                Results searchResults = runSearch(search, 10, true);
+                Results searchResults = runSearch(search, getRuntime(filePath), SEARCH_TIMES, true);
 
                 bestSolutions.add(searchResults.bestSolution());
             }
@@ -223,7 +229,7 @@ public class Main {
 
             System.out.println("\n" + RANDOM_SEARCH.getName());
 
-            Results searchResults = runSearch(RANDOM_SEARCH, 10, true);
+            Results searchResults = runSearch(RANDOM_SEARCH, getRuntime(filePath), SEARCH_TIMES, true);
 
             bestSolutions.add(searchResults.bestSolution());
 
@@ -239,5 +245,16 @@ public class Main {
         problem = new Problem(filePath);
         initialSolution = new Solution();
         initialCost = initialSolution.cost();
+    }
+
+    public static double getRuntime(String instance) {
+        return switch (instance) {
+            case C7V3 -> RUN_TIME_C7V3;
+            case C18V5 -> RUN_TIME_C18V5;
+            case C35V7 -> RUN_TIME_C35V7;
+            case C80V20 -> RUN_TIME_C80V20;
+            case C130V40 -> RUN_TIME_C130V40;
+            default -> throw new IllegalStateException("Unexpected value: " + instance);
+        };
     }
 }

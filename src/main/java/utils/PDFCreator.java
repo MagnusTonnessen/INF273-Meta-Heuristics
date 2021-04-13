@@ -98,7 +98,7 @@ public class PDFCreator {
 
             Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, 12, BaseColor.BLACK);
             Paragraph subParagraph = new Paragraph();
-            subParagraph.add(new Chunk("Best solution found for " + getInstanceName(INSTANCES[i]) + "\n", font));
+            subParagraph.add(new Chunk("Best solution found for " + getInstanceName(INSTANCES.get(i)) + "\n", font));
             subParagraph.add(new Chunk(Arrays.toString(bestSolutions.get(i))));
 
             subParagraph.setAlignment(Element.ALIGN_CENTER);
