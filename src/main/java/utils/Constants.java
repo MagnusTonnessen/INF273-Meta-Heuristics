@@ -8,22 +8,18 @@ import algorithms.SimulatedAnnealing;
 import algorithms.SimulatedAnnealingNewOperators;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-
-import static java.util.stream.Collectors.toMap;
 
 public class Constants {
 
     // INSTANCES
 
-    public static final String C7V3 = "src/main/resources/Call_7_Vehicle_3.txt";
-    public static final String C18V5 = "src/main/resources/Call_18_Vehicle_5.txt";
-    public static final String C35V7 = "src/main/resources/Call_35_Vehicle_7.txt";
-    public static final String C80V20 = "src/main/resources/Call_80_Vehicle_20.txt";
-    public static final String C130V40 = "src/main/resources/Call_130_Vehicle_40.txt";
+    public static final String C7V3 = "src/main/resources/assignment/Call_7_Vehicle_3.txt";
+    public static final String C18V5 = "src/main/resources/assignment/Call_18_Vehicle_5.txt";
+    public static final String C35V7 = "src/main/resources/assignment/Call_35_Vehicle_7.txt";
+    public static final String C80V20 = "src/main/resources/assignment/Call_80_Vehicle_20.txt";
+    public static final String C130V40 = "src/main/resources/assignment/Call_130_Vehicle_40.txt";
     public static final List<String> INSTANCES = Arrays.asList(C7V3, C18V5, C35V7, C80V20, C130V40);
 
     // SEARCHING ALGORITHMS
@@ -36,14 +32,18 @@ public class Constants {
     public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
 
     // NUMBER OF ITERATIONS PER SEARCH
-    public static final int ITERATIONS = 20000;
+
+    public static final boolean ITERATION_SEARCH = true;
+    public static final int ITERATIONS = 10000;
     public static final int SEARCH_TIMES = 10;
     public static final double RUN_TIME_C7V3 = 10 * 0.999;
     public static final double RUN_TIME_C18V5 = 30 * 0.999;
     public static final double RUN_TIME_C35V7 = 80 * 0.999;
     public static final double RUN_TIME_C80V20 = 140 * 0.999;
     public static final double RUN_TIME_C130V40 = 340 * 0.999;
+
     public static final Random random = new Random();
+
     public static final String TRANSPORT_ALL_TITLE = "Transport all operator";
     public static final String TRANSPORT_ALL_DESCRIPTION =
             """
@@ -149,8 +149,6 @@ public class Constants {
                     for example by choosing from a queue of last changed vehicles.
                     Operator is limited to vehicles with few calls
                     """;
-    public static final Map<String, Map<String, Map<String, Object>>> RESULTS_MAP = INSTANCES.stream().collect(toMap(i -> i, i -> new HashMap<>()));
-    public static boolean ITERATION_SEARCH = true;
 }
 /*
 Diversification is the method of identifying diverse promising regions

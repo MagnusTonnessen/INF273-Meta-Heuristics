@@ -18,6 +18,7 @@ public class JSONCreator {
         mapper.writeValue(new File(filePath), map);
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Map<String, Map<String, Object>>> read() throws Exception {
         return mapper.readValue(new File(filePath), Map.class);
     }

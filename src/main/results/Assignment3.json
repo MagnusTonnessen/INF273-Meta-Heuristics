@@ -1,6 +1,6 @@
 {
-  "src/main/resources/Call_18_Vehicle_5.txt": {
-    "simulatedAnnealing": {
+  "Call 18 Vehicle 5": {
+    "Simulated Annealing": {
       "Average objective": 3866492.3,
       "Best objective": 3727829.0,
       "Average run time": 0.23,
@@ -10,7 +10,7 @@
         17, 17, 7, 7, 18, 18, 6, 6
       ]
     },
-    "randomSearch": {
+    "Random Search": {
       "Average objective": 7039433.7,
       "Best objective": 5792619.0,
       "Average run time": 0.16,
@@ -20,7 +20,7 @@
         13, 15, 2, 4, 5, 15, 13, 5
       ]
     },
-    "localSearch": {
+    "Local Search": {
       "Average objective": 3894102.7,
       "Best objective": 3482990.0,
       "Average run time": 0.22,
@@ -31,8 +31,8 @@
       ]
     }
   },
-  "src/main/resources/Call_80_Vehicle_20.txt": {
-    "simulatedAnnealing": {
+  "Call 80 Vehicle 20": {
+    "Simulated Annealing": {
       "Average objective": 2.02356128E7,
       "Best objective": 1.9259583E7,
       "Average run time": 0.83,
@@ -47,7 +47,7 @@
         67, 67, 13, 13
       ]
     },
-    "randomSearch": {
+    "Random Search": {
       "Average objective": 4.2211425E7,
       "Best objective": 4.2211425E7,
       "Average run time": 0.56,
@@ -62,7 +62,7 @@
         79, 80, 80
       ]
     },
-    "localSearch": {
+    "Local Search": {
       "Average objective": 2.09182292E7,
       "Best objective": 1.9810961E7,
       "Average run time": 0.81,
@@ -78,22 +78,22 @@
       ]
     }
   },
-  "src/main/resources/Call_7_Vehicle_3.txt": {
-    "simulatedAnnealing": {
+  "Call 7 Vehicle 3": {
+    "Simulated Annealing": {
       "Average objective": 1531375.5,
       "Best objective": 1477429.0,
       "Average run time": 0.13,
       "Improvement": 55.04,
       "Best solution": [3, 3, 0, 7, 7, 1, 1, 0, 5, 5, 6, 6, 0, 2, 2, 4, 4]
     },
-    "randomSearch": {
+    "Random Search": {
       "Average objective": 1977054.4,
       "Best objective": 1851768.0,
       "Average run time": 0.1,
       "Improvement": 43.65,
       "Best solution": [1, 1, 0, 0, 5, 5, 6, 6, 0, 3, 2, 2, 3, 4, 4, 7, 7]
     },
-    "localSearch": {
+    "Local Search": {
       "Average objective": 1531375.5,
       "Best objective": 1477429.0,
       "Average run time": 0.12,
@@ -101,8 +101,8 @@
       "Best solution": [3, 3, 0, 7, 7, 1, 1, 0, 5, 5, 6, 6, 0, 2, 2, 4, 4]
     }
   },
-  "src/main/resources/Call_130_Vehicle_40.txt": {
-    "simulatedAnnealing": {
+  "Call 130 Vehicle 40": {
+    "Simulated Annealing": {
       "Average objective": 3.32192874E7,
       "Best objective": 3.1618987E7,
       "Average run time": 1.48,
@@ -121,7 +121,7 @@
         57, 57, 1, 1, 104, 104, 21, 21, 60, 60, 122, 122, 127, 127, 20, 20, 72, 72, 86, 86
       ]
     },
-    "randomSearch": {
+    "Random Search": {
       "Average objective": 7.5446687E7,
       "Best objective": 7.5446687E7,
       "Average run time": 0.95,
@@ -140,7 +140,7 @@
         122, 122, 123, 123, 124, 124, 125, 125, 126, 126, 127, 127, 128, 128, 129, 129, 130, 130
       ]
     },
-    "localSearch": {
+    "Local Search": {
       "Average objective": 3.34292751E7,
       "Best objective": 3.212557E7,
       "Average run time": 1.45,
@@ -160,8 +160,8 @@
       ]
     }
   },
-  "src/main/resources/Call_35_Vehicle_7.txt": {
-    "simulatedAnnealing": {
+  "Call 35 Vehicle 7": {
+    "Simulated Annealing": {
       "Average objective": 1.0438207E7,
       "Best objective": 9545304.0,
       "Average run time": 0.33,
@@ -172,7 +172,7 @@
         14, 14, 3, 3, 16, 16, 15, 15, 35, 35, 9, 9, 11, 11, 29, 29
       ]
     },
-    "randomSearch": {
+    "Random Search": {
       "Average objective": 1.81147794E7,
       "Best objective": 1.6248192E7,
       "Average run time": 0.24,
@@ -183,7 +183,7 @@
         30, 26, 12, 19, 6, 32, 24, 7, 18, 29, 34, 19, 1, 26, 10, 28
       ]
     },
-    "localSearch": {
+    "Local Search": {
       "Average objective": 9846322.7,
       "Best objective": 8821467.0,
       "Average run time": 0.33,

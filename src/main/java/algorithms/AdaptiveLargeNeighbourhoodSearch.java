@@ -1,6 +1,9 @@
 package algorithms;
 
 import objects.Solution;
+import operators.escapeOperators.Escape;
+import operators.insertionHeuristics.GreedyInsertion;
+import operators.insertionHeuristics.InsertionHeuristic;
 import operators.operators.BruteForce;
 import operators.operators.KReinsert;
 import operators.operators.OneInsert;
@@ -9,9 +12,6 @@ import operators.operators.Operator;
 import operators.operators.Random;
 import operators.operators.ThreeExchange;
 import operators.operators.TwoExchange;
-import operators.escapeOperators.Escape;
-import operators.insertionHeuristics.GreedyInsertion;
-import operators.insertionHeuristics.InsertionHeuristic;
 import operators.removalHeuristics.RandomRemoval;
 import operators.removalHeuristics.RemovalHeuristic;
 import operators.removalHeuristics.WorstRemoval;
@@ -19,7 +19,9 @@ import operators.removalHeuristics.WorstRemoval;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
@@ -40,7 +42,9 @@ Great Deluge Algorithm (GDA)    |   The solution s' is accepted, if c(s') < L wi
  */
 public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
-    private final int UPDATE_SEGMENT = 100;
+    private final Set<Solution> foundSolutions = new HashSet<>();
+    private final int ESCAPE_ITERATIONS = 800;
+    private final int UPDATE_SEGMENT = 500;
 
     @Override
     public Solution search(double runtime) {
@@ -64,7 +68,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             add(new OperatorWithWeights(new Random()));
         }};
 
-        operators.forEach(op -> op.setCurrentWeight(op.getCurrentWeight() / operators.size()));
+        operators.forEach(op -> {
+            op.setCurrentWeight(op.getCurrentWeight() / operators.size());
+            op.setLastWeight(op.getCurrentWeight());
+        });
 
         List<RemovalHeuristic> removal = Arrays.asList(new WorstRemoval(), new RandomRemoval()); // new RelatedRemoval
         List<InsertionHeuristic> insertion = Arrays.asList(new GreedyInsertion()); // new RegretKInsertion()
@@ -86,11 +93,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         while ((ITERATION_SEARCH && iteration < ITERATIONS) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
             if (iteration % UPDATE_SEGMENT == 0) {
-
-                // updateOperators(operators);
+                updateOperators(operators);
             }
 
-            if (iterationsSinceLastImprovement > 500) {
+            if (iterationsSinceLastImprovement > ESCAPE_ITERATIONS) {
                 currSolution = escape.operate(currSolution);
                 iterationsSinceLastImprovement = 0;
             }
@@ -115,57 +121,59 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
             double newCost = newSolution.cost();
             double deltaE = newCost - currCost;
-
             boolean feasible = newSolution.isFeasible();
-            if (feasible && deltaE < 0) {
-                currSolution = newSolution;
-                currCost = newCost;
+            boolean newSolutionFound = feasible && !foundSolutions.contains(newSolution);
 
-                if (currCost < bestCost) {
-                    bestSolution = currSolution;
-                    bestCost = currCost;
+            if (feasible) {
+                foundSolutions.add(newSolution);
+                if (deltaE < 0) {
+                    currSolution = newSolution;
+                    currCost = newCost;
+
+                    if (currCost < bestCost) {
+                        bestSolution = currSolution;
+                        bestCost = currCost;
+                    }
+                } else if (random.nextDouble() < pow(E, -deltaE / T)) {
+                    currSolution = newSolution;
+                    currCost = newCost;
+                    iterationsSinceLastImprovement++;
                 }
-            } else if (feasible && random.nextDouble() < pow(E, -deltaE / T)) {
-                currSolution = newSolution;
-                currCost = newCost;
-                iterationsSinceLastImprovement++;
             } else {
                 iterationsSinceLastImprovement++;
             }
 
-            /*
-            if (newSolution.isFeasible()) {
-                if (newCost < bestCost) {
-                    bestSolution = newSolution;
-                    bestCost = newCost;
-                } else {
-                    iterationsSinceLastImprovement++;
-                }
-                if (newCost < currCost) {
-                    currSolution = newSolution;
-                    currCost = newCost;
-                }
-            }
-            */
+            updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
+
             T *= a;
             iteration++;
         }
-        // System.out.println("\nTime removing: " + timeRemoving/1000.0);
-        // System.out.println("Time inserting: " + timeInserting/1000.0);
-        // System.out.println("\nIterations done: " + iteration);
         return bestSolution;
     }
 
     private void updateOperators(List<OperatorWithWeights> operators) {
         operators.forEach(op -> {
+            double newWeight = op.getLastWeight() * 0.8 + 0.2 * op.getScore() / op.getTimesUsed();
             op.setLastWeight(op.getCurrentWeight());
-            op.setCurrentWeight(op.getLastWeight() * 0.8 + 0.2 * op.getCurrentWeight() / op.getTimesUsed());
+            op.setCurrentWeight(newWeight);
+        });
+
+        double weightSum = operators.stream().mapToDouble(op -> op.currentWeight).sum();
+
+        operators.forEach(op -> {
+            op.setCurrentWeight(op.getCurrentWeight() / weightSum);
             op.resetTimesUsed();
+            op.resetScore();
         });
     }
 
-    private void updateOperator(OperatorWithWeights operator, boolean feasible, double newCost, double currCost, double bestCost) {
-        operator.adjustScore((feasible ? 0.5 : -0.5) + (newCost < currCost ? 0.5 : -0.25) + (newCost < bestCost ? 1 : 0));
+    private void updateOperator(OperatorWithWeights operator, boolean newSolutionFound, boolean feasible, double newCost, double currCost, double bestCost) {
+        operator.incrementTimesUsed();
+        operator.adjustScore(
+                (newSolutionFound ? 1 : -0.5) +
+                        (feasible ? 0.5 : -0.5) +
+                        (newCost < currCost ? 2 : -0.5) +
+                        (newCost < bestCost ? 4 : 0));
     }
 
     private OperatorWithWeights selectOperator(List<OperatorWithWeights> operators) {
@@ -180,10 +188,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 .sorted(Comparator.comparingDouble(op -> op.currentWeight))
                 .dropWhile(op -> {
                     cumulative.weight += op.currentWeight;
-                    return p > cumulative.weight;
+                    return p >= cumulative.weight;
                 })
                 .findFirst()
-                .orElseThrow();
+                .orElse(operators.get(operators.size() - 1));
     }
 
     private static class OperatorWithWeights {
@@ -198,7 +206,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             this.currentWeight = 1;
             this.lastWeight = 1;
             this.score = 0;
-            this.timesUsed = 0;
+            this.timesUsed = 1;
         }
 
         public Operator getOperator() {
@@ -238,7 +246,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         }
 
         public void resetTimesUsed() {
-            this.timesUsed = 0;
+            this.timesUsed = 1;
         }
 
         public void incrementTimesUsed() {
@@ -248,9 +256,11 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         @Override
         public String toString() {
             return "OperatorWithWeights{" +
-                    "operator=" + operator +
+                    "operator=" + operator.getClass().getSimpleName() +
                     ", lastWeight=" + lastWeight +
                     ", currentWeight=" + currentWeight +
+                    ", score=" + score +
+                    ", timesUsed=" + timesUsed +
                     '}';
         }
     }
