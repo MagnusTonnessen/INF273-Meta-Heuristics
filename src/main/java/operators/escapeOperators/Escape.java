@@ -2,7 +2,7 @@ package operators.escapeOperators;
 
 import objects.Solution;
 import objects.Vehicle;
-import operators.Operator;
+import operators.operators.Operator;
 
 import java.util.List;
 

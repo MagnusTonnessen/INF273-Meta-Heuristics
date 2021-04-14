@@ -1,10 +1,10 @@
 package algorithms;
 
 import objects.Solution;
-import operators.BruteForce;
-import operators.Operator;
-import operators.TransportAll;
-import operators.TwoExchange;
+import operators.operators.BruteForce;
+import operators.operators.Operator;
+import operators.operators.TransportAll;
+import operators.operators.TwoExchange;
 
 import static java.lang.Math.E;
 import static java.lang.Math.pow;

@@ -1,14 +1,14 @@
 package algorithms;
 
 import objects.Solution;
-import operators.BruteForce;
-import operators.KReinsert;
-import operators.OneInsert;
-import operators.OneInsertFromDummy;
-import operators.Operator;
-import operators.Random;
-import operators.ThreeExchange;
-import operators.TwoExchange;
+import operators.operators.BruteForce;
+import operators.operators.KReinsert;
+import operators.operators.OneInsert;
+import operators.operators.OneInsertFromDummy;
+import operators.operators.Operator;
+import operators.operators.Random;
+import operators.operators.ThreeExchange;
+import operators.operators.TwoExchange;
 import operators.escapeOperators.Escape;
 import operators.insertionHeuristics.GreedyInsertion;
 import operators.insertionHeuristics.InsertionHeuristic;

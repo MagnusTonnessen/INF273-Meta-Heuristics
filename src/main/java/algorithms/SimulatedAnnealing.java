@@ -1,10 +1,10 @@
 package algorithms;
 
 import objects.Solution;
-import operators.OneInsert;
-import operators.Operator;
-import operators.ThreeExchange;
-import operators.TwoExchange;
+import operators.operators.OneInsert;
+import operators.operators.Operator;
+import operators.operators.ThreeExchange;
+import operators.operators.TwoExchange;
 
 import static java.lang.Math.E;
 import static java.lang.Math.pow;

@@ -1,4 +1,4 @@
-package operators;
+package operators.operators;
 
 import objects.Solution;
 import objects.Vehicle;
