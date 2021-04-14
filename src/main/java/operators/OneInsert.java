@@ -2,7 +2,6 @@ package operators;
 
 import objects.Solution;
 import objects.Vehicle;
-import operators.Operator;
 
 import java.util.Collections;
 import java.util.List;

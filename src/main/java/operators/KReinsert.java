@@ -1,11 +1,9 @@
 package operators;
 
 import objects.Solution;
-import objects.Vehicle;
 
 import java.util.List;
 
-import static main.Main.problem;
 import static utils.Constants.random;
 
 public class KReinsert extends Operator {

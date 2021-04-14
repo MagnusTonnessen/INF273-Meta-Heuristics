@@ -77,6 +77,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         int iterationsSinceLastImprovement = 0;
 
+        double a = 0.999;
         double T = 200;
 
         int iteration = 1;
@@ -86,7 +87,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
             if (iteration % UPDATE_SEGMENT == 0) {
 
-                updateOperators(operators);
+                // updateOperators(operators);
             }
 
             if (iterationsSinceLastImprovement > 500) {
@@ -127,6 +128,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             } else if (feasible && random.nextDouble() < pow(E, -deltaE / T)) {
                 currSolution = newSolution;
                 currCost = newCost;
+                iterationsSinceLastImprovement++;
             } else {
                 iterationsSinceLastImprovement++;
             }
@@ -145,6 +147,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 }
             }
             */
+            T *= a;
             iteration++;
         }
         // System.out.println("\nTime removing: " + timeRemoving/1000.0);
@@ -162,24 +165,23 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
     }
 
     private void updateOperator(OperatorWithWeights operator, boolean feasible, double newCost, double currCost, double bestCost) {
-        operator.adjustScore(
-            (feasible ? 0.5 : -0.5) +
-            (newCost < currCost ? 0.5 : -0.25) +
-            (newCost < bestCost ? 1 : 0)
-        );
+        operator.adjustScore((feasible ? 0.5 : -0.5) + (newCost < currCost ? 0.5 : -0.25) + (newCost < bestCost ? 1 : 0));
     }
 
     private OperatorWithWeights selectOperator(List<OperatorWithWeights> operators) {
 
         double p = random.nextDouble();
-        var cumulative = new Object() { double weight = 0; };
+        var cumulative = new Object() {
+            double weight = 0;
+        };
 
         return operators
                 .stream()
                 .sorted(Comparator.comparingDouble(op -> op.currentWeight))
                 .dropWhile(op -> {
                     cumulative.weight += op.currentWeight;
-                    return p > cumulative.weight; })
+                    return p > cumulative.weight;
+                })
                 .findFirst()
                 .orElseThrow();
     }

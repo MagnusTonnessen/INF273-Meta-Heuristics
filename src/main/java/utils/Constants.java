@@ -36,7 +36,7 @@ public class Constants {
     public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
 
     // NUMBER OF ITERATIONS PER SEARCH
-    public static final int ITERATIONS = 10000;
+    public static final int ITERATIONS = 20000;
     public static final int SEARCH_TIMES = 10;
     public static final double RUN_TIME_C7V3 = 10 * 0.999;
     public static final double RUN_TIME_C18V5 = 30 * 0.999;
