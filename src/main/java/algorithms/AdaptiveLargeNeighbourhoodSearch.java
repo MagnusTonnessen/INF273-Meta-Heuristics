@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.lang.Math.E;
+import static java.lang.Math.pow;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
 import static utils.Constants.ITERATIONS;
@@ -75,10 +77,17 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         int iterationsSinceLastImprovement = 0;
 
-        int iteration = 0;
+        double T = 200;
+
+        int iteration = 1;
         double endTime = System.currentTimeMillis() + runtime * 1000L;
 
         while ((ITERATION_SEARCH && iteration < ITERATIONS) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
+
+            if (iteration % UPDATE_SEGMENT == 0) {
+
+                updateOperators(operators);
+            }
 
             if (iterationsSinceLastImprovement > 500) {
                 currSolution = escape.operate(currSolution);
@@ -86,8 +95,8 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             }
 
             Solution newSolution = currSolution.copy();
-            Operator operator = selectOperator(operators);
-            newSolution = operator.operate(newSolution);
+            OperatorWithWeights operator = selectOperator(operators);
+            newSolution = operator.getOperator().operate(newSolution);
 
             /*
             int callsToRelocate = random.nextInt(4) + 1; // Remove 1 to 4 calls from currSolution
@@ -104,6 +113,24 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             */
 
             double newCost = newSolution.cost();
+            double deltaE = newCost - currCost;
+
+            if (newSolution.isFeasible()) {
+                if (deltaE < 0) {
+                    currSolution = newSolution;
+                    currCost = newCost;
+
+                    if (currCost < bestCost) {
+                        bestSolution = currSolution;
+                        bestCost = currCost;
+                    }
+                } else if (random.nextDouble() < pow(E, -deltaE / T)) {
+                    currSolution = newSolution;
+                    currCost = newCost;
+                }
+            } else {
+
+            }
 
             if (newSolution.isFeasible()) {
                 if (newCost < bestCost) {
@@ -118,9 +145,6 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                     currCost = newCost;
                 }
             }
-            if (iteration % UPDATE_SEGMENT == 0) {
-                // updateOperators(operators);
-            }
             iteration++;
         }
         // System.out.println("\nTime removing: " + timeRemoving/1000.0);
@@ -129,7 +153,23 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         return bestSolution;
     }
 
-    private Operator selectOperator(List<OperatorWithWeights> operators) {
+    private void updateOperators(List<OperatorWithWeights> operators) {
+        operators.forEach(op -> {
+            op.setLastWeight(op.getCurrentWeight());
+            op.setCurrentWeight(op.getLastWeight() * 0.8 + 0.2 * op.getCurrentWeight() / op.getTimesUsed());
+            op.resetTimesUsed();
+        });
+    }
+
+    private void updateOperator(OperatorWithWeights operator, boolean feasible, double newCost, double currCost, double bestCost) {
+        operator.adjustScore(
+            (feasible ? 0.5 : -0.5) +
+            (newCost < currCost ? 0.5 : -0.25) +
+            (newCost < bestCost ? 1 : 0)
+        );
+    }
+
+    private OperatorWithWeights selectOperator(List<OperatorWithWeights> operators) {
 
         double p = random.nextDouble();
         var cumulative = new Object() { double weight = 0; };
@@ -139,21 +179,24 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 .sorted(Comparator.comparingDouble(op -> op.currentWeight))
                 .dropWhile(op -> {
                     cumulative.weight += op.currentWeight;
-                    return p < cumulative.weight; })
+                    return p > cumulative.weight; })
                 .findFirst()
-                .orElseThrow()
-                .getOperator();
+                .orElseThrow();
     }
 
     private static class OperatorWithWeights {
         private final Operator operator;
         private double lastWeight;
         private double currentWeight;
+        private double score;
+        private int timesUsed;
 
         public OperatorWithWeights(Operator operator) {
             this.operator = operator;
             this.currentWeight = 1;
             this.lastWeight = 1;
+            this.score = 0;
+            this.timesUsed = 0;
         }
 
         public Operator getOperator() {
@@ -174,6 +217,39 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         public void setCurrentWeight(double currentWeight) {
             this.currentWeight = currentWeight;
+        }
+
+        public double getScore() {
+            return score;
+        }
+
+        public void adjustScore(double score) {
+            this.score += score;
+        }
+
+        public void resetScore() {
+            this.score = 0;
+        }
+
+        public int getTimesUsed() {
+            return timesUsed;
+        }
+
+        public void resetTimesUsed() {
+            this.timesUsed = 0;
+        }
+
+        public void incrementTimesUsed() {
+            this.timesUsed++;
+        }
+
+        @Override
+        public String toString() {
+            return "OperatorWithWeights{" +
+                    "operator=" + operator +
+                    ", lastWeight=" + lastWeight +
+                    ", currentWeight=" + currentWeight +
+                    '}';
         }
     }
 }

@@ -14,6 +14,9 @@ public class OneInsertFromDummy extends Operator {
     public Solution operate(Solution solution) {
 
         Vehicle dummy = solution.getDummy();
+        if (dummy.isEmpty()) {
+            return solution;
+        }
         int call = dummy.get(random.nextInt(dummy.size()));
         List<Vehicle> validVehicles = problem.calls.get(call).getValidVehicles();
 

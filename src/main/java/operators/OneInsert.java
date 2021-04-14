@@ -2,12 +2,12 @@ package operators;
 
 import objects.Solution;
 import objects.Vehicle;
+import operators.Operator;
 
 import java.util.Collections;
 import java.util.List;
 
 import static main.Main.problem;
-import static operators.Operator.greedyInsertion;
 import static utils.Constants.random;
 
 public class OneInsert extends Operator {
@@ -15,7 +15,8 @@ public class OneInsert extends Operator {
     @Override
     public Solution operate(Solution solution) {
 
-        int call = random.nextInt(problem.nCalls);
+        List<Integer> worstCalls = worstRemoval.remove(solution, random.nextInt(4) + 1);
+        int call = worstCalls.get(random.nextInt(worstCalls.size())); // random.nextInt(problem.nCalls);
         List<Vehicle> validVehicles = problem.calls.get(call).getValidVehicles();
 
         if (validVehicles.isEmpty()) {
