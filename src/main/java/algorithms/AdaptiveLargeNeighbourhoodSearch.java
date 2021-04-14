@@ -127,6 +127,8 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             } else if (feasible && random.nextDouble() < pow(E, -deltaE / T)) {
                 currSolution = newSolution;
                 currCost = newCost;
+            } else {
+                iterationsSinceLastImprovement++;
             }
 
             /*
