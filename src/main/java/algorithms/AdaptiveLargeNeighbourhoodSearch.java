@@ -115,23 +115,21 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             double newCost = newSolution.cost();
             double deltaE = newCost - currCost;
 
-            if (newSolution.isFeasible()) {
-                if (deltaE < 0) {
-                    currSolution = newSolution;
-                    currCost = newCost;
+            boolean feasible = newSolution.isFeasible();
+            if (feasible && deltaE < 0) {
+                currSolution = newSolution;
+                currCost = newCost;
 
-                    if (currCost < bestCost) {
-                        bestSolution = currSolution;
-                        bestCost = currCost;
-                    }
-                } else if (random.nextDouble() < pow(E, -deltaE / T)) {
-                    currSolution = newSolution;
-                    currCost = newCost;
+                if (currCost < bestCost) {
+                    bestSolution = currSolution;
+                    bestCost = currCost;
                 }
-            } else {
-
+            } else if (feasible && random.nextDouble() < pow(E, -deltaE / T)) {
+                currSolution = newSolution;
+                currCost = newCost;
             }
 
+            /*
             if (newSolution.isFeasible()) {
                 if (newCost < bestCost) {
                     bestSolution = newSolution;
@@ -139,12 +137,12 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 } else {
                     iterationsSinceLastImprovement++;
                 }
-                // TODO: Greedy accept
                 if (newCost < currCost) {
                     currSolution = newSolution;
                     currCost = newCost;
                 }
             }
+            */
             iteration++;
         }
         // System.out.println("\nTime removing: " + timeRemoving/1000.0);
