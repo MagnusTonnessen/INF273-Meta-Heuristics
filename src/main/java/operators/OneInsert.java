@@ -3,9 +3,11 @@ package operators;
 import objects.Solution;
 import objects.Vehicle;
 
+import java.util.Collections;
 import java.util.List;
 
 import static main.Main.problem;
+import static operators.Operator.greedyInsertion;
 import static utils.Constants.random;
 
 public class OneInsert extends Operator {
@@ -20,8 +22,12 @@ public class OneInsert extends Operator {
             return solution.copy();
         }
 
+        solution.removeCall(call);
+        return greedyInsertion.insert(solution, Collections.singletonList(call));
+        /*
         return new Solution(solution) {{
             moveCalls(call, validVehicles.get(random.nextInt(validVehicles.size())));
         }};
+        */
     }
 }

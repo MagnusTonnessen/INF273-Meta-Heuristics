@@ -8,6 +8,7 @@ import java.util.List;
 import static main.Main.problem;
 import static utils.Constants.random;
 
+// TODO: Swap related calls
 public class ThreeExchange extends Operator {
     @Override
     public Solution operate(Solution solution) {

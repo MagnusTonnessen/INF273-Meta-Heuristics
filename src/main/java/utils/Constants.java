@@ -36,25 +36,15 @@ public class Constants {
     public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
 
     // NUMBER OF ITERATIONS PER SEARCH
-
     public static final int ITERATIONS = 10000;
-
     public static final int SEARCH_TIMES = 1;
-
     public static final double RUN_TIME_C7V3 = 10 * 0.999;
-
     public static final double RUN_TIME_C18V5 = 30 * 0.999;
-
     public static final double RUN_TIME_C35V7 = 80 * 0.999;
-
     public static final double RUN_TIME_C80V20 = 140 * 0.999;
-
     public static final double RUN_TIME_C130V40 = 340 * 0.999;
-
     public static final Random random = new Random();
-
     public static final String TRANSPORT_ALL_TITLE = "Transport all operator";
-
     public static final String TRANSPORT_ALL_DESCRIPTION =
             """
                     Not transporting a call is the most expensive option for a call.
@@ -88,9 +78,7 @@ public class Constants {
                     Potential for improvement:
                     Sort vehicles by cost of transporting call
                     """;
-
     public static final String REINSERT_MOST_EXPENSIVE_TITLE = "Reinsert most expensive operator";
-
     public static final String REINSERT_MOST_EXPENSIVE_DESCRIPTION =
             """
                     This operator aims to reduce objective of solution
@@ -132,9 +120,7 @@ public class Constants {
                     Reduce the randomness of the operator.
                     Improve choice of call to relocate and insert vehicle
                     """;
-
     public static final String BRUTE_FORCE_VEHICLE_TITLE = "Brute force vehicle operator";
-
     public static final String BRUTE_FORCE_VEHICLE_DESCRIPTION =
             """
                     Transport all and reinsert from most expensive inserts call in the front/back of the vehicle.
@@ -163,9 +149,8 @@ public class Constants {
                     for example by choosing from a queue of last changed vehicles.
                     Operator is limited to vehicles with few calls
                     """;
-
-
     public static final Map<String, Map<String, Map<String, Object>>> RESULTS_MAP = INSTANCES.stream().collect(toMap(i -> i, i -> new HashMap<>()));
+    public static boolean ITERATION_SEARCH = true;
 }
 /*
 Diversification is the method of identifying diverse promising regions

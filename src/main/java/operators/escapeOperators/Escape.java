@@ -9,7 +9,7 @@ import java.util.List;
 import static main.Main.problem;
 import static utils.Constants.random;
 
-public class EscapeOperator extends Operator {
+public class Escape extends Operator {
     @Override
     public Solution operate(Solution solution) {
         solution = new Solution(solution);

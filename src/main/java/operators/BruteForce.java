@@ -21,7 +21,6 @@ public class BruteForce extends Operator {
     @Override
     public Solution operate(Solution solution) {
 
-
         List<Vehicle> vehicles = solution
                 .getVehiclesWithNToMCalls(2, 6)
                 .stream()

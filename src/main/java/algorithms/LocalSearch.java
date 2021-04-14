@@ -8,6 +8,8 @@ import operators.TwoExchange;
 
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
+import static utils.Constants.ITERATIONS;
+import static utils.Constants.ITERATION_SEARCH;
 import static utils.Constants.random;
 
 public class LocalSearch implements SearchingAlgorithm {
@@ -27,8 +29,10 @@ public class LocalSearch implements SearchingAlgorithm {
         Solution currentSolution;
         double currentCost;
 
+        int iteration = 0;
         double endTime = System.currentTimeMillis() + runtime * 1000L;
-        while (System.currentTimeMillis() < endTime) {
+
+        while ((ITERATION_SEARCH && iteration < ITERATIONS) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
             double p = random.nextDouble();
 
@@ -46,29 +50,8 @@ public class LocalSearch implements SearchingAlgorithm {
                 bestSolution = currentSolution;
                 bestCost = currentCost;
             }
+            iteration++;
         }
-
-        /*
-        for (int i = 0; i < ITERATIONS; i++) {
-
-            double p = random.nextDouble();
-
-            if (p < P1) {
-                currentSolution = oneInsert.operate(bestSolution);
-            } else if (p < P1 + P2) {
-                currentSolution = twoExchange.operate(bestSolution);
-            } else {
-                currentSolution = threeExchange.operate(bestSolution);
-            }
-
-            currentCost = currentSolution.cost();
-
-            if (currentSolution.isFeasible() && currentCost < bestCost) {
-                bestSolution = currentSolution;
-                bestCost = currentCost;
-            }
-        }
-        */
         return bestSolution;
     }
 }

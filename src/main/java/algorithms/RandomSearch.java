@@ -6,6 +6,8 @@ import operators.Random;
 
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
+import static utils.Constants.ITERATIONS;
+import static utils.Constants.ITERATION_SEARCH;
 
 public class RandomSearch implements SearchingAlgorithm {
     @Override
@@ -19,9 +21,10 @@ public class RandomSearch implements SearchingAlgorithm {
         Solution currentSolution = initialSolution.copy();
         double currentCost;
 
+        int iteration = 0;
         double endTime = System.currentTimeMillis() + runtime * 1000L;
 
-        while (System.currentTimeMillis() < endTime) {
+        while ((ITERATION_SEARCH && iteration < ITERATIONS) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
             currentSolution = random.operate(currentSolution);
             currentCost = currentSolution.cost();
 
@@ -29,19 +32,8 @@ public class RandomSearch implements SearchingAlgorithm {
                 bestSolution = currentSolution.copy();
                 bestCost = currentCost;
             }
+            iteration++;
         }
-        /*
-        for (int i = 0; i < ITERATIONS; i++) {
-
-            currentSolution = random.operate(currentSolution);
-            currentCost = currentSolution.cost();
-
-            if (currentSolution.isFeasible() && currentCost < bestCost) {
-                bestSolution = currentSolution.copy();
-                bestCost = currentCost;
-            }
-        }
-        */
         return bestSolution;
     }
 }
