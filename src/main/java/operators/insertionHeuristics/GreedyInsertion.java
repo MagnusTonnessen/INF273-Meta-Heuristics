@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-// TODO: This shit is time expensive af
 public class GreedyInsertion implements InsertionHeuristic {
     @Override
     public Solution insert(Solution solution, List<Integer> calls) {

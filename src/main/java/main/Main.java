@@ -48,13 +48,11 @@ public class Main {
     public static double initialCost;
     public static String instanceName;
 
-    /*
-    ====================
-    Best T: 250
-    Best a: 0.9694021368469093
-    Best cost: 2.27710862E7
-    ====================
-     */
+    // TODO:
+    //  Implement related removal
+    //  Implement regret k
+    //  Score removal and insertion heuristics
+    //  Swap related calls two and three exchange
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
@@ -145,6 +143,7 @@ public class Main {
         return new Results(Arrays.stream(bestSolution.asArray()).map(i -> i + 1).toArray(), bestCost, averageCost, improvement, averageExecutionTime);
     }
 
+    @SuppressWarnings("unchecked")
     public static void JSONToPDF(String jsonPath, String pdfPath, String algorithm) throws Exception {
         PDFCreator pdf = new PDFCreator(pdfPath);
         pdf.openDocument();
