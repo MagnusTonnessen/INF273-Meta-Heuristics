@@ -7,6 +7,7 @@ import objects.Solution;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,9 +48,18 @@ public class Main {
     public static double initialCost;
     public static String instanceName;
 
+    /*
+    ====================
+    Best T: 250
+    Best a: 0.9694021368469093
+    Best cost: 2.27710862E7
+    ====================
+     */
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
+        System.out.println(LocalTime.now());
 
+        /*
         assignment2();
         JSONToPDF("src/main/results/test/Assignment2test.json", "src/main/results/test/Assignment2test.pdf", RANDOM_SEARCH.getName());
 
@@ -61,6 +71,12 @@ public class Main {
 
         assignment5();
         JSONToPDF("src/main/results/test/Assignment5test.json", "src/main/results/test/Assignment5test.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName());
+        */
+
+        long startTime = System.currentTimeMillis();
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
+        long executionTime = (System.currentTimeMillis() - startTime) / 1000;
+        System.out.printf("%d minutes %d seconds", executionTime / 60, executionTime % 60);
     }
 
     public static void runAllSearches() throws Exception {
@@ -171,7 +187,7 @@ public class Main {
     public static void assignment5() throws Exception {
 
         Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>(
-                new JSONCreator("src/main/results/test/Assignment4test.json").read()
+                new JSONCreator("src/main/results/Assignment4.json").read()
         );
 
         for (String filePath : INSTANCES) {
@@ -189,7 +205,7 @@ public class Main {
             resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
-        new JSONCreator("src/main/results/test/Assignment5test.json").save(resultsMap);
+        new JSONCreator("src/main/results/Assignment5.json").save(resultsMap);
     }
 
     public static void assignment4() throws Exception {

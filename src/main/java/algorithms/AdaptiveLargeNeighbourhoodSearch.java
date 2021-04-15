@@ -42,16 +42,47 @@ Great Deluge Algorithm (GDA)    |   The solution s' is accepted, if c(s') < L wi
  */
 public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
-    private final Set<Solution> foundSolutions = new HashSet<>();
-    private final int ESCAPE_ITERATIONS = 800;
-    private final int UPDATE_SEGMENT = 500;
-
     @Override
     public Solution search(double runtime) {
-        return ALNS(runtime);
+        return ALNS(runtime, 250, 0.97);
     }
 
-    public Solution ALNS(double runtime) {
+    public Solution tune(double runtime) {
+        int bestT = 50;
+        double besta = 0.999;
+        double bestCost = Integer.MAX_VALUE;
+
+        for (int T = 50; T < 500; T += 50) {
+            double a = 0.999;
+            for (int i = 0; i < 10; i++) {
+                double totalCost = 0;
+                for (int j = 0; j < 10; j++) {
+                    totalCost += ALNS(runtime, T, a).cost();
+                }
+                totalCost /= 10;
+                if (totalCost < bestCost) {
+                    bestCost = totalCost;
+                    bestT = T;
+                    besta = a;
+                }
+                a *= 0.995;
+            }
+            System.out.println("T = " + T);
+        }
+
+        System.out.println("\n====================");
+        System.out.println("Best T: " + bestT);
+        System.out.println("Best a: " + besta);
+        System.out.println("Best cost: " + bestCost);
+        System.out.println("====================");
+        return null;
+    }
+
+    public Solution ALNS(double runtime, double T, double a) {
+
+        final Set<Solution> foundSolutions = new HashSet<>();
+        final int ESCAPE_ITERATIONS = 500;
+        final int UPDATE_SEGMENT = 250;
 
         long timeRemoving = 0;
         long timeInserting = 0;
@@ -83,9 +114,6 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         double currCost = initialCost;
 
         int iterationsSinceLastImprovement = 0;
-
-        double a = 0.999;
-        double T = 200;
 
         int iteration = 1;
         double endTime = System.currentTimeMillis() + runtime * 1000L;
