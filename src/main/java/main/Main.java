@@ -1,13 +1,10 @@
 package main;
 
-import algorithms.AdaptiveLargeNeighbourhoodSearch;
 import algorithms.AdaptiveLargeNeighbourhoodSearchConcurrent;
-import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
-import objects.Vehicle;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
@@ -20,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -83,7 +79,7 @@ public class Main {
         long executionTime = (System.currentTimeMillis() - startTime) / 1000;
 
         System.out.printf("%d minutes %d seconds", executionTime / 60, executionTime % 60);
-        System.out.println("\nAverage iterations: " + iterations.getAndSet(0)/SEARCH_TIMES);
+        System.out.println("\nAverage iterations: " + iterations.getAndSet(0) / SEARCH_TIMES);
 
         System.out.println("\n======================================================================================================================================================\n");
 
@@ -92,7 +88,7 @@ public class Main {
         executionTime = (System.currentTimeMillis() - startTime) / 1000;
 
         System.out.printf("%d minutes %d seconds", executionTime / 60, executionTime % 60);
-        System.out.println("\nAverage iterations: " + iterations.get()/SEARCH_TIMES);
+        System.out.println("\nAverage iterations: " + iterations.get() / SEARCH_TIMES);
 
     }
 

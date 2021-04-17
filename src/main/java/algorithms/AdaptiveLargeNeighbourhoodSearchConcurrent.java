@@ -9,7 +9,6 @@ import operators.operators.KReinsert;
 import operators.operators.OneInsert;
 import operators.operators.OneInsertFromDummy;
 import operators.operators.Operator;
-import operators.operators.Random;
 import operators.operators.ThreeExchange;
 import operators.operators.TwoExchange;
 import operators.removalHeuristics.RandomRemoval;
@@ -22,9 +21,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
 
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
@@ -44,7 +41,7 @@ Threshold Accepting (TA)        |   The solution s' is accepted, if c(s') − c(
 Old Bachelor Acceptance (OBA)   |   The solution s' is accepted, if c(s') − c(s) < T with a threshold T. The threshold is decreased after every acceptance a factor φ and increased after every rejection a factor ψ.
 Great Deluge Algorithm (GDA)    |   The solution s' is accepted, if c(s') < L with a level L. The level will decrease by a factor φ only if the solution is accepted.
  */
-public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgorithm{
+public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgorithm {
     @Override
     public Solution search(double runtime) {
         return ALNS(runtime, 250, 0.97);
