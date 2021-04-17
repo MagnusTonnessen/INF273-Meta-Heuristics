@@ -27,6 +27,7 @@ import static java.lang.Math.E;
 import static java.lang.Math.pow;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
+import static main.Main.iterations;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.ITERATION_SEARCH;
 import static utils.Constants.random;
@@ -96,7 +97,6 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             add(new OperatorWithWeights(new TwoExchange()));
             add(new OperatorWithWeights(new ThreeExchange()));
             add(new OperatorWithWeights(new BruteForce()));
-            add(new OperatorWithWeights(new Random()));
         }};
 
         operators.forEach(op -> {
@@ -176,6 +176,8 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             T *= a;
             iteration++;
         }
+
+        iterations.addAndGet(iteration);
         return bestSolution;
     }
 

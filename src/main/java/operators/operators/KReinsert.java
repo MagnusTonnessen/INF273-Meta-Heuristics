@@ -10,7 +10,7 @@ public class KReinsert extends Operator {
     @Override
     public Solution operate(Solution solution) {
         Solution newSolution = solution.copy();
-        List<Integer> calls = (random.nextDouble() < 0.3 ? randomRemoval : worstRemoval).remove(solution, random.nextInt(4) + 1);
+        List<Integer> calls = (random.nextDouble() < 0.0 ? randomRemoval : worstRemoval).remove(solution, random.nextInt(4) + 1);
         newSolution.removeCalls(calls);
         return greedyInsertion.insert(newSolution, calls);
         /*

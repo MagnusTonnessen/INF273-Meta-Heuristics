@@ -229,10 +229,9 @@ public class Utils {
                 int VIdx = vehicle.vehicleIndex;
                 int[] sortRoute = Arrays.stream(currentVPlan).sorted().toArray();
                 int[] index = argSort(argSort(currentVPlan));
-
                 int[] portIndexSorted = IntStream.range(0, sortRoute.length).map(call -> cargo[sortRoute[call]][call % 2]).toArray();
                 int[] portIndex = IntStream.range(0, sortRoute.length).map(call -> portIndexSorted[index[call]] - 1).toArray();
-                int[] diag = IntStream.range(0, portIndex.length - 1).map(call -> travelCost[VIdx][portIndex[call]][portIndex[call]]).toArray();
+                int[] diag = IntStream.range(0, portIndex.length - 1).map(call -> travelCost[VIdx][portIndex[call]][portIndex[call + 1]]).toArray();
 
                 int firstVisitCost = firstTravelCost[VIdx][cargo[currentVPlan[0]][0] - 1];
 

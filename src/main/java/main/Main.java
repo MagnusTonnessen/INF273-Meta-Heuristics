@@ -1,9 +1,13 @@
 package main;
 
+import algorithms.AdaptiveLargeNeighbourhoodSearch;
+import algorithms.AdaptiveLargeNeighbourhoodSearchConcurrent;
+import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
+import objects.Vehicle;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
@@ -16,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -47,6 +53,7 @@ public class Main {
     public static Solution initialSolution;
     public static double initialCost;
     public static String instanceName;
+    public static AtomicInteger iterations = new AtomicInteger(0);
 
     // TODO:
     //  Implement related removal
@@ -68,13 +75,25 @@ public class Main {
         JSONToPDF("src/main/results/test/Assignment4test.json", "src/main/results/test/Assignment4test.pdf", SIMULATED_ANNEALING_NEW_OPERATORS.getName());
 
         assignment5();
-        JSONToPDF("src/main/results/test/Assignment5test.json", "src/main/results/test/Assignment5test.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName());
+        JSONToPDF("src/main/results/test/Assignment5test.json", "src/main/results/test/Assignment5test.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName())
         */
 
         long startTime = System.currentTimeMillis();
-        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, Collections.singletonList(C130V40));
         long executionTime = (System.currentTimeMillis() - startTime) / 1000;
+
         System.out.printf("%d minutes %d seconds", executionTime / 60, executionTime % 60);
+        System.out.println("\nAverage iterations: " + iterations.getAndSet(0)/SEARCH_TIMES);
+
+        System.out.println("\n======================================================================================================================================================\n");
+
+        startTime = System.currentTimeMillis();
+        runSearches(new AdaptiveLargeNeighbourhoodSearchConcurrent(), Collections.singletonList(C130V40));
+        executionTime = (System.currentTimeMillis() - startTime) / 1000;
+
+        System.out.printf("%d minutes %d seconds", executionTime / 60, executionTime % 60);
+        System.out.println("\nAverage iterations: " + iterations.get()/SEARCH_TIMES);
+
     }
 
     public static void runAllSearches() throws Exception {

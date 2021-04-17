@@ -14,7 +14,7 @@ public class OneInsert extends Operator {
     @Override
     public Solution operate(Solution solution) {
 
-        List<Integer> calls = randomRemoval.remove(solution, 1);
+        List<Integer> calls = worstRemoval.remove(solution, 1);
         int call = calls.get(random.nextInt(calls.size())); // random.nextInt(problem.nCalls);
         List<Vehicle> validVehicles = problem.calls.get(call).getValidVehicles();
 

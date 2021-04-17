@@ -30,6 +30,7 @@ import static java.lang.Math.E;
 import static java.lang.Math.pow;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
+import static main.Main.iterations;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.ITERATION_SEARCH;
 import static utils.Constants.random;
@@ -43,8 +44,7 @@ Threshold Accepting (TA)        |   The solution s' is accepted, if c(s') − c(
 Old Bachelor Acceptance (OBA)   |   The solution s' is accepted, if c(s') − c(s) < T with a threshold T. The threshold is decreased after every acceptance a factor φ and increased after every rejection a factor ψ.
 Great Deluge Algorithm (GDA)    |   The solution s' is accepted, if c(s') < L with a level L. The level will decrease by a factor φ only if the solution is accepted.
  */
-public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgorithm {
-
+public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgorithm{
     @Override
     public Solution search(double runtime) {
         return ALNS(runtime, 250, 0.97);
@@ -85,7 +85,8 @@ public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgo
 
         AtomicReference<Solution> bestSolution = new AtomicReference<>(initialSolution);
         AtomicReference<Double> bestCost = new AtomicReference<>(initialCost);
-        AtomicInteger iterations = new AtomicInteger(0);
+
+        final double endTime = System.currentTimeMillis() + runtime * 1000L;
 
         Runnable task = () -> {
             double finalT = T;
@@ -105,7 +106,6 @@ public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgo
                 add(new OperatorWithWeights(new TwoExchange()));
                 add(new OperatorWithWeights(new ThreeExchange()));
                 add(new OperatorWithWeights(new BruteForce()));
-                add(new OperatorWithWeights(new Random()));
             }};
 
             operators.forEach(op -> {
@@ -122,7 +122,6 @@ public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgo
             int iterationsSinceLastImprovement = 0;
 
             int iteration = 1;
-            double endTime = System.currentTimeMillis() + runtime * 1000L;
 
             while ((ITERATION_SEARCH && iteration < ITERATIONS) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
@@ -185,21 +184,15 @@ public class AdaptiveLargeNeighbourhoodSearchConcurrent implements SearchingAlgo
             iterations.addAndGet(iteration);
         };
 
-        IntStream
-            .range(0, 10)
-            .mapToObj(i -> {
+        for (int i = 0; i < 10; i++) {
+            try {
                 Thread thread = new Thread(task);
                 thread.start();
-                return thread; })
-            .forEach(thread -> {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-
-        System.out.println("Total iterations: " + iterations);
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         return bestSolution.get();
     }
