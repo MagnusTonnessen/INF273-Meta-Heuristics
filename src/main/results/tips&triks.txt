@@ -1,0 +1,13 @@
+Escape operator:
+- Remove random 1 - 3
+- Insert best
+- Repeat 20 times
+
+SA Acceptance tuning:
+- In the first 100 iterations, fix the probability of accepting worse solutions to 0.8
+- In these 100 iterations collect the Deltas (of course when the delta is positive, since negative means you have a better solution and we do not need the probability of acceptance in that case as we always accept better solutions)
+- Use the average of collected Deltas to calculate the T_0 such that with the average Delta you get P=0.8 in the Boltzmann function
+- Assuming that you want to reach to T_f = 1 after n iterations. Then you can simply find the proper Alpha value. Alpha= POWER((T_f / T_0),(1/n))
+Note: T_0 for one instance might be very different from the other instances so that is why we do not fix the T_0 and we use the above process. In this process you get a better estimation of the Delta values because it is average of deltas from the same instance.
+
+T_f = 0.001 - 1
