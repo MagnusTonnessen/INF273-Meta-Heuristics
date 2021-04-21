@@ -3,6 +3,9 @@ Escape operator:
 - Insert best
 - Repeat 20 times
 
+Local search:
+- Local search at the end of the ALNS to find local optima
+
 SA Acceptance tuning:
 - In the first 100 iterations, fix the probability of accepting worse solutions to 0.8
 - In these 100 iterations collect the Deltas (of course when the delta is positive, since negative means you have a better solution and we do not need the probability of acceptance in that case as we always accept better solutions)

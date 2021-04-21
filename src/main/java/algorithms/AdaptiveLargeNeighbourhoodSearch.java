@@ -2,21 +2,15 @@ package algorithms;
 
 import objects.Solution;
 import operators.escapeOperators.Escape;
-import operators.insertionHeuristics.GreedyInsertion;
-import operators.insertionHeuristics.InsertionHeuristic;
-import operators.operators.BruteForce;
-import operators.operators.KReinsert;
-import operators.operators.OneInsert;
-import operators.operators.OneInsertFromDummy;
-import operators.operators.Operator;
-import operators.operators.ThreeExchange;
-import operators.operators.TwoExchange;
-import operators.removalHeuristics.RandomRemoval;
-import operators.removalHeuristics.RemovalHeuristic;
-import operators.removalHeuristics.WorstRemoval;
+import operators.oldOperators.BruteForce;
+import operators.oldOperators.KReinsert;
+import operators.oldOperators.OneInsert;
+import operators.oldOperators.OneInsertFromDummy;
+import operators.oldOperators.Operator;
+import operators.oldOperators.ThreeExchange;
+import operators.oldOperators.TwoExchange;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -103,9 +97,6 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             op.setLastWeight(op.getCurrentWeight());
         });
 
-        List<RemovalHeuristic> removal = Arrays.asList(new WorstRemoval(), new RandomRemoval()); // new RelatedRemoval
-        List<InsertionHeuristic> insertion = Arrays.asList(new GreedyInsertion()); // new RegretKInsertion()
-
         Solution bestSolution = initialSolution;
         double bestCost = initialCost;
 
@@ -176,7 +167,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             iteration++;
         }
 
-        iterations.addAndGet(iteration);
+        iterations += iteration;
         return bestSolution;
     }
 
@@ -199,10 +190,28 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
     private void updateOperator(OperatorWithWeights operator, boolean newSolutionFound, boolean feasible, double newCost, double currCost, double bestCost) {
         operator.incrementTimesUsed();
         operator.adjustScore(
+                (newSolutionFound ? 1 : 0) +
+                        (newCost < currCost ? 2 : 0) +
+                        (newCost < bestCost ? 4 : 0)
+        );
+        /*
+        operator.adjustScore(
                 (newSolutionFound ? 1 : -0.5) +
                         (feasible ? 0.5 : -0.5) +
                         (newCost < currCost ? 2 : -0.5) +
                         (newCost < bestCost ? 4 : 0));
+
+         */
+    }
+
+    private void tuneParameters() {
+        /*
+        p = e ^ ( -delta / T )
+        ln ( p ) = -delta / T
+        ln ( p ) = -delta / T
+        ln ( p ) / -delta = 1 / T
+        T = 1 / ( ln ( p ) / -delta )
+        */
     }
 
     private OperatorWithWeights selectOperator(List<OperatorWithWeights> operators) {

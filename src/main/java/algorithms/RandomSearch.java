@@ -1,8 +1,8 @@
 package algorithms;
 
 import objects.Solution;
-import operators.operators.Operator;
-import operators.operators.Random;
+import operators.oldOperators.Operator;
+import operators.oldOperators.Random;
 
 import static main.Main.initialCost;
 import static main.Main.initialSolution;

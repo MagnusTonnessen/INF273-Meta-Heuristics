@@ -1,4 +1,4 @@
-package operators.operators;
+package operators.oldOperators;
 
 import objects.Solution;
 import objects.Vehicle;
@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static main.Main.problem;
+import static utils.Constants.greedyInsertion;
 import static utils.Constants.random;
 
 public class OneInsertFromDummy extends Operator {

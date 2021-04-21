@@ -6,6 +6,13 @@ import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
 import algorithms.SimulatedAnnealing;
 import algorithms.SimulatedAnnealingNewOperators;
+import operators.insertionHeuristics.GreedyInsertion;
+import operators.insertionHeuristics.InsertionHeuristic;
+import operators.insertionHeuristics.RegretKInsertion;
+import operators.removalHeuristics.RandomRemoval;
+import operators.removalHeuristics.RelatedRemoval;
+import operators.removalHeuristics.RemovalHeuristic;
+import operators.removalHeuristics.WorstRemoval;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,10 +38,18 @@ public class Constants {
     public static final SearchingAlgorithm ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH = new AdaptiveLargeNeighbourhoodSearch();
     public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
 
-    // NUMBER OF ITERATIONS PER SEARCH
+    // INSERTION AND REMOVAL HEURISTICS
 
-    public static final boolean ITERATION_SEARCH = true;
-    public static final int ITERATIONS = 10000;
+    public static final InsertionHeuristic greedyInsertion = new GreedyInsertion();
+    public static final InsertionHeuristic regretKInsertion = new RegretKInsertion();
+    public static final RemovalHeuristic randomRemoval = new RandomRemoval();
+    public static final RemovalHeuristic worstRemoval = new WorstRemoval();
+    public static final RemovalHeuristic relatedRemoval = new RelatedRemoval();
+
+    // SEARCH CONSTANTS
+
+    public static final boolean ITERATION_SEARCH = false;
+    public static final int ITERATIONS = 25000;
     public static final int SEARCH_TIMES = 10;
     public static final double RUN_TIME_C7V3 = 10 * 0.99999;
     public static final double RUN_TIME_C18V5 = 30 * 0.99999;

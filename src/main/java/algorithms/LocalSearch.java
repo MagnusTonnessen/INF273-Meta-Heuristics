@@ -1,10 +1,10 @@
 package algorithms;
 
 import objects.Solution;
-import operators.operators.OneInsert;
-import operators.operators.Operator;
-import operators.operators.ThreeExchange;
-import operators.operators.TwoExchange;
+import operators.oldOperators.OneInsert;
+import operators.oldOperators.Operator;
+import operators.oldOperators.ThreeExchange;
+import operators.oldOperators.TwoExchange;
 
 import static main.Main.initialCost;
 import static main.Main.initialSolution;

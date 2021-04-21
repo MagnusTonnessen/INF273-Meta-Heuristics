@@ -1,10 +1,13 @@
-package operators.operators;
+package operators.oldOperators;
 
 import objects.Solution;
 
 import java.util.List;
 
+import static utils.Constants.greedyInsertion;
 import static utils.Constants.random;
+import static utils.Constants.randomRemoval;
+import static utils.Constants.worstRemoval;
 
 public class KReinsert extends Operator {
     @Override

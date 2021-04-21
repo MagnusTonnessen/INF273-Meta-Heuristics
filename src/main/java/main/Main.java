@@ -1,6 +1,5 @@
 package main;
 
-import algorithms.AdaptiveLargeNeighbourhoodSearchConcurrent;
 import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -49,7 +47,7 @@ public class Main {
     public static Solution initialSolution;
     public static double initialCost;
     public static String instanceName;
-    public static AtomicInteger iterations = new AtomicInteger(0);
+    public static int iterations = 0;
 
     // TODO:
     //  Implement related removal
@@ -74,21 +72,7 @@ public class Main {
         JSONToPDF("src/main/results/test/Assignment5test.json", "src/main/results/test/Assignment5test.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName())
         */
 
-        long startTime = System.currentTimeMillis();
-        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, Collections.singletonList(C130V40));
-        long executionTime = (System.currentTimeMillis() - startTime) / 1000;
-
-        System.out.printf("%d minutes %d seconds", executionTime / 60, executionTime % 60);
-        System.out.println("\nAverage iterations: " + iterations.getAndSet(0) / SEARCH_TIMES);
-
-        System.out.println("\n======================================================================================================================================================\n");
-
-        startTime = System.currentTimeMillis();
-        runSearches(new AdaptiveLargeNeighbourhoodSearchConcurrent(), Collections.singletonList(C130V40));
-        executionTime = (System.currentTimeMillis() - startTime) / 1000;
-
-        System.out.printf("%d minutes %d seconds", executionTime / 60, executionTime % 60);
-        System.out.println("\nAverage iterations: " + iterations.get() / SEARCH_TIMES);
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
 
     }
 
@@ -111,11 +95,20 @@ public class Main {
 
             for (SearchingAlgorithm searchingAlgorithm : algorithms) {
 
+                long startTime = System.currentTimeMillis();
+
                 Results searchResults = runSearch(searchingAlgorithm, getRuntime(filePath), SEARCH_TIMES);
+
+                long executionTime = (System.currentTimeMillis() - startTime) / 1000;
 
                 bestSolutions.add(searchResults.bestSolution());
 
                 printRunResults(searchingAlgorithm.getName(), searchResults);
+
+                System.out.printf("\n%d minutes %d seconds", executionTime / 60, executionTime % 60);
+                System.out.println("\nAverage iterations: " + iterations / SEARCH_TIMES);
+                iterations = 0;
+
             }
 
             IntStream.range(0, algorithms.size()).forEach(i -> {
