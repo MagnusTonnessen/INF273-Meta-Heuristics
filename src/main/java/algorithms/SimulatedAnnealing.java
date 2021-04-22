@@ -10,17 +10,16 @@ import static java.lang.Math.E;
 import static java.lang.Math.pow;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
-import static utils.Constants.ITERATIONS;
 import static utils.Constants.ITERATION_SEARCH;
 import static utils.Constants.random;
 
 public class SimulatedAnnealing implements SearchingAlgorithm {
     @Override
-    public Solution search(double runtime) {
-        return simulatedAnnealing(runtime, 0.33, 0.33, 200, 0.999);
+    public Solution search(Solution initialSolution, int iterations, double runtime) {
+        return simulatedAnnealing(iterations, runtime, 0.33, 0.33, 200, 0.999);
     }
 
-    public Solution simulatedAnnealing(double runtime, double P1, double P2, double T0, double a) {
+    public Solution simulatedAnnealing(int iterations, double runtime, double P1, double P2, double T0, double a) {
 
         Operator oneInsert = new OneInsert();
         Operator twoExchange = new TwoExchange();
@@ -42,7 +41,7 @@ public class SimulatedAnnealing implements SearchingAlgorithm {
         int iteration = 0;
         double endTime = System.currentTimeMillis() + runtime * 1000L;
 
-        while ((ITERATION_SEARCH && iteration < ITERATIONS) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
+        while ((ITERATION_SEARCH && iteration < iterations) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
             p = random.nextDouble();
 

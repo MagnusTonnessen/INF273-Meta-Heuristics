@@ -17,7 +17,10 @@ public class Escape extends Operator {
         while (i < 20) {
             Solution newSolution = new Solution(solution);
             int call = random.nextInt(problem.nCalls);
+            Vehicle currentVehicle = newSolution.getVehicleFromCall(call);
             List<Vehicle> validVehicles = problem.getCallFromIndex(call).getValidVehicles();
+            validVehicles.removeIf(vehicle -> vehicle.vehicleIndex == currentVehicle.vehicleIndex);
+            validVehicles.add(newSolution.getDummy());
             newSolution.moveCalls(call, validVehicles.get(random.nextInt(validVehicles.size())));
             if (newSolution.isFeasible()) {
                 solution = newSolution;

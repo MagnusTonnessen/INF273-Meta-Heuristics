@@ -7,6 +7,7 @@ import objects.Solution;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
+import java.net.Inet4Address;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import static utils.Constants.C35V7;
 import static utils.Constants.C7V3;
 import static utils.Constants.C80V20;
 import static utils.Constants.INSTANCES;
+import static utils.Constants.ITERATIONS;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
 import static utils.Constants.RUN_TIME_C130V40;
@@ -47,7 +49,6 @@ public class Main {
     public static Solution initialSolution;
     public static double initialCost;
     public static String instanceName;
-    public static int iterations = 0;
 
     // TODO:
     //  Implement related removal
@@ -58,26 +59,15 @@ public class Main {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
 
-        /*
-        assignment2();
-        JSONToPDF("src/main/results/test/Assignment2test.json", "src/main/results/test/Assignment2test.pdf", RANDOM_SEARCH.getName());
-
-        assignment3();
-        JSONToPDF("src/main/results/test/Assignment3test.json", "src/main/results/test/Assignment3test.pdf", LOCAL_SEARCH.getName());
-
-        assignment4();
-        JSONToPDF("src/main/results/test/Assignment4test.json", "src/main/results/test/Assignment4test.pdf", SIMULATED_ANNEALING_NEW_OPERATORS.getName());
-
-        assignment5();
-        JSONToPDF("src/main/results/test/Assignment5test.json", "src/main/results/test/Assignment5test.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName())
-        */
-
-        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, Collections.singletonList(C130V40));
-
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
     }
 
     public static void runAllSearches() throws Exception {
         runSearches(SEARCHING_ALGORITHMS, INSTANCES);
+    }
+
+    public static void runSearches(SearchingAlgorithm algorithm, String instances) throws Exception {
+        runSearches(Collections.singletonList(algorithm), Collections.singletonList(instances));
     }
 
     public static void runSearches(SearchingAlgorithm algorithm, List<String> instances) throws Exception {
@@ -95,19 +85,11 @@ public class Main {
 
             for (SearchingAlgorithm searchingAlgorithm : algorithms) {
 
-                long startTime = System.currentTimeMillis();
-
                 Results searchResults = runSearch(searchingAlgorithm, getRuntime(filePath), SEARCH_TIMES);
-
-                long executionTime = (System.currentTimeMillis() - startTime) / 1000;
 
                 bestSolutions.add(searchResults.bestSolution());
 
                 printRunResults(searchingAlgorithm.getName(), searchResults);
-
-                System.out.printf("\n%d minutes %d seconds", executionTime / 60, executionTime % 60);
-                System.out.println("\nAverage iterations: " + iterations / SEARCH_TIMES);
-                iterations = 0;
 
             }
 
@@ -132,7 +114,7 @@ public class Main {
             System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times);
 
             long startTime = System.currentTimeMillis();
-            Solution solution = searchingAlgorithm.search(runtime);
+            Solution solution = searchingAlgorithm.search(initialSolution, ITERATIONS, runtime);
             executionTime += System.currentTimeMillis() - startTime;
 
             double cost = solution.cost();

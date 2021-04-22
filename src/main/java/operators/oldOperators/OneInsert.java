@@ -9,6 +9,7 @@ import java.util.List;
 import static main.Main.problem;
 import static utils.Constants.greedyInsertion;
 import static utils.Constants.random;
+import static utils.Constants.randomRemoval;
 import static utils.Constants.worstRemoval;
 
 public class OneInsert extends Operator {
@@ -16,7 +17,7 @@ public class OneInsert extends Operator {
     @Override
     public Solution operate(Solution solution) {
 
-        List<Integer> calls = worstRemoval.remove(solution, 1);
+        List<Integer> calls = randomRemoval.remove(solution, 1);
         int call = calls.get(random.nextInt(calls.size())); // random.nextInt(problem.nCalls);
         List<Vehicle> validVehicles = problem.calls.get(call).getValidVehicles();
 
@@ -24,12 +25,8 @@ public class OneInsert extends Operator {
             return solution.copy();
         }
 
-        solution.removeCall(call);
-        return greedyInsertion.insert(solution, Collections.singletonList(call));
-        /*
-        return new Solution(solution) {{
-            moveCalls(call, validVehicles.get(random.nextInt(validVehicles.size())));
-        }};
-        */
+        Solution newSolution = solution.copy();
+        newSolution.moveCalls(call, validVehicles.get(random.nextInt(validVehicles.size())));
+        return newSolution;
     }
 }
