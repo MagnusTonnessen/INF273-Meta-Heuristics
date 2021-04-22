@@ -48,8 +48,8 @@ public class Constants {
 
     // SEARCH CONSTANTS
 
-    public static final boolean ITERATION_SEARCH = false;
-    public static final int ITERATIONS = 25000;
+    public static final boolean ITERATION_SEARCH = true;
+    public static final int ITERATIONS = 35000;
     public static final int SEARCH_TIMES = 10;
     public static final double RUN_TIME_C7V3 = 10 * 0.99999;
     public static final double RUN_TIME_C18V5 = 30 * 0.99999;
