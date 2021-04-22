@@ -36,10 +36,6 @@ public class WorstRemoval implements RemovalHeuristic {
                     });
         }
         return removedCalls;
-        /*
-        Collections.shuffle(removedCalls);
-        return removedCalls.subList(0, Math.min(number, removedCalls.size()));
-        */
     }
 
     private void computeCallCost(Vehicle vehicle, Map<Integer, Integer> callCost) {

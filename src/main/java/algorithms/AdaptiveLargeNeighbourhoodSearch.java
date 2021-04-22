@@ -2,13 +2,13 @@ package algorithms;
 
 import objects.Solution;
 import operators.escapeOperators.Escape;
-import operators.oldOperators.BruteForce;
-import operators.oldOperators.KReinsert;
-import operators.oldOperators.OneInsert;
-import operators.oldOperators.OneInsertFromDummy;
+import operators.newOperators.RandomRemovalGreedyInsertion;
+import operators.newOperators.RandomRemovalRegretKInsertion;
+import operators.newOperators.RelatedRemovalGreedyInsertion;
+import operators.newOperators.RelatedRemovalRegretKInsertion;
+import operators.newOperators.WorstRemovalGreedyInsertion;
+import operators.newOperators.WorstRemovalRegretKInsertion;
 import operators.oldOperators.Operator;
-import operators.oldOperators.ThreeExchange;
-import operators.oldOperators.TwoExchange;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,63 +38,29 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     @Override
     public Solution search(double runtime) {
-        return ALNS(runtime, 250, 0.97);
+        return ALNS(runtime); // , 250, 0.97);
     }
 
-    public Solution tune(double runtime) {
-        int bestT = 50;
-        double besta = 0.999;
-        double bestCost = Integer.MAX_VALUE;
-
-        for (int T = 50; T < 500; T += 50) {
-            double a = 0.999;
-            for (int i = 0; i < 10; i++) {
-                double totalCost = 0;
-                for (int j = 0; j < 10; j++) {
-                    totalCost += ALNS(runtime, T, a).cost();
-                }
-                totalCost /= 10;
-                if (totalCost < bestCost) {
-                    bestCost = totalCost;
-                    bestT = T;
-                    besta = a;
-                }
-                a *= 0.995;
-            }
-            System.out.println("T = " + T);
-        }
-
-        System.out.println("\n====================");
-        System.out.println("Best T: " + bestT);
-        System.out.println("Best a: " + besta);
-        System.out.println("Best cost: " + bestCost);
-        System.out.println("====================");
-        return null;
-    }
-
-    public Solution ALNS(double runtime, double T, double a) {
+    public Solution ALNS(double runtime) {
 
         final Set<Solution> foundSolutions = new HashSet<>();
-        final int ESCAPE_ITERATIONS = 500;
-        final int UPDATE_SEGMENT = 250;
-
-        long timeRemoving = 0;
-        long timeInserting = 0;
+        final int escapeIterations = 500;
+        final int updateSegment = 250;
 
         Escape escape = new Escape();
 
         List<OperatorWithWeights> operators = new ArrayList<>() {{
-            add(new OperatorWithWeights(new OneInsert()));
-            add(new OperatorWithWeights(new OneInsertFromDummy()));
-            add(new OperatorWithWeights(new KReinsert()));
-            add(new OperatorWithWeights(new TwoExchange()));
-            add(new OperatorWithWeights(new ThreeExchange()));
-            add(new OperatorWithWeights(new BruteForce()));
+            add(new OperatorWithWeights(new RandomRemovalGreedyInsertion()));
+            add(new OperatorWithWeights(new RandomRemovalRegretKInsertion()));
+            add(new OperatorWithWeights(new RelatedRemovalGreedyInsertion()));
+            add(new OperatorWithWeights(new RelatedRemovalRegretKInsertion()));
+            add(new OperatorWithWeights(new WorstRemovalGreedyInsertion()));
+            add(new OperatorWithWeights(new WorstRemovalRegretKInsertion()));
         }};
 
         operators.forEach(op -> {
-            op.setCurrentWeight(op.getCurrentWeight() / operators.size());
-            op.setLastWeight(op.getCurrentWeight());
+            op.setCurrentWeight(1.0 / operators.size());
+            op.setLastWeight(1.0 / operators.size());
         });
 
         Solution bestSolution = initialSolution;
@@ -105,16 +71,64 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         int iterationsSinceLastImprovement = 0;
 
+        double T;
+        double alpha;
         int iteration = 1;
         double endTime = System.currentTimeMillis() + runtime * 1000L;
 
+        /*
+        Find initial temperature and cooling factor
+        */
+        double deltas = 0;
+        int numDeltas = 0;
+        while (iteration <= 500) {
+
+            OperatorWithWeights operator = selectOperator(operators);
+            Solution newSolution = operator.getOperator().operate(currSolution.copy());
+
+            double newCost = newSolution.cost();
+            double delta = newCost - currCost;
+            boolean feasible = newSolution.isFeasible();
+            boolean newSolutionFound = feasible && !foundSolutions.contains(newSolution);
+
+            if (feasible) {
+                foundSolutions.add(newSolution);
+                if (delta < 0) {
+                    currSolution = newSolution;
+                    currCost = newCost;
+
+                    if (currCost < bestCost) {
+                        bestSolution = currSolution;
+                        bestCost = currCost;
+                    }
+                } else if (random.nextDouble() < 0.8) {
+                    deltas += delta;
+                    numDeltas++;
+                    currSolution = newSolution;
+                    currCost = newCost;
+                }
+            }
+
+            updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
+
+            iteration++;
+        }
+
+        T = findInitialTemperature(deltas / numDeltas, 0.8);
+        alpha = getAlpha(1, T, 35000);
+
+        System.out.println("\nInitial temperature: " + T);
+        System.out.println("Alpha: " + alpha);
+        if (T == 0.0) {
+            return bestSolution;
+        }
         while ((ITERATION_SEARCH && iteration < ITERATIONS) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
-            if (iteration % UPDATE_SEGMENT == 0) {
+            if (iteration % updateSegment == 0) {
                 updateOperators(operators);
             }
 
-            if (iterationsSinceLastImprovement > ESCAPE_ITERATIONS) {
+            if (iterationsSinceLastImprovement > escapeIterations) {
                 currSolution = escape.operate(currSolution);
                 iterationsSinceLastImprovement = 0;
             }
@@ -163,11 +177,12 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
             updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
 
-            T *= a;
+            T *= alpha;
             iteration++;
         }
 
         iterations += iteration;
+        System.out.println("Final temperature: " + T + "\n");
         return bestSolution;
     }
 
@@ -204,14 +219,18 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
          */
     }
 
-    private void tuneParameters() {
+    private double findInitialTemperature(double delta, double initialProbability) {
         /*
         p = e ^ ( -delta / T )
-        ln ( p ) = -delta / T
         ln ( p ) = -delta / T
         ln ( p ) / -delta = 1 / T
         T = 1 / ( ln ( p ) / -delta )
         */
+        return 1.0 / (Math.log(initialProbability) / -delta);
+    }
+
+    public double getAlpha(double T_F, double T_0, int n) {
+        return Math.pow(T_F / T_0, 1.0 / n);
     }
 
     private OperatorWithWeights selectOperator(List<OperatorWithWeights> operators) {

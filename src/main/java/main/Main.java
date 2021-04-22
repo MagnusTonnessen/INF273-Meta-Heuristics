@@ -72,7 +72,7 @@ public class Main {
         JSONToPDF("src/main/results/test/Assignment5test.json", "src/main/results/test/Assignment5test.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName())
         */
 
-        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, Collections.singletonList(C130V40));
 
     }
 
