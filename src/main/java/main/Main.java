@@ -58,8 +58,10 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
-
+        long startTime = System.currentTimeMillis();
         runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
+        long endTime = System.currentTimeMillis() - startTime;
+        System.out.printf("Total runtime: %d minutes %d seconds", (endTime/1000)/60, (endTime/1000)%60);
     }
 
     public static void runAllSearches() throws Exception {
