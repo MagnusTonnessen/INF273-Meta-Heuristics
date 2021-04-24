@@ -53,8 +53,8 @@ public class Main {
     // TODO:
     //  Implement related removal
     //  Implement regret k
-    //  Score removal and insertion heuristics
     //  Swap related calls two and three exchange
+    //  Fix initial temperature calculation
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
