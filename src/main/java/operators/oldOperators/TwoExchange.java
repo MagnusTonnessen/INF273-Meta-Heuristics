@@ -10,7 +10,7 @@ import static utils.Constants.random;
 
 public class TwoExchange extends Operator {
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
 
         int firstCall = random.nextInt(problem.nCalls);
         int secondCall = random.nextInt(problem.nCalls);

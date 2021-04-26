@@ -12,7 +12,7 @@ import static main.Main.problem;
 public class TransportAll extends Operator {
 
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
         // All calls are transported, return solution
 
         if (solution.getDummy().isEmpty()) {

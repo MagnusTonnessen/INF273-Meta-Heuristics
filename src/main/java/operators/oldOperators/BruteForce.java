@@ -19,7 +19,7 @@ import static utils.Constants.random;
  */
 public class BruteForce extends Operator {
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
 
         List<Vehicle> vehicles = solution
                 .getVehiclesWithNToMCalls(2, 6)

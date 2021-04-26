@@ -11,9 +11,9 @@ import static utils.Constants.worstRemoval;
 
 public class KReinsert extends Operator {
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
         Solution newSolution = solution.copy();
-        List<Integer> calls = (random.nextDouble() < 0.0 ? randomRemoval : worstRemoval).remove(solution, random.nextInt(4) + 1);
+        List<Integer> calls = (random.nextDouble() < 0.0 ? randomRemoval : worstRemoval).remove(solution, numberOfMoves);
         newSolution.removeCalls(calls);
         return greedyInsertion.insert(newSolution, calls);
         /*

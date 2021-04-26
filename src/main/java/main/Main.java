@@ -7,6 +7,7 @@ import objects.Solution;
 import utils.JSONCreator;
 import utils.PDFCreator;
 
+import java.net.Inet4Address;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,8 @@ import static utils.Constants.C35V7;
 import static utils.Constants.C7V3;
 import static utils.Constants.C80V20;
 import static utils.Constants.INSTANCES;
+import static utils.Constants.INSTANCES_EXAM;
+import static utils.Constants.ITERATIONS;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
 import static utils.Constants.RUN_TIME_C130V40;
@@ -47,37 +50,27 @@ public class Main {
     public static Solution initialSolution;
     public static double initialCost;
     public static String instanceName;
-    public static int iterations = 0;
 
     // TODO:
     //  Implement related removal
     //  Implement regret k
-    //  Score removal and insertion heuristics
     //  Swap related calls two and three exchange
+    //  Fix initial temperature calculation
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
-
-        /*
-        assignment2();
-        JSONToPDF("src/main/results/test/Assignment2test.json", "src/main/results/test/Assignment2test.pdf", RANDOM_SEARCH.getName());
-
-        assignment3();
-        JSONToPDF("src/main/results/test/Assignment3test.json", "src/main/results/test/Assignment3test.pdf", LOCAL_SEARCH.getName());
-
-        assignment4();
-        JSONToPDF("src/main/results/test/Assignment4test.json", "src/main/results/test/Assignment4test.pdf", SIMULATED_ANNEALING_NEW_OPERATORS.getName());
-
-        assignment5();
-        JSONToPDF("src/main/results/test/Assignment5test.json", "src/main/results/test/Assignment5test.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName())
-        */
-
-        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, Collections.singletonList(C130V40));
-
+        long startTime = System.currentTimeMillis();
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
+        long endTime = System.currentTimeMillis() - startTime;
+        System.out.printf("Total runtime: %d minutes %d seconds", (endTime/1000)/60, (endTime/1000)%60);
     }
 
     public static void runAllSearches() throws Exception {
         runSearches(SEARCHING_ALGORITHMS, INSTANCES);
+    }
+
+    public static void runSearches(SearchingAlgorithm algorithm, String instances) throws Exception {
+        runSearches(Collections.singletonList(algorithm), Collections.singletonList(instances));
     }
 
     public static void runSearches(SearchingAlgorithm algorithm, List<String> instances) throws Exception {
@@ -95,19 +88,11 @@ public class Main {
 
             for (SearchingAlgorithm searchingAlgorithm : algorithms) {
 
-                long startTime = System.currentTimeMillis();
-
                 Results searchResults = runSearch(searchingAlgorithm, getRuntime(filePath), SEARCH_TIMES);
-
-                long executionTime = (System.currentTimeMillis() - startTime) / 1000;
 
                 bestSolutions.add(searchResults.bestSolution());
 
                 printRunResults(searchingAlgorithm.getName(), searchResults);
-
-                System.out.printf("\n%d minutes %d seconds", executionTime / 60, executionTime % 60);
-                System.out.println("\nAverage iterations: " + iterations / SEARCH_TIMES);
-                iterations = 0;
 
             }
 
@@ -132,7 +117,7 @@ public class Main {
             System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times);
 
             long startTime = System.currentTimeMillis();
-            Solution solution = searchingAlgorithm.search(runtime);
+            Solution solution = searchingAlgorithm.search(initialSolution, ITERATIONS, runtime);
             executionTime += System.currentTimeMillis() - startTime;
 
             double cost = solution.cost();
@@ -304,7 +289,7 @@ public class Main {
             case C35V7 -> RUN_TIME_C35V7;
             case C80V20 -> RUN_TIME_C80V20;
             case C130V40 -> RUN_TIME_C130V40;
-            default -> throw new IllegalStateException("Unexpected value: " + instance);
+            default -> getRuntime(instance.replace("exam", "assignment"));
         };
     }
 }

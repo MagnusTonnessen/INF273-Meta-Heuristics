@@ -12,7 +12,7 @@ import static utils.Constants.random;
 
 public class OneInsertFromDummy extends Operator {
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
 
         Vehicle dummy = solution.getDummy();
         if (dummy.isEmpty()) {
