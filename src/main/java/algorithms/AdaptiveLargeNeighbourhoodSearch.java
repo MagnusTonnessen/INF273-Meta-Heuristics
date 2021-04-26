@@ -50,14 +50,15 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     public Solution ALNS(int iterations, double runtime) {
 
-        double endTime = System.currentTimeMillis() + runtime * 1000L * 0.9;
+        final double localSearchTime = 0.2;
+        double endTime = System.currentTimeMillis() + runtime * 1000L * (1 - localSearchTime);
 
         final Set<Solution> foundSolutions = new HashSet<>();
         final int initialTemperatureIterations = 200;
         final int escapeIterations = 500;
         final int updateSegment = 100;
 
-        Operator escape = new NewEscape();
+        Operator escape = new Escape();
 
         // Operators with weights
         List<OperatorWithWeights> operators = new ArrayList<>() {{
@@ -100,7 +101,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         int numDeltas = 0;
 
         // 90 % of runtime is dedicated to ALNS
-        while ((ITERATION_SEARCH && iteration < iterations * 0.9) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
+        while ((ITERATION_SEARCH && iteration < iterations * (1 - localSearchTime)) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
             if (iteration % updateSegment == 0) {
                 updateOperators(operators);
@@ -142,7 +143,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
             if (iteration == initialTemperatureIterations) {
                 T = Math.min(5000, Math.max(5, findInitialTemperature(deltas / numDeltas)));
-                alpha = getAlpha(T / 5000, T, iterations * 0.9);
+                alpha = getAlpha(T / 5000, T, iterations * (1 - localSearchTime));
                 System.out.printf("\nInitial temperature: %.4f", T);
             }
 
@@ -161,7 +162,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         }
 
         // 10 % of runtime is dedicated to local search
-        currSolution = new LocalSearch().localSearch(bestSolution, bestCost, iterations * 0.1, runtime * 0.1, 0.33, 0.33);
+        currSolution = new LocalSearch().localSearch(bestSolution, bestCost, iterations * localSearchTime, runtime * localSearchTime, 0.33, 0.33);
         currCost = currSolution.cost();
 
         if (currCost < bestCost) {
@@ -172,8 +173,8 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         System.out.printf("\nFinal temperature: %.4f\n", T);
         String name = instanceName;
-        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
-        // EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
+        // EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
+        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         return bestSolution;
     }
 
