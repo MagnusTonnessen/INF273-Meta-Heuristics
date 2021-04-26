@@ -9,9 +9,10 @@ public abstract class Operator {
 
     /**
      * @param solution initial solution to operate on
+     * @param numberOfMoves
      * @return new solution after executing an operation
      */
-    public abstract Solution operate(Solution solution);
+    public abstract Solution operate(Solution solution, int numberOfMoves);
 
     public String getName() {
         return Arrays

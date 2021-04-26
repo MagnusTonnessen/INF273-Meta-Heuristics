@@ -11,8 +11,8 @@ import static utils.Constants.randomRemoval;
 
 public class RandomRemovalGreedyInsertion extends Operator {
     @Override
-    public Solution operate(Solution solution) {
-        List<Integer> removedCalls = randomRemoval.remove(solution, random.nextInt(4) + 1);
+    public Solution operate(Solution solution, int numberOfMoves) {
+        List<Integer> removedCalls = randomRemoval.remove(solution, numberOfMoves);
         solution.removeCalls(removedCalls);
         return greedyInsertion.insert(solution, removedCalls);
     }

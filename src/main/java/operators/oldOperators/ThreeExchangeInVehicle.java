@@ -5,12 +5,11 @@ import objects.Vehicle;
 
 import java.util.List;
 
-import static main.Main.problem;
 import static utils.Constants.random;
 
 public class ThreeExchangeInVehicle extends Operator {
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
 
         Vehicle vehicle = solution.get(random.nextInt(solution.size() - 1));
 

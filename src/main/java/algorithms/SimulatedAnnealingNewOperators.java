@@ -46,11 +46,11 @@ public class SimulatedAnnealingNewOperators implements SearchingAlgorithm {
             p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = bruteForce.operate(incumbentSolution);
+                currentSolution = bruteForce.operate(incumbentSolution, random.nextInt(4) + 1);
             } else if (p < P1 + P2) {
-                currentSolution = reduceVehicleCost.operate(incumbentSolution);
+                currentSolution = reduceVehicleCost.operate(incumbentSolution, random.nextInt(4) + 1);
             } else {
-                currentSolution = transportAll.operate(incumbentSolution);
+                currentSolution = transportAll.operate(incumbentSolution, random.nextInt(4) + 1);
             }
 
             currentCost = currentSolution.cost();

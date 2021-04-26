@@ -3,19 +3,16 @@ package operators.oldOperators;
 import objects.Solution;
 import objects.Vehicle;
 
-import java.util.Collections;
 import java.util.List;
 
 import static main.Main.problem;
-import static utils.Constants.greedyInsertion;
 import static utils.Constants.random;
 import static utils.Constants.randomRemoval;
-import static utils.Constants.worstRemoval;
 
 public class OneInsert extends Operator {
 
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
 
         List<Integer> calls = randomRemoval.remove(solution, 1);
         int call = calls.get(random.nextInt(calls.size())); // random.nextInt(problem.nCalls);

@@ -9,7 +9,7 @@ import static utils.Constants.random;
 
 public class Random extends Operator {
     @Override
-    public Solution operate(Solution solution) {
+    public Solution operate(Solution solution, int numberOfMoves) {
 
         return new Solution(solution) {{
             for (int call = 0; call < problem.nCalls; call++) {

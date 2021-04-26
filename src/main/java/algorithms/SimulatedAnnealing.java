@@ -46,11 +46,11 @@ public class SimulatedAnnealing implements SearchingAlgorithm {
             p = random.nextDouble();
 
             if (p < P1) {
-                currentSolution = oneInsert.operate(incumbentSolution);
+                currentSolution = oneInsert.operate(incumbentSolution, random.nextInt(4) + 1);
             } else if (p < P1 + P2) {
-                currentSolution = twoExchange.operate(incumbentSolution);
+                currentSolution = twoExchange.operate(incumbentSolution, random.nextInt(4) + 1);
             } else {
-                currentSolution = threeExchange.operate(incumbentSolution);
+                currentSolution = threeExchange.operate(incumbentSolution, random.nextInt(4) + 1);
             }
 
             currentCost = currentSolution.cost();

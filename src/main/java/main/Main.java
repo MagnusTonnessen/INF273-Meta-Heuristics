@@ -27,6 +27,7 @@ import static utils.Constants.C35V7;
 import static utils.Constants.C7V3;
 import static utils.Constants.C80V20;
 import static utils.Constants.INSTANCES;
+import static utils.Constants.INSTANCES_EXAM;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -288,7 +289,7 @@ public class Main {
             case C35V7 -> RUN_TIME_C35V7;
             case C80V20 -> RUN_TIME_C80V20;
             case C130V40 -> RUN_TIME_C130V40;
-            default -> throw new IllegalStateException("Unexpected value: " + instance);
+            default -> getRuntime(instance.replace("exam", "assignment"));
         };
     }
 }

@@ -11,8 +11,8 @@ import static utils.Constants.relatedRemoval;
 
 public class RelatedRemovalGreedyInsertion extends Operator {
     @Override
-    public Solution operate(Solution solution) {
-        List<Integer> removedCalls = relatedRemoval.remove(solution, random.nextInt(4) + 1);
+    public Solution operate(Solution solution, int numberOfMoves) {
+        List<Integer> removedCalls = relatedRemoval.remove(solution, numberOfMoves);
         solution.removeCalls(removedCalls);
         return greedyInsertion.insert(solution, removedCalls);
     }

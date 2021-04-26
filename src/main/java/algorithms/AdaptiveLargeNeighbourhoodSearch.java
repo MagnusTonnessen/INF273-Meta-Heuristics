@@ -1,8 +1,8 @@
 package algorithms;
 
-import main.Main;
 import objects.Solution;
 import operators.escapeOperators.Escape;
+import operators.escapeOperators.NewEscape;
 import operators.newOperators.RandomRemovalGreedyInsertion;
 import operators.newOperators.RandomRemovalRegretKInsertion;
 import operators.newOperators.RelatedRemovalGreedyInsertion;
@@ -10,9 +10,10 @@ import operators.newOperators.RelatedRemovalRegretKInsertion;
 import operators.newOperators.WorstRemovalGreedyInsertion;
 import operators.newOperators.WorstRemovalRegretKInsertion;
 import operators.oldOperators.Operator;
-import utils.VisualiseOperatorWeights;
 import utils.VisualiseImprovement;
+import utils.VisualiseOperatorWeights;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -52,12 +53,13 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         double endTime = System.currentTimeMillis() + runtime * 1000L * 0.9;
 
         final Set<Solution> foundSolutions = new HashSet<>();
-        final int initialTemperatureIterations = 100;
+        final int initialTemperatureIterations = 200;
         final int escapeIterations = 500;
-        final int updateSegment = 250;
+        final int updateSegment = 100;
 
-        Escape escape = new Escape();
+        Operator escape = new NewEscape();
 
+        // Operators with weights
         List<OperatorWithWeights> operators = new ArrayList<>() {{
             add(new OperatorWithWeights(new RandomRemovalGreedyInsertion()));
             add(new OperatorWithWeights(new RandomRemovalRegretKInsertion()));
@@ -67,11 +69,13 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             add(new OperatorWithWeights(new WorstRemovalRegretKInsertion()));
         }};
 
+        // Normalize operators
         operators.forEach(op -> {
             op.setCurrentWeight(1.0 / operators.size());
             op.setLastWeight(1.0 / operators.size());
         });
 
+        // Lists for probabilities and improvement visualisation
         Map<String, List<Double>> operatorProbabilities = new HashMap<>();
         operators.forEach(op -> {
             List<Double> list = new ArrayList<>();
@@ -79,22 +83,23 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             operatorProbabilities.put(op.getOperator().getName(), list);
         });
 
+        List<Double> improvement = new ArrayList<>();
+        improvement.add(0.0);
+
         Solution bestSolution = initialSolution;
         double bestCost = initialCost;
 
         Solution currSolution = initialSolution.copy();
         double currCost = initialCost;
 
-        List<Double> improvement = new ArrayList<>();
-        improvement.add(0.0);
-
         int iterationsSinceLastImprovement = 0;
         double T = 500;
-        double alpha = 0.999;
+        double alpha = 0.99;
         int iteration = 1;
         double deltas = 0;
         int numDeltas = 0;
 
+        // 90 % of runtime is dedicated to ALNS
         while ((ITERATION_SEARCH && iteration < iterations * 0.9) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
             if (iteration % updateSegment == 0) {
@@ -103,7 +108,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             }
 
             OperatorWithWeights operator = selectOperator(operators);
-            Solution newSolution = operator.getOperator().operate(currSolution.copy());
+            Solution newSolution = operator.getOperator().operate(currSolution.copy(), random.nextInt(3) + 1);
 
             double newCost = newSolution.cost();
             double deltaE = newCost - currCost;
@@ -138,13 +143,13 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             if (iteration == initialTemperatureIterations) {
                 T = Math.min(5000, Math.max(5, findInitialTemperature(deltas / numDeltas)));
                 alpha = getAlpha(T / 5000, T, iterations * 0.9);
-                System.out.printf("\nInitial temperature: %.2f", T);
+                System.out.printf("\nInitial temperature: %.4f", T);
             }
 
             updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
 
             if (iterationsSinceLastImprovement > escapeIterations) {
-                currSolution = escape.operate(currSolution);
+                currSolution = escape.operate(currSolution, random.nextInt(4) + 1);
                 currCost = currSolution.cost();
                 iterationsSinceLastImprovement = 0;
             }
@@ -155,6 +160,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             iteration++;
         }
 
+        // 10 % of runtime is dedicated to local search
         currSolution = new LocalSearch().localSearch(bestSolution, bestCost, iterations * 0.1, runtime * 0.1, 0.33, 0.33);
         currCost = currSolution.cost();
 
@@ -164,9 +170,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         improvement.add(100.0 * (initialCost - currCost) / initialCost);
 
-        System.out.printf("\nFinal temperature: %.2f\n", T);
-        // EventQueue.invokeLater(() -> new VisualiseOperatorWeights(instanceName, operatorProbabilities));
-        // EventQueue.invokeLater(() -> new VisualiseImprovement(instanceName, improvement));
+        System.out.printf("\nFinal temperature: %.4f\n", T);
+        String name = instanceName;
+        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
+        // EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         return bestSolution;
     }
 

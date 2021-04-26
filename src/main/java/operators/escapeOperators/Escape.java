@@ -11,8 +11,7 @@ import static utils.Constants.random;
 
 public class Escape extends Operator {
     @Override
-    public Solution operate(Solution solution) {
-        solution = new Solution(solution);
+    public Solution operate(Solution solution, int numberOfMoves) {
         int i = 0;
         while (i < 20) {
             Solution newSolution = new Solution(solution);
@@ -27,7 +26,6 @@ public class Escape extends Operator {
                 i++;
             }
         }
-
         return solution;
     }
 }
