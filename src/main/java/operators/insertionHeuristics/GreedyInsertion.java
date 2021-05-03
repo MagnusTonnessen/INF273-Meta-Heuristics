@@ -10,17 +10,16 @@ import java.util.stream.Collectors;
 public class GreedyInsertion implements InsertionHeuristic {
     @Override
     public Solution insert(Solution solution, List<Integer> calls) {
-        List<InsertInfo> bestInserts = calls.stream().map(call -> bestInsert(solution, call)).collect(Collectors.toList());
-        for (int i = 0; i < calls.size(); i++) {
+        List<Greedy> bestInserts = calls.stream().map(call -> bestInsert(solution, call)).collect(Collectors.toList());
+        while (!bestInserts.isEmpty()) {
+            bestInserts.stream().min(Comparator.comparingDouble(Greedy::cost)).ifPresent(call -> {
 
-            bestInserts.stream().min(Comparator.comparingDouble(InsertInfo::cost)).ifPresent(bestInsert -> {
+                solution.moveCall(call.call(), call.vehicleIndex(), call.insertIndex1(), call.insertIndex2());
+                bestInserts.removeIf(c -> c.call() == call.call());
 
-                solution.moveCall(bestInsert.call(), bestInsert.vehicleIndex(), bestInsert.insertIndex1(), bestInsert.insertIndex2());
-                bestInserts.removeIf(call -> call.call() == bestInsert.call());
-
-                for (int j = 0; j < bestInserts.size(); j++) {
-                    if (bestInserts.get(j).vehicleIndex == bestInsert.vehicleIndex) {
-                        bestInserts.set(j, bestInsert(solution, bestInserts.get(j).call()));
+                for (int i = 0; i < bestInserts.size(); i++) {
+                    if (bestInserts.get(i).vehicleIndex == call.vehicleIndex) {
+                        bestInserts.set(i, bestInsert(solution, bestInserts.get(i).call()));
                     }
                 }
             });
@@ -28,7 +27,7 @@ public class GreedyInsertion implements InsertionHeuristic {
         return solution;
     }
 
-    private InsertInfo bestInsert(Solution solution, int call) {
+    private Greedy bestInsert(Solution solution, int call) {
         int minCost = Integer.MAX_VALUE;
         Vehicle insertVehicle = solution.getDummy();
         int insertIndex1 = 0;
@@ -54,10 +53,10 @@ public class GreedyInsertion implements InsertionHeuristic {
                 }
             }
         }
-        return new InsertInfo(call, insertVehicle.vehicleIndex, insertIndex1, insertIndex2, minCost);
+        return new Greedy(call, insertVehicle.vehicleIndex, insertIndex1, insertIndex2, minCost);
     }
 
-    private static record InsertInfo(int call, int vehicleIndex, int insertIndex1, int insertIndex2, int cost) {
+    private static record Greedy(int call, int vehicleIndex, int insertIndex1, int insertIndex2, int cost) {
     }
 }
 

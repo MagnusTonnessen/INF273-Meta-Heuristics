@@ -38,6 +38,7 @@ import static utils.Constants.SEARCHING_ALGORITHMS;
 import static utils.Constants.SEARCH_TIMES;
 import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
+import static utils.Constants.random;
 import static utils.Constants.randomRemoval;
 import static utils.Constants.regretKInsertion;
 import static utils.Utils.getInstanceName;
@@ -53,25 +54,15 @@ public class Main {
 
     // TODO:
     //  Implement related removal
-    //  Implement regret k
     //  Swap related calls two and three exchange
     //  Fix initial temperature calculation
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
-        initialize(C18V5);
-        Solution solution = initialSolution.copy();
-        List<Integer> calls = randomRemoval.remove(solution, 3);
-        solution.removeCalls(calls);
-        System.out.println(calls);
-        regretKInsertion.insert(solution, calls);
-        /*
         long startTime = System.currentTimeMillis();
         runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
         long endTime = System.currentTimeMillis() - startTime;
         System.out.printf("Total runtime: %d minutes %d seconds", (endTime/1000)/60, (endTime/1000)%60);
-
-         */
     }
 
     public static void runAllSearches() throws Exception {

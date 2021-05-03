@@ -48,7 +48,7 @@ public class VisualiseOperatorWeights extends JFrame {
         XYSeries series = new XYSeries(name);
 
         for (int iter = 0; iter < probabilities.size(); iter++) {
-            series.add(iter * 250, probabilities.get(iter));
+            series.add(iter * 100, probabilities.get(iter));
         }
 
         dataset.addSeries(series);

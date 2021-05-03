@@ -189,7 +189,7 @@ public class Utils {
             int[] currentVPlan = vehicle.asArray();
 
             if (VIdx == nVehicles) {
-                notTransportCost = Arrays.stream(currentVPlan).map(j -> cargo[j][3]).sum();
+                notTransportCost = Arrays.stream(currentVPlan).map(j -> cargo[j][3]).sum() / 2;
             } else {
                 if (vehicle.size() > 0) {
                     int finalVIdx = VIdx;

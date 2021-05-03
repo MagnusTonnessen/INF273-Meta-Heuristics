@@ -4,80 +4,90 @@ import objects.Solution;
 import objects.Vehicle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static main.Main.problem;
+
 public class RegretKInsertion implements InsertionHeuristic {
+
+    private final Comparator<RegretK> CMP = new RegretKCmp();
+
     @Override
     public Solution insert(Solution solution, List<Integer> calls) {
-        // Calculate
-        List<List<InsertInfo>> best = calls.stream().map(call -> bestInserts(solution, call, calls.size())).collect(Collectors.toList());
-        best.forEach(System.out::println);
-        /*
-        for (int i = 0; i < calls.size(); i++) {
+        AtomicInteger k = new AtomicInteger(calls.size());
+        List<RegretK> bestInserts = calls.stream().map(call -> bestInserts(solution, call, k.get())).collect(Collectors.toList());
 
-            best.stream().min(Comparator.comparingDouble(InsertInfo::cost)).ifPresent(bestInsert -> {
-
-                solution.moveCall(bestInsert.call(), bestInsert.vehicleIndex(), bestInsert.insertIndex1(), bestInsert.insertIndex2());
-                best.removeIf(call -> call.call() == bestInsert.call());
-
-                for (int j = 0; j < best.size(); j++) {
-                    if (best.get(j).vehicleIndex == bestInsert.vehicleIndex) {
-                        best.set(j, bestInsert(solution, best.get(j).call()));
-                    }
-                }
-            });
-
+        while (!bestInserts.isEmpty()) {
+            RegretK call = Collections.max(bestInserts, CMP);
+            solution.moveCall(call.call(), call.vehicleIndex(), call.insertIndex1(), call.insertIndex2());
+            bestInserts.removeIf(c -> c.call() == call.call());
+            k.decrementAndGet();
+            bestInserts = bestInserts.stream().map(e -> bestInserts(solution, e.call, k.get())).collect(Collectors.toList());
+            // bestInserts = bestInserts.parallelStream().map(e -> bestInserts(solution, e.call, k.get())).collect(Collectors.toList());
         }
 
-        */
         return solution;
     }
 
-    private List<InsertInfo> bestInserts(Solution solution, int call, int k) {
-        List<InsertInfo> bestInserts = new ArrayList<>() {{
-            add(new InsertInfo(call, solution.size() - 1, 0, 1, Integer.MAX_VALUE));
-        }};
-        int worstBestCost = Integer.MAX_VALUE;
+    private static class RegretKCmp implements Comparator<RegretK> {
+
+        @Override
+        public int compare(RegretK o1, RegretK o2) {
+            return o1.costs.size() < o2.costs.size() ? 1 :
+                    o1.costs.size() > o2.costs.size() ? -1 :
+                    Integer.compare(o1.regretValue, o2.regretValue);
+        }
+    }
+
+    private RegretK bestInserts(Solution solution, int call, int k) {
+        List<Integer> minCosts = new ArrayList<>();
+        int maxCost = problem.calls.get(call).costNotTransport;
+        int minCost = problem.calls.get(call).costNotTransport;
+        Vehicle insertVehicle = solution.getDummy();
+        int insertIndex1 = 0;
+        int insertIndex2 = 1;
         for (Vehicle vehicle : solution) {
             if (!vehicle.isDummy) {
                 int vehicleCost = vehicle.cost();
                 for (int i = 0; i < vehicle.size() + 1; i++) {
                     for (int j = i + 1; j < vehicle.size() + 2; j++) {
                         Vehicle copy = vehicle.copy();
-                        copy.add(i, call);
-                        copy.add(j, call);
+                        copy.insertCall(call, i, j);
                         if (copy.isFeasible()) {
                             int cost = copy.cost() - vehicleCost;
-                            InsertInfo insertInfo = new InsertInfo(call, copy.vehicleIndex, i, j, cost);
-                            if (bestInserts.size() < k) {
-                                bestInserts.add(insertInfo);
-                                if (cost < worstBestCost) {
-                                    worstBestCost = cost;
-                                }
-                            } else if (cost < worstBestCost) {
-                                bestInserts.sort(Comparator.comparingDouble(InsertInfo::cost));
-                                bestInserts.remove(bestInserts.size() - 1);
-                                bestInserts.add(insertInfo);
-                                worstBestCost = cost;
+                            if (minCosts.size() < k) {
+                                minCosts.add(cost);
+                            } else if (cost < maxCost) {
+                                minCosts.remove((Integer) maxCost);
+                                minCosts.add(cost);
+                                maxCost = Collections.max(minCosts);
+                            }
+                            if (cost < minCost) {
+                                minCost = cost;
+                                insertVehicle = copy;
+                                insertIndex1 = i;
+                                insertIndex2 = j;
                             }
                         }
                     }
                 }
             }
         }
-        bestInserts.sort(Comparator.comparingDouble(InsertInfo::cost));
-        return bestInserts.subList(0, Math.min(k, bestInserts.size()));
+        if (minCosts.isEmpty()) {
+            minCosts.add(problem.calls.get(call).costNotTransport);
+        }
+        return new RegretK(call, insertVehicle.vehicleIndex, insertIndex1, insertIndex2, minCosts, regretValue(minCosts));
     }
 
-    private void methodName(Solution solution, List<Integer> calls) {
-        Map<Integer, List<InsertInfo>> inserts = calls.stream().collect(Collectors.toMap(c -> c, c -> new ArrayList<>()));
-
-
+    private int regretValue(List<Integer> costs) {
+        int min = Collections.min(costs);
+        return costs.stream().mapToInt(cost -> cost - min).sum();
     }
 
-    private static record InsertInfo(int call, int vehicleIndex, int insertIndex1, int insertIndex2, int cost) {
+    private static record RegretK(int call, int vehicleIndex, int insertIndex1, int insertIndex2, List<Integer> costs, int regretValue) {
     }
 }

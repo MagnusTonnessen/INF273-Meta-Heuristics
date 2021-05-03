@@ -43,6 +43,11 @@ public class Vehicle extends ArrayList<Integer> {
         removeIf(c -> c == call);
     }
 
+    public void insertCall(int call, int index1, int index2) {
+        add(index1, call);
+        add(index2, call);
+    }
+
     public int cost() {
         return costFunction(this);
     }
