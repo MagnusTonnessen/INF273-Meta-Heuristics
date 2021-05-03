@@ -36,7 +36,7 @@ public class BruteForce extends Operator {
         Vehicle bestVehicle = vehicles.get(random.nextInt(Math.min(4, vehicles.size())));
         Vehicle copy = bestVehicle.copy();
 
-        double bestObjective = bestVehicle.cost();
+        int bestObjective = bestVehicle.cost();
 
         int[] indexes = new int[bestVehicle.size()];
 
@@ -45,7 +45,7 @@ public class BruteForce extends Operator {
             if (indexes[i] < i) {
                 Collections.swap(copy, i % 2 == 0 ? 0 : indexes[i], i);
                 if (copy.isFeasible()) {
-                    double newObjective = copy.cost();
+                    int newObjective = copy.cost();
                     if (newObjective < bestObjective) {
                         bestObjective = newObjective;
                         bestVehicle = copy;

@@ -3,7 +3,6 @@ package operators.removalHeuristics;
 import objects.Solution;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +13,7 @@ public class RandomRemoval implements RemovalHeuristic {
                 .stream()
                 .flatMap(Collection::stream)
                 .distinct()
+                /*
                 .collect(Collectors.collectingAndThen(
                         Collectors.toList(),
                         list -> {
@@ -21,6 +21,7 @@ public class RandomRemoval implements RemovalHeuristic {
                             return list;
                         }))
                 .stream()
+                */
                 .limit(number)
                 .collect(Collectors.toList());
     }

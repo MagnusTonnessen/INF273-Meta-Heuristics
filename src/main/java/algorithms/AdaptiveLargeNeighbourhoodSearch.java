@@ -2,7 +2,6 @@ package algorithms;
 
 import objects.Solution;
 import operators.escapeOperators.Escape;
-import operators.escapeOperators.NewEscape;
 import operators.newOperators.RandomRemovalGreedyInsertion;
 import operators.newOperators.RandomRemovalRegretKInsertion;
 import operators.newOperators.RelatedRemovalGreedyInsertion;
@@ -13,7 +12,6 @@ import operators.oldOperators.Operator;
 import utils.VisualiseImprovement;
 import utils.VisualiseOperatorWeights;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +23,6 @@ import java.util.Set;
 
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
-import static java.util.stream.Collectors.toMap;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
 import static main.Main.instanceName;
@@ -109,7 +106,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             }
 
             OperatorWithWeights operator = selectOperator(operators);
-            Solution newSolution = operator.getOperator().operate(currSolution.copy(), random.nextInt(3) + 1);
+            Solution newSolution = operator.getOperator().operate(currSolution.copy(), random.nextInt(4) + 1);
 
             double newCost = newSolution.cost();
             double deltaE = newCost - currCost;
@@ -173,7 +170,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         System.out.printf("\nFinal temperature: %.4f\n", T);
         String name = instanceName;
-        // EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
+        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
         EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         return bestSolution;
     }
@@ -211,7 +208,14 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         ln ( p ) / -delta = 1 / T
         T = 1 / ( ln ( p ) / -delta )
         */
-        return 1.0 / (Math.log(0.8) / -delta);
+        /*
+        p = e ^ -(dE / T)
+        ln (p) = ln (e) * -(dE / T)
+        ln (p) = -dE / T
+        T * ln (p) = -dE
+        T = -dE / ln(p)
+         */
+        return -delta / Math.log(0.8);
     }
 
     private double getAlpha(double T_F, double T_0, double n) {

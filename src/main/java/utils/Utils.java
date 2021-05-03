@@ -179,9 +179,9 @@ public class Utils {
         int[][] portCost = problem.portCost;
         int[][][] travelCost = problem.travelCost;
 
-        double notTransportCost = 0;
-        double[] routeTravelCost = new double[nVehicles];
-        double[] costInPorts = new double[nVehicles];
+        int notTransportCost = 0;
+        int[] routeTravelCost = new int[nVehicles];
+        int[] costInPorts = new int[nVehicles];
 
         for (int VIdx = 0; VIdx < nVehicles + 1; VIdx++) {
             Vehicle vehicle = solution.get(VIdx);
@@ -189,7 +189,7 @@ public class Utils {
             int[] currentVPlan = vehicle.asArray();
 
             if (VIdx == nVehicles) {
-                notTransportCost = Arrays.stream(currentVPlan).map(j -> cargo[j][3]).sum() / 2.0;
+                notTransportCost = Arrays.stream(currentVPlan).map(j -> cargo[j][3]).sum();
             } else {
                 if (vehicle.size() > 0) {
                     int finalVIdx = VIdx;
@@ -203,7 +203,7 @@ public class Utils {
                     int firstVisitCost = firstTravelCost[finalVIdx][cargo[currentVPlan[0]][0] - 1];
 
                     routeTravelCost[VIdx] = firstVisitCost + Arrays.stream(diag).sum();
-                    costInPorts[VIdx] = Arrays.stream(currentVPlan).map(j -> portCost[finalVIdx][j]).sum() / 2.0;
+                    costInPorts[VIdx] = Arrays.stream(currentVPlan).map(j -> portCost[finalVIdx][j]).sum() / 2;
                 }
             }
         }
