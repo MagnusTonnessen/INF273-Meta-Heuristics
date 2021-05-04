@@ -1,20 +1,18 @@
 package operators.removalHeuristics;
 
 import objects.Solution;
-import objects.Vehicle;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static main.Main.problem;
 
 public class RelatedRemoval implements RemovalHeuristic {
+
+    private final double[][] relations = getRelations();
+
     @Override
     public List<Integer> remove(Solution solution, int number) {
         return solution
@@ -30,5 +28,13 @@ public class RelatedRemoval implements RemovalHeuristic {
                 .stream()
                 .limit(number)
                 .collect(Collectors.toList());
+    }
+
+    public List<Integer> remove_(Solution solution, int number) {
+        return null;
+    }
+
+    public double[][] getRelations() {
+        return new double[problem.nCalls][problem.nCalls];
     }
 }

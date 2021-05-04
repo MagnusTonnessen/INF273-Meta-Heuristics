@@ -4,11 +4,13 @@ import objects.Solution;
 import objects.Vehicle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import static main.Main.problem;
 
@@ -22,18 +24,13 @@ public class WorstRemoval implements RemovalHeuristic {
         Map<Integer, Integer> costMap = new HashMap<>();
         solutionCopy.forEach(vehicle -> computeCallCost(vehicle, costMap));
 
-        for (int i = 0; i < number; i++) {
-            costMap
-                    .entrySet()
-                    .stream()
-                    .max(Comparator.comparingDouble(e -> -e.getValue()))
-                    .ifPresent(e -> {
-                        Vehicle vehicle = solutionCopy.getVehicle(e.getKey());
-                        solutionCopy.removeCall(e.getKey());
-                        removedCalls.add(e.getKey());
-                        costMap.remove(e.getKey());
-                        computeCallCost(vehicle, costMap);
-                    });
+        while (!costMap.isEmpty() && removedCalls.size() < number) {
+            int mostExpensiveCall = Collections.max(costMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+            Vehicle vehicle = solutionCopy.getVehicle(mostExpensiveCall);
+            solutionCopy.removeCall(mostExpensiveCall);
+            removedCalls.add(mostExpensiveCall);
+            costMap.remove(mostExpensiveCall);
+            computeCallCost(vehicle, costMap);
         }
         return removedCalls;
     }
@@ -43,7 +40,8 @@ public class WorstRemoval implements RemovalHeuristic {
             vehicle.stream().distinct().forEach(call -> callCost.put(call, problem.getCallFromIndex(call).costNotTransport));
         } else {
             int cost = vehicle.cost();
-            for (int call : vehicle.stream().distinct().collect(Collectors.toList())) {
+            Set<Integer> calls = new HashSet<>(vehicle);
+            for (int call : calls) {
                 Vehicle copy = vehicle.copy();
                 copy.removeCall(call);
                 callCost.put(call, cost - copy.cost());
