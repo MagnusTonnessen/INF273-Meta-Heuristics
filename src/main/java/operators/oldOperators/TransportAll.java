@@ -1,7 +1,6 @@
 package operators.oldOperators;
 
 import objects.Solution;
-import objects.Vehicle;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,7 @@ public class TransportAll extends Operator {
 
                 // Get all valid vehicles for call
 
-                List<Vehicle> vehicles = problem.calls.get(call).getValidVehicles();
+                List<Integer> vehicles = problem.calls.get(call).getValidVehicles();
                 if (vehicles.size() > 0) {
                     Collections.shuffle(vehicles);
 

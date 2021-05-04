@@ -7,11 +7,9 @@ import algorithms.SearchingAlgorithm;
 import algorithms.SimulatedAnnealing;
 import algorithms.SimulatedAnnealingNewOperators;
 import operators.insertionHeuristics.GreedyInsertion;
-import operators.insertionHeuristics.InsertionHeuristic;
 import operators.insertionHeuristics.RegretKInsertion;
 import operators.removalHeuristics.RandomRemoval;
 import operators.removalHeuristics.RelatedRemoval;
-import operators.removalHeuristics.RemovalHeuristic;
 import operators.removalHeuristics.WorstRemoval;
 
 import java.util.Arrays;
@@ -49,11 +47,11 @@ public class Constants {
 
     // INSERTION AND REMOVAL HEURISTICS
 
-    public static final InsertionHeuristic greedyInsertion = new GreedyInsertion();
-    public static final InsertionHeuristic regretKInsertion = new RegretKInsertion();
-    public static final RemovalHeuristic randomRemoval = new RandomRemoval();
-    public static final RemovalHeuristic worstRemoval = new WorstRemoval();
-    public static final RemovalHeuristic relatedRemoval = new RelatedRemoval();
+    public static final GreedyInsertion greedyInsertion = new GreedyInsertion();
+    public static final RegretKInsertion regretKInsertion = new RegretKInsertion();
+    public static final RandomRemoval randomRemoval = new RandomRemoval();
+    public static final WorstRemoval worstRemoval = new WorstRemoval();
+    public static final RelatedRemoval relatedRemoval = new RelatedRemoval();
 
     // SEARCH CONSTANTS
 

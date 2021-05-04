@@ -19,7 +19,7 @@ public class OneInsertFromDummy extends Operator {
             return solution;
         }
         int call = dummy.get(random.nextInt(dummy.size()));
-        List<Vehicle> validVehicles = problem.calls.get(call).getValidVehicles();
+        List<Integer> validVehicles = problem.calls.get(call).getValidVehicles();
 
         if (validVehicles.isEmpty()) {
             return solution.copy();

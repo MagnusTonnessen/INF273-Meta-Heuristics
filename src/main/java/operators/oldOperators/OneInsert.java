@@ -1,7 +1,6 @@
 package operators.oldOperators;
 
 import objects.Solution;
-import objects.Vehicle;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ public class OneInsert extends Operator {
 
         List<Integer> calls = randomRemoval.remove(solution, 1);
         int call = calls.get(random.nextInt(calls.size())); // random.nextInt(problem.nCalls);
-        List<Vehicle> validVehicles = problem.calls.get(call).getValidVehicles();
+        List<Integer> validVehicles = problem.calls.get(call).getValidVehicles();
 
         if (validVehicles.isEmpty()) {
             return solution.copy();

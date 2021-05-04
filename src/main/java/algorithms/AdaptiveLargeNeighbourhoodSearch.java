@@ -177,7 +177,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     private void updateOperators(List<OperatorWithWeights> operators) {
         operators.forEach(op -> {
-            double newWeight = op.getLastWeight() * 0.8 + 0.2 * op.getScore() / op.getTimesUsed();
+            double newWeight = op.getLastWeight() * 0.8 + (op.getTimesUsed() == 0 ? 0 : 0.2 * op.getScore() / op.getTimesUsed());
             op.setLastWeight(op.getCurrentWeight());
             op.setCurrentWeight(newWeight);
         });
@@ -202,12 +202,6 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
     }
 
     private double findInitialTemperature(double delta) {
-        /*
-        p = e ^ ( -delta / T )
-        ln ( p ) = -delta / T
-        ln ( p ) / -delta = 1 / T
-        T = 1 / ( ln ( p ) / -delta )
-        */
         /*
         p = e ^ -(dE / T)
         ln (p) = ln (e) * -(dE / T)
@@ -292,7 +286,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         }
 
         public void resetTimesUsed() {
-            this.timesUsed = 1;
+            this.timesUsed = 0;
         }
 
         public void incrementTimesUsed() {
