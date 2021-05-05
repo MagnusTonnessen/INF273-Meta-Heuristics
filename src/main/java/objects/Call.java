@@ -14,9 +14,9 @@ public class Call {
     public final int upperTimePickup;
     public final int lowerTimeDelivery;
     public final int upperTimeDelivery;
-    public final List<Vehicle> validVehicles;
+    public final List<Integer> validVehicles;
 
-    public Call(int[] call, List<Vehicle> validVehicles) {
+    public Call(int[] call, List<Integer> validVehicles) {
         this.callIndex = call[0] - 1;
         this.originNode = call[1] - 1;
         this.destinationNode = call[2] - 1;
@@ -41,10 +41,11 @@ public class Call {
                 ", upperTimePickup=" + upperTimePickup +
                 ", lowerTimeDelivery=" + lowerTimeDelivery +
                 ", upperTimeDelivery=" + upperTimeDelivery +
+                ", validVehicles=" + validVehicles +
                 '}';
     }
 
-    public List<Vehicle> getValidVehicles() {
+    public List<Integer> getValidVehicles() {
         return validVehicles;
     }
 

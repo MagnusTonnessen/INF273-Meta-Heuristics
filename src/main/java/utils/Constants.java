@@ -7,11 +7,9 @@ import algorithms.SearchingAlgorithm;
 import algorithms.SimulatedAnnealing;
 import algorithms.SimulatedAnnealingNewOperators;
 import operators.insertionHeuristics.GreedyInsertion;
-import operators.insertionHeuristics.InsertionHeuristic;
 import operators.insertionHeuristics.RegretKInsertion;
 import operators.removalHeuristics.RandomRemoval;
 import operators.removalHeuristics.RelatedRemoval;
-import operators.removalHeuristics.RemovalHeuristic;
 import operators.removalHeuristics.WorstRemoval;
 
 import java.util.Arrays;
@@ -49,16 +47,16 @@ public class Constants {
 
     // INSERTION AND REMOVAL HEURISTICS
 
-    public static final InsertionHeuristic greedyInsertion = new GreedyInsertion();
-    public static final InsertionHeuristic regretKInsertion = new RegretKInsertion();
-    public static final RemovalHeuristic randomRemoval = new RandomRemoval();
-    public static final RemovalHeuristic worstRemoval = new WorstRemoval();
-    public static final RemovalHeuristic relatedRemoval = new RelatedRemoval();
+    public static final GreedyInsertion greedyInsertion = new GreedyInsertion();
+    public static final RegretKInsertion regretKInsertion = new RegretKInsertion();
+    public static final RandomRemoval randomRemoval = new RandomRemoval();
+    public static final WorstRemoval worstRemoval = new WorstRemoval();
+    public static final RelatedRemoval relatedRemoval = new RelatedRemoval();
 
     // SEARCH CONSTANTS
 
     public static final boolean ITERATION_SEARCH = true;
-    public static final int ITERATIONS = 25000;
+    public static final int ITERATIONS = 10000;
     public static final int SEARCH_TIMES = 1;
     public static final double RUN_TIME_C7V3 = 10 * 0.99;
     public static final double RUN_TIME_C18V5 = 30 * 0.99;

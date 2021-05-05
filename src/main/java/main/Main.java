@@ -38,9 +38,7 @@ import static utils.Constants.SEARCHING_ALGORITHMS;
 import static utils.Constants.SEARCH_TIMES;
 import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
-import static utils.Constants.random;
-import static utils.Constants.randomRemoval;
-import static utils.Constants.regretKInsertion;
+import static utils.Constants.relatedRemoval;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
 import static utils.Utils.printRunResults;
@@ -56,13 +54,17 @@ public class Main {
     //  Implement related removal
     //  Swap related calls two and three exchange
     //  Fix initial temperature calculation
+    // Find longest org -> org and longest dest -> dest
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
+        initialize(C130V40);
+        /*
         long startTime = System.currentTimeMillis();
         runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
         long endTime = System.currentTimeMillis() - startTime;
         System.out.printf("Total runtime: %d minutes %d seconds", (endTime/1000)/60, (endTime/1000)%60);
+        */
     }
 
     public static void runAllSearches() throws Exception {
@@ -280,6 +282,7 @@ public class Main {
         problem = new Problem(filePath);
         initialSolution = new Solution();
         initialCost = initialSolution.cost();
+        relatedRemoval.calculateRelations();
     }
 
     public static double getRuntime(String instance) {

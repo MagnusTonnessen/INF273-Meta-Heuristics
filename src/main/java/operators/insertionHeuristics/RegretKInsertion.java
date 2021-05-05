@@ -5,49 +5,52 @@ import objects.Vehicle;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static main.Main.problem;
 
 public class RegretKInsertion implements InsertionHeuristic {
 
-    private final Comparator<RegretK> CMP = new RegretKCmp();
-
     @Override
     public Solution insert(Solution solution, List<Integer> calls) {
-        AtomicInteger k = new AtomicInteger(calls.size());
-        List<RegretK> bestInserts = calls.stream().map(call -> bestInserts(solution, call, k.get())).collect(Collectors.toList());
+        int k = calls.size();
+        List<RegretK> bestInserts = calls.stream().map(call -> bestInserts(solution, call, calls.size())).collect(Collectors.toList());
 
         while (!bestInserts.isEmpty()) {
-            RegretK call = Collections.max(bestInserts, CMP);
+            RegretK call = Collections.max(bestInserts, RegretK::compareTo);
             solution.moveCall(call.call(), call.vehicleIndex(), call.insertIndex1(), call.insertIndex2());
             bestInserts.removeIf(c -> c.call() == call.call());
-            k.decrementAndGet();
-            bestInserts = bestInserts.stream().map(e -> bestInserts(solution, e.call, k.get())).collect(Collectors.toList());
-            // bestInserts = bestInserts.parallelStream().map(e -> bestInserts(solution, e.call, k.get())).collect(Collectors.toList());
+            k--;
+            for (int i = 0; i < bestInserts.size(); i++) {
+                RegretK rk = bestInserts.get(i);
+                if (rk.vehicleIndex == call.vehicleIndex) {
+                    bestInserts.set(i, bestInserts(solution, rk.call, k));
+                }
+            }
         }
 
         return solution;
     }
 
-    private static class RegretKCmp implements Comparator<RegretK> {
-
-        @Override
-        public int compare(RegretK o1, RegretK o2) {
-            return o1.costs.size() < o2.costs.size() ? 1 :
-                    o1.costs.size() > o2.costs.size() ? -1 :
-                    Integer.compare(o1.regretValue, o2.regretValue);
-        }
-    }
-
     private RegretK bestInserts(Solution solution, int call, int k) {
-        List<Integer> minCosts = new ArrayList<>();
+        List<VehicleInsertCost> minCosts = new ArrayList<>() {
+            @Override
+            public boolean remove(Object o) {
+                if (!(o instanceof VehicleInsertCost)) {
+                    return false;
+                }
+                for (VehicleInsertCost vic : this) {
+                    if (vic.cost == (int) o) {
+                        return super.remove(vic);
+                    }
+                }
+                return false;
+            }
+        };
         int maxCost = problem.calls.get(call).costNotTransport;
         int minCost = problem.calls.get(call).costNotTransport;
-        Vehicle insertVehicle = solution.getDummy();
+        int vehicleIndex = solution.getDummy().vehicleIndex;
         int insertIndex1 = 0;
         int insertIndex2 = 1;
         for (Vehicle vehicle : solution) {
@@ -60,15 +63,15 @@ public class RegretKInsertion implements InsertionHeuristic {
                         if (copy.isFeasible()) {
                             int cost = copy.cost() - vehicleCost;
                             if (minCosts.size() < k) {
-                                minCosts.add(cost);
+                                minCosts.add(new VehicleInsertCost(cost, copy.vehicleIndex));
                             } else if (cost < maxCost) {
                                 minCosts.remove((Integer) maxCost);
-                                minCosts.add(cost);
-                                maxCost = Collections.max(minCosts);
+                                minCosts.add(new VehicleInsertCost(cost, copy.vehicleIndex));
+                                maxCost = Collections.max(minCosts, VehicleInsertCost::compareTo).cost;
                             }
                             if (cost < minCost) {
                                 minCost = cost;
-                                insertVehicle = copy;
+                                vehicleIndex = copy.vehicleIndex;
                                 insertIndex1 = i;
                                 insertIndex2 = j;
                             }
@@ -78,16 +81,46 @@ public class RegretKInsertion implements InsertionHeuristic {
             }
         }
         if (minCosts.isEmpty()) {
-            minCosts.add(problem.calls.get(call).costNotTransport);
+            minCosts.add(new VehicleInsertCost(problem.calls.get(call).costNotTransport, solution.getDummy().vehicleIndex));
         }
-        return new RegretK(call, insertVehicle.vehicleIndex, insertIndex1, insertIndex2, minCosts, regretValue(minCosts));
+        return new RegretK(call, vehicleIndex, insertIndex1, insertIndex2, minCosts, regretValue(minCosts));
     }
 
-    private int regretValue(List<Integer> costs) {
-        int min = Collections.min(costs);
-        return costs.stream().mapToInt(cost -> cost - min).sum();
+    private int regretValue(List<VehicleInsertCost> costs) {
+        int min = Collections.min(costs).cost;
+        return costs.stream().mapToInt(v -> v.cost - min).sum();
     }
 
-    private static record RegretK(int call, int vehicleIndex, int insertIndex1, int insertIndex2, List<Integer> costs, int regretValue) {
+    private static record RegretK(int call, int vehicleIndex, int insertIndex1, int insertIndex2,
+                                  List<VehicleInsertCost> costs, int regretValue) implements Comparable<RegretK> {
+        @Override
+        public int compareTo(RegretK o) {
+            return this.costs.size() < o.costs.size() ? 1 :
+                    this.costs.size() > o.costs.size() ? -1 :
+                            Integer.compare(this.regretValue, o.regretValue);
+        }
+    }
+
+    private static record VehicleInsertCost(int vehicleIndex, int cost) implements Comparable<VehicleInsertCost> {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof VehicleInsertCost that)) return false;
+
+            if (vehicleIndex != that.vehicleIndex) return false;
+            return cost == that.cost;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = vehicleIndex;
+            result = 31 * result + cost;
+            return result;
+        }
+
+        @Override
+        public int compareTo(VehicleInsertCost o) {
+            return Integer.compare(this.cost, o.cost);
+        }
     }
 }
