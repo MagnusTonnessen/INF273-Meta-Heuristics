@@ -82,11 +82,12 @@ public class RelatedRemoval implements RemovalHeuristic {
         int org2 = problem.calls.get(call2).originNode;
         int dest1 = problem.calls.get(call1).destinationNode;
         int dest2 = problem.calls.get(call2).destinationNode;
-        int org1ToOrg2 = commonVehicles.stream().reduce(0, (acc, vehicle) -> problem.travelTime[vehicle][org1][org2], Integer::sum);
-        // int org1ToDest2 = commonVehicles.stream().reduce(0, (acc, vehicle) -> problem.travelTime[vehicle][org1][dest2], Integer::sum);
-        // int org2ToDest1 = commonVehicles.stream().reduce(0, (acc, vehicle) -> problem.travelTime[vehicle][org2][dest1], Integer::sum);
-        int dest1ToDest2 = commonVehicles.stream().reduce(0, (acc, vehicle) -> problem.travelTime[vehicle][dest1][dest2], Integer::sum);
-        return normalize(1, 0, org1ToOrg2 + dest1ToDest2);
+        double org1ToOrg2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org1][org2], Double::sum) / commonVehicles.size();
+        double dest1ToDest2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][dest1][dest2], Double::sum) / commonVehicles.size();
+        // double org1ToDest2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org1][dest2], Double::sum) / commonVehicles.size();
+        // double org2ToDest1 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org2][dest1], Double::sum) / commonVehicles.size();
+        System.out.println(call1 + " " + call2 + ": " + normalize(problem.maxTravelDistance, problem.minTravelDistance, org1ToOrg2 + dest1ToDest2));
+        return normalize(problem.maxTravelDistance, problem.minTravelDistance, org1ToOrg2 + dest1ToDest2);
     }
 
     private double getTimeRelation(int call1, int call2) {
@@ -110,8 +111,7 @@ public class RelatedRemoval implements RemovalHeuristic {
     }
 
     private double getVesselCompatibilityRelation(int call1, int call2) {
-        double minSize = min(problem.calls.get(call1).validVehicles.size(),
-                problem.calls.get(call2).validVehicles.size());
+        double minSize = min(problem.calls.get(call1).validVehicles.size(), problem.calls.get(call2).validVehicles.size());
         double commonVehicles = getCommonVehicles(call1, call2).size();
         return normalize(1, 0, 1 - (commonVehicles / minSize));
     }

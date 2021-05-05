@@ -55,14 +55,14 @@ public class Constants {
 
     // SEARCH CONSTANTS
 
-    public static final boolean ITERATION_SEARCH = true;
-    public static final int ITERATIONS = 10000;
-    public static final int SEARCH_TIMES = 1;
-    public static final double RUN_TIME_C7V3 = 10 * 0.99;
-    public static final double RUN_TIME_C18V5 = 30 * 0.99;
-    public static final double RUN_TIME_C35V7 = 80 * 0.99;
-    public static final double RUN_TIME_C80V20 = 140 * 0.99;
-    public static final double RUN_TIME_C130V40 = 340 * 0.99;
+    public static final boolean ITERATION_SEARCH = false;
+    public static final int ITERATIONS = 20000;
+    public static final int SEARCH_TIMES = 10;
+    public static final double RUN_TIME_C7V3 = 10 * 0.999;
+    public static final double RUN_TIME_C18V5 = 30 * 0.999;
+    public static final double RUN_TIME_C35V7 = 80 * 0.999;
+    public static final double RUN_TIME_C80V20 = 140 * 0.999;
+    public static final double RUN_TIME_C130V40 = 340 * 0.999;
 
     public static final Random random = new Random();
 

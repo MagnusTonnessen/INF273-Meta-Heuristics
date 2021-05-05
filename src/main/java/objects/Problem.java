@@ -2,17 +2,23 @@ package objects;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static main.Main.problem;
 
 public class Problem {
-    public int maxCallSize = -1;
+    public int maxCallSize = Integer.MIN_VALUE;
     public int minCallSize = Integer.MAX_VALUE;
+    public double maxTravelDistance = Integer.MIN_VALUE;
+    public double minTravelDistance = Integer.MAX_VALUE;
     public final int nCalls;
     public final int nVehicles;
     public final int nNodes;
@@ -72,8 +78,8 @@ public class Problem {
                             .skip(1)
                             .mapToInt(Integer::parseInt)
                             .toArray();
-                    minCallSize = Math.min(minCallSize, call[2]);
-                    maxCallSize = Math.max(maxCallSize, call[2]);
+                    minCallSize = min(minCallSize, call[2]);
+                    maxCallSize = max(maxCallSize, call[2]);
                     return call;
                 }).toArray(int[][]::new);
 
@@ -122,6 +128,21 @@ public class Problem {
             for (int j = 0; j < nNodes; j++) {
                 firstTravelTime[i][j] = travelTime[i][vehicles.get(i).homeNode - 1][j] + vehicles.get(i).startingTime;
                 firstTravelCost[i][j] = travelCost[i][vehicles.get(i).homeNode - 1][j];
+            }
+        }
+
+        for (int call1 = 0; call1 < nCalls - 1; call1++) {
+            for (int call2 = call1 + 1; call2 < nCalls; call2++) {
+                List<Integer> commonVehicles = new ArrayList<>(calls.get(call1).validVehicles);
+                commonVehicles.retainAll(calls.get(call2).validVehicles);
+                if (!commonVehicles.isEmpty()) {
+                    int finalCall1 = call1;
+                    int finalCall2 = call2;
+                    double orgToOrg = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) travelTime[vehicle][calls.get(finalCall1).originNode][calls.get(finalCall2).originNode], Double::sum) / commonVehicles.size();
+                    double destToDest = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) travelTime[vehicle][calls.get(finalCall1).destinationNode][calls.get(finalCall2).destinationNode], Double::sum) / commonVehicles.size();
+                    maxTravelDistance = max(maxTravelDistance, orgToOrg + destToDest);
+                    minTravelDistance = min(minTravelDistance, orgToOrg + destToDest);
+                }
             }
         }
     }

@@ -22,10 +22,10 @@ public class BruteForce extends Operator {
     public Solution operate(Solution solution, int numberOfMoves) {
 
         List<Vehicle> vehicles = solution
-                .getVehiclesWithNToMCalls(2, 6)
-                .stream()
-                .sorted(Comparator.comparingDouble(vehicle -> -vehicle.cost()))
-                .collect(Collectors.toList());
+                                    .stream()
+                                    .filter(vehicle -> vehicle.size() < 6 && !vehicle.isDummy)
+                                    .sorted(Comparator.comparingDouble(vehicle -> -vehicle.cost()))
+                                    .collect(Collectors.toList());
 
         if (vehicles.isEmpty()) {
             return solution.copy();

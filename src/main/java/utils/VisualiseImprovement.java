@@ -45,7 +45,7 @@ public class VisualiseImprovement extends JFrame {
 
     private void addSeries(List<Double> costs) {
 
-        XYSeries series = new XYSeries("Solution cost");
+        XYSeries series = new XYSeries("Cost improvement");
 
         for (int iter = 0; iter < costs.size(); iter++) {
             series.add(iter, costs.get(iter));

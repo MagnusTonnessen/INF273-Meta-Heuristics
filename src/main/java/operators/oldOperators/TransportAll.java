@@ -39,7 +39,7 @@ public class TransportAll extends Operator {
                     // Move call to random valid vehicle and return if feasible
 
                     Solution newSolution = solution.copy();
-                    newSolution.moveCalls(call, vehicles.get(0));
+                    newSolution.moveCallRandom(call, vehicles.get(0));
                     if (newSolution.isFeasible()) {
                         return newSolution;
                     }

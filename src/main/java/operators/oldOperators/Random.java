@@ -13,7 +13,7 @@ public class Random extends Operator {
 
         return new Solution(solution) {{
             for (int call = 0; call < problem.nCalls; call++) {
-                moveCalls(call, random.nextInt(problem.nVehicles + 1));
+                moveCallRandom(call, random.nextInt(problem.nVehicles + 1));
             }
 
             for (int vehicle = 0; vehicle < problem.nVehicles; vehicle++) {

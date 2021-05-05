@@ -58,7 +58,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
-        initialize(C7V3);
+        initialize(C130V40);
         /*
         long startTime = System.currentTimeMillis();
         runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
@@ -176,6 +176,30 @@ public class Main {
         pdf.addBestSolutions(bestSolutions);
 
         pdf.closeDocument();
+    }
+
+    public static void finalAssignment() throws Exception {
+
+        Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>(
+                new JSONCreator("src/main/results/Assignment4.json").read()
+        );
+
+        for (String filePath : INSTANCES) {
+
+            initialize(filePath);
+
+            printRunInfo();
+
+            resultsMap.get(getInstanceName(filePath)).putIfAbsent(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), new HashMap<>());
+
+            Results searchResults = runSearch(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, getRuntime(filePath), SEARCH_TIMES);
+
+            printRunResults(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), searchResults);
+
+            resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
+        }
+
+        new JSONCreator("src/main/results/FinalAssignment.json").save(resultsMap);
     }
 
     public static void assignment5() throws Exception {

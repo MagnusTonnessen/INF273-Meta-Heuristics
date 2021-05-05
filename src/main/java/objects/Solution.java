@@ -42,14 +42,6 @@ public class Solution extends ArrayList<Vehicle> {
         return get(size() - 1);
     }
 
-    public void removePickupCall(int call) {
-        forEach(vehicle -> vehicle.remove(call));
-    }
-
-    public void removeDeliveryCall(int call) {
-        forEach(vehicle -> vehicle.remove(lastIndexOf(call)));
-    }
-
     public void removeCall(int call) {
         forEach(vehicle -> vehicle.removeIf(c -> c == call));
     }
@@ -64,7 +56,7 @@ public class Solution extends ArrayList<Vehicle> {
         get(toVehicle).add(index2, call);
     }
 
-    public void moveCalls(int call, int vehicle) {
+    public void moveCallRandom(int call, int vehicle) {
         removeCall(call);
         int index1 = random.nextInt(getVehicleSize(vehicle) + 1);
         int index2 = random.nextInt(getVehicleSize(vehicle) + 2);
@@ -73,22 +65,6 @@ public class Solution extends ArrayList<Vehicle> {
 
     public Vehicle getVehicle(int call) {
         return stream().filter(vehicle -> vehicle.contains(call)).findFirst().orElse(getDummy());
-    }
-
-    public void moveCalls(int call, Vehicle vehicle) {
-        moveCalls(call, vehicle.vehicleIndex);
-    }
-
-    public List<Vehicle> getVehiclesWithNToMCalls(int N, int M) {
-        return stream().filter(vehicle -> N <= vehicle.size() && vehicle.size() <= M).collect(Collectors.toList());
-    }
-
-    public List<Vehicle> getNotEmptyVehicles() {
-        return stream().filter(vehicle -> !vehicle.isEmpty()).collect(Collectors.toList());
-    }
-
-    public List<Integer> getTransportedCalls() {
-        return stream().filter(vehicle -> vehicle.vehicleIndex != problem.nVehicles).flatMap(Collection::stream).distinct().collect(Collectors.toList());
     }
 
     public boolean isFeasible() {

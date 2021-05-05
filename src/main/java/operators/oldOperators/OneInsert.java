@@ -22,7 +22,7 @@ public class OneInsert extends Operator {
         }
 
         Solution newSolution = solution.copy();
-        newSolution.moveCalls(call, validVehicles.get(random.nextInt(validVehicles.size())));
+        newSolution.moveCallRandom(call, validVehicles.get(random.nextInt(validVehicles.size())));
         return newSolution;
     }
 }

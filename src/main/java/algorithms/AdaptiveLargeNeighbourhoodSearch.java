@@ -141,7 +141,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             if (iteration == initTempIter) {
                 T = Math.min(5000, Math.max(5, findInitTemp(deltas / numDeltas)));
                 alpha = getAlpha(T / 5000, T, iterations * (1 - localSearchTime));
-                System.out.printf("\nInitial temperature: %.4f", T);
+//                System.out.printf("\nInitial temperature: %.4f", T);
             }
 
             updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
@@ -168,10 +168,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         improvement.add(100.0 * (initialCost - currCost) / initialCost);
 
-        System.out.printf("\nFinal temperature: %.4f\n", T);
+//        System.out.printf("\nFinal temperature: %.4f\n", T);
         String name = instanceName;
-        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
-        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
+//        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
+//        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         return bestSolution;
     }
 
