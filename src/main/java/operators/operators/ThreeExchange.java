@@ -13,7 +13,7 @@ public class ThreeExchange extends Operator {
     @Override
     public Solution operate(Solution solution, int numberOfMoves) {
 
-        List<Integer> calls = relatedRemoval.remove(solution, 3);
+        List<Integer> calls = relatedRemoval.remove(solution, numberOfMoves);
         int firstCall = random.nextInt(problem.nCalls); // calls.get(0); //
         int secondCall = random.nextInt(problem.nCalls); // calls.get(1); //
         int thirdCall = random.nextInt(problem.nCalls); // calls.get(2); //

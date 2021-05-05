@@ -31,6 +31,8 @@ import static utils.Constants.worstRemovalRegretKInsertion;
 
 public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
+    public static List<Double> improvement = new ArrayList<>();
+
     @Override
     public Solution search(Solution initialSolution, int iterations, double runtime) {
         return ALNS(iterations, runtime);
@@ -72,7 +74,6 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             operatorProbabilities.put(op.getOperator().getName(), list);
         });
 
-        List<Double> improvement = new ArrayList<>();
         improvement.add(0.0);
 
         Solution bestSolution = initialSolution;
@@ -160,9 +161,9 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         improvement.add(100.0 * (initialCost - currCost) / initialCost);
 
 //        System.out.printf("\nFinal temperature: %.4f\n", T);
-        String name = instanceName;
-        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
-        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
+//        String name = instanceName;
+//        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
+//        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         return bestSolution;
     }
 

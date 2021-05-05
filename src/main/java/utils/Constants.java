@@ -83,7 +83,7 @@ public class Constants {
 
     public static final boolean ITERATION_SEARCH = false;
     public static final int ITERATIONS = 10000;
-    public static final int SEARCH_TIMES = 1;
+    public static final int SEARCH_TIMES = 3;
     public static final double RUN_TIME_C7V3 = 10 * 0.999;
     public static final double RUN_TIME_C18V5 = 30 * 0.999;
     public static final double RUN_TIME_C35V7 = 80 * 0.999;

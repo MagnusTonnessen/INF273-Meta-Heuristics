@@ -2,6 +2,7 @@ package algorithms;
 
 import objects.Solution;
 
+import static algorithms.AdaptiveLargeNeighbourhoodSearch.improvement;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
 import static utils.Constants.ITERATION_SEARCH;
@@ -38,7 +39,7 @@ public class LocalSearch implements SearchingAlgorithm {
             if (p < P1) {
                 currentSolution = oneInsert.operate(bestSolution, random.nextInt(3) + 1);
             } else if (p < P1 + P2) {
-                currentSolution = twoExchange.operate(bestSolution, random.nextInt(3) + 1);
+                currentSolution = twoExchange.operate(bestSolution, random.nextInt(2) + 1);
             } else {
                 currentSolution = threeExchange.operate(bestSolution, random.nextInt(3) + 1);
             }
@@ -50,6 +51,7 @@ public class LocalSearch implements SearchingAlgorithm {
                 bestCost = currentCost;
             }
             iteration++;
+            improvement.add(100.0 * (initialCost - currentCost) / initialCost);
         }
         return bestSolution;
     }
