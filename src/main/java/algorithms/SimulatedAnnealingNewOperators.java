@@ -1,10 +1,10 @@
 package algorithms;
 
 import objects.Solution;
-import operators.oldOperators.BruteForce;
-import operators.oldOperators.Operator;
-import operators.oldOperators.TransportAll;
-import operators.oldOperators.TwoExchange;
+import operators.operators.BruteForce;
+import operators.operators.Operator;
+import operators.operators.TransportAll;
+import operators.operators.TwoExchange;
 
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
@@ -22,7 +22,7 @@ public class SimulatedAnnealingNewOperators implements SearchingAlgorithm {
     public Solution simulatedAnnealingNewOperators(int iterations, double runtime, double P1, double P2, double T0, double a) {
 
         Operator bruteForce = new BruteForce();
-        Operator reduceVehicleCost = new TwoExchange();
+        Operator twoExchange = new TwoExchange();
         Operator transportAll = new TransportAll();
 
         Solution incumbentSolution = initialSolution;
@@ -48,7 +48,7 @@ public class SimulatedAnnealingNewOperators implements SearchingAlgorithm {
             if (p < P1) {
                 currentSolution = bruteForce.operate(incumbentSolution, random.nextInt(4) + 1);
             } else if (p < P1 + P2) {
-                currentSolution = reduceVehicleCost.operate(incumbentSolution, random.nextInt(4) + 1);
+                currentSolution = twoExchange.operate(incumbentSolution, random.nextInt(4) + 1);
             } else {
                 currentSolution = transportAll.operate(incumbentSolution, random.nextInt(4) + 1);
             }

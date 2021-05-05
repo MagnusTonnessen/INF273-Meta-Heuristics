@@ -1,11 +1,9 @@
-package operators.newOperators;
+package operators.operators;
 
 import objects.Solution;
-import operators.oldOperators.Operator;
 
 import java.util.List;
 
-import static utils.Constants.random;
 import static utils.Constants.regretKInsertion;
 import static utils.Constants.worstRemoval;
 

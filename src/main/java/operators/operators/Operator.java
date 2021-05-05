@@ -1,4 +1,4 @@
-package operators.oldOperators;
+package operators.operators;
 
 import objects.Solution;
 
@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 public abstract class Operator {
 
     /**
-     * @param solution initial solution to operate on
-     * @param numberOfMoves
+     * @param solution      initial solution to operate on
+     * @param numberOfMoves number of calls to move
      * @return new solution after executing an operation
      */
     public abstract Solution operate(Solution solution, int numberOfMoves);

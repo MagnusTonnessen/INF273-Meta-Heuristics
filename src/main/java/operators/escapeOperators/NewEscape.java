@@ -1,7 +1,7 @@
 package operators.escapeOperators;
 
 import objects.Solution;
-import operators.oldOperators.Operator;
+import operators.operators.Operator;
 
 import java.util.List;
 

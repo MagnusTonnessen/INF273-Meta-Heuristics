@@ -24,20 +24,23 @@ public class WorstRemoval implements RemovalHeuristic {
         Map<Integer, Integer> costMap = new HashMap<>();
         solutionCopy.forEach(vehicle -> computeCallCost(vehicle, costMap));
 
-        while (!costMap.isEmpty() && removedCalls.size() < number) {
+        while (!costMap.isEmpty() && removedCalls.size() < number * 2) {
             int mostExpensiveCall = Collections.max(costMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
             Vehicle vehicle = solutionCopy.getVehicle(mostExpensiveCall);
             solutionCopy.removeCall(mostExpensiveCall);
             removedCalls.add(mostExpensiveCall);
             costMap.remove(mostExpensiveCall);
-            computeCallCost(vehicle, costMap);
+            if (!vehicle.isDummy) {
+                computeCallCost(vehicle, costMap);
+            }
         }
-        return removedCalls;
+        Collections.shuffle(removedCalls);
+        return removedCalls.subList(0, Math.min(removedCalls.size(), number));
     }
 
     private void computeCallCost(Vehicle vehicle, Map<Integer, Integer> callCost) {
         if (vehicle.isDummy) {
-            vehicle.stream().distinct().forEach(call -> callCost.put(call, problem.getCallFromIndex(call).costNotTransport));
+            vehicle.stream().distinct().forEach(call -> callCost.put(call, problem.getCall(call).costNotTransport));
         } else {
             int cost = vehicle.cost();
             Set<Integer> calls = new HashSet<>(vehicle);

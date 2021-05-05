@@ -2,13 +2,7 @@ package algorithms;
 
 import objects.Solution;
 import operators.escapeOperators.Escape;
-import operators.newOperators.RandomRemovalGreedyInsertion;
-import operators.newOperators.RandomRemovalRegretKInsertion;
-import operators.newOperators.RelatedRemovalGreedyInsertion;
-import operators.newOperators.RelatedRemovalRegretKInsertion;
-import operators.newOperators.WorstRemovalGreedyInsertion;
-import operators.newOperators.WorstRemovalRegretKInsertion;
-import operators.oldOperators.Operator;
+import operators.operators.Operator;
 import utils.VisualiseImprovement;
 import utils.VisualiseOperatorWeights;
 
@@ -28,21 +22,18 @@ import static main.Main.initialSolution;
 import static main.Main.instanceName;
 import static utils.Constants.ITERATION_SEARCH;
 import static utils.Constants.random;
+import static utils.Constants.randomRemovalGreedyInsertion;
+import static utils.Constants.randomRemovalRegretKInsertion;
+import static utils.Constants.relatedRemovalGreedyInsertion;
+import static utils.Constants.relatedRemovalRegretKInsertion;
+import static utils.Constants.worstRemovalGreedyInsertion;
+import static utils.Constants.worstRemovalRegretKInsertion;
 
-/*
-ACCEPTANCE METHODS
-Random Walk (RW)                |   Every new solution s' is accepted.
-Greedy Acceptance (GRE)         |   The solution s' is only accepted, if it reduces the costs compared to the current solution s. This resembles Algorithm 1.
-Simulated Annealing (SA)        |   Every improving solution s' is accepted. If c(s') > c(s), s' is accepted with probability exp(c(s)−c(s')/T) where T is the so-called temperature. The temperature decreases in every iteration by a factor φ.
-Threshold Accepting (TA)        |   The solution s' is accepted, if c(s') − c(s) < T with a threshold T. The threshold is decreased in every iteration by a factor φ.
-Old Bachelor Acceptance (OBA)   |   The solution s' is accepted, if c(s') − c(s) < T with a threshold T. The threshold is decreased after every acceptance a factor φ and increased after every rejection a factor ψ.
-Great Deluge Algorithm (GDA)    |   The solution s' is accepted, if c(s') < L with a level L. The level will decrease by a factor φ only if the solution is accepted.
- */
 public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     @Override
     public Solution search(Solution initialSolution, int iterations, double runtime) {
-        return ALNS(iterations, runtime); // , 250, 0.97);
+        return ALNS(iterations, runtime);
     }
 
     public Solution ALNS(int iterations, double runtime) {
@@ -52,25 +43,25 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         final Set<Solution> foundSolutions = new HashSet<>();
         final int initTempIter = 200;
-        final int escapeIters = 500;
+        final int escapeIter = 500;
         final int updateSegment = 100;
 
         Operator escape = new Escape();
 
         // Operators with weights
         List<OperatorWithWeights> operators = new ArrayList<>() {{
-            add(new OperatorWithWeights(new RandomRemovalGreedyInsertion()));
-            add(new OperatorWithWeights(new RandomRemovalRegretKInsertion()));
-            add(new OperatorWithWeights(new RelatedRemovalGreedyInsertion()));
-            add(new OperatorWithWeights(new RelatedRemovalRegretKInsertion()));
-            add(new OperatorWithWeights(new WorstRemovalGreedyInsertion()));
-            add(new OperatorWithWeights(new WorstRemovalRegretKInsertion()));
+            add(new OperatorWithWeights(randomRemovalGreedyInsertion));
+            add(new OperatorWithWeights(randomRemovalRegretKInsertion));
+            add(new OperatorWithWeights(relatedRemovalGreedyInsertion));
+            add(new OperatorWithWeights(relatedRemovalRegretKInsertion));
+            add(new OperatorWithWeights(worstRemovalGreedyInsertion));
+            add(new OperatorWithWeights(worstRemovalRegretKInsertion));
         }};
 
         // Normalize operators
         operators.forEach(op -> {
-            op.setCurrentWeight(1.0 / operators.size());
-            op.setLastWeight(1.0 / operators.size());
+            op.setCurrentWeight(op.getCurrentWeight() / operators.size());
+            op.setLastWeight(op.getLastWeight() / operators.size());
         });
 
         // Lists for probabilities and improvement visualisation
@@ -90,7 +81,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         Solution currSolution = initialSolution.copy();
         double currCost = initialCost;
 
-        int itersSinceImp = 0;
+        int iterSinceImp = 0;
         double T = 500;
         double alpha = 0.99;
         int iteration = 1;
@@ -116,7 +107,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             if (feasible) {
                 foundSolutions.add(newSolution);
                 if (deltaE < 0) {
-                    itersSinceImp = 0;
+                    iterSinceImp = 0;
                     currSolution = newSolution;
                     currCost = newCost;
 
@@ -132,10 +123,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 } else if (iteration > initTempIter && random.nextDouble() < pow(E, -deltaE / T)) {
                     currSolution = newSolution;
                     currCost = newCost;
-                    itersSinceImp++;
+                    iterSinceImp++;
                 }
             } else {
-                itersSinceImp++;
+                iterSinceImp++;
             }
 
             if (iteration == initTempIter) {
@@ -146,10 +137,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
             updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
 
-            if (itersSinceImp > escapeIters) {
+            if (iterSinceImp > escapeIter) {
                 currSolution = escape.operate(currSolution, random.nextInt(4) + 1);
                 currCost = currSolution.cost();
-                itersSinceImp = 0;
+                iterSinceImp = 0;
             }
 
             improvement.add(100.0 * (initialCost - currCost) / initialCost);
@@ -170,8 +161,8 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
 //        System.out.printf("\nFinal temperature: %.4f\n", T);
         String name = instanceName;
-//        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
-//        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
+        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
+        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         return bestSolution;
     }
 

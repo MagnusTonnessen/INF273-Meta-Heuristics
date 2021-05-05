@@ -1,17 +1,16 @@
 package algorithms;
 
 import objects.Solution;
-import operators.oldOperators.OneInsert;
-import operators.oldOperators.Operator;
-import operators.oldOperators.ThreeExchange;
-import operators.oldOperators.TwoExchange;
 
 import static java.lang.Math.E;
 import static java.lang.Math.pow;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
 import static utils.Constants.ITERATION_SEARCH;
+import static utils.Constants.oneInsert;
 import static utils.Constants.random;
+import static utils.Constants.threeExchange;
+import static utils.Constants.twoExchange;
 
 public class SimulatedAnnealing implements SearchingAlgorithm {
     @Override
@@ -20,10 +19,6 @@ public class SimulatedAnnealing implements SearchingAlgorithm {
     }
 
     public Solution simulatedAnnealing(int iterations, double runtime, double P1, double P2, double T0, double a) {
-
-        Operator oneInsert = new OneInsert();
-        Operator twoExchange = new TwoExchange();
-        Operator threeExchange = new ThreeExchange();
 
         Solution incumbentSolution = initialSolution;
         double incumbentCost = initialCost;

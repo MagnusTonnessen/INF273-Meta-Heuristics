@@ -51,20 +51,14 @@ public class Main {
     public static String instanceName;
 
     // TODO:
-    //  Implement related removal
-    //  Swap related calls two and three exchange
     //  Fix initial temperature calculation
-    // Find longest org -> org and longest dest -> dest
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
-        initialize(C130V40);
-        /*
         long startTime = System.currentTimeMillis();
         runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
         long endTime = System.currentTimeMillis() - startTime;
         System.out.printf("Total runtime: %d minutes %d seconds", (endTime/1000)/60, (endTime/1000)%60);
-        */
     }
 
     public static void runAllSearches() throws Exception {

@@ -1,4 +1,4 @@
-package operators.oldOperators;
+package operators.operators;
 
 import objects.Solution;
 
@@ -7,7 +7,7 @@ import java.util.Collections;
 import static main.Main.problem;
 import static utils.Constants.random;
 
-public class Random extends Operator {
+public class RandomOperator extends Operator {
     @Override
     public Solution operate(Solution solution, int numberOfMoves) {
 

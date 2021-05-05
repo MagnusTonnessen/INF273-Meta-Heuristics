@@ -1,12 +1,10 @@
-package operators.newOperators;
+package operators.operators;
 
 import objects.Solution;
-import operators.oldOperators.Operator;
 
 import java.util.List;
 
 import static utils.Constants.greedyInsertion;
-import static utils.Constants.random;
 import static utils.Constants.randomRemoval;
 
 public class RandomRemovalGreedyInsertion extends Operator {

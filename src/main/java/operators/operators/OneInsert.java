@@ -1,4 +1,4 @@
-package operators.oldOperators;
+package operators.operators;
 
 import objects.Solution;
 

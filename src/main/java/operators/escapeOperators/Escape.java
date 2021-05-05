@@ -2,7 +2,7 @@ package operators.escapeOperators;
 
 import objects.Solution;
 import objects.Vehicle;
-import operators.oldOperators.Operator;
+import operators.operators.Operator;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class Escape extends Operator {
             Solution newSolution = new Solution(solution);
             int call = random.nextInt(problem.nCalls);
             Vehicle currentVehicle = newSolution.getVehicleFromCall(call);
-            List<Integer> validVehicles = problem.getCallFromIndex(call).getValidVehicles();
+            List<Integer> validVehicles = problem.getCall(call).getValidVehicles();
             validVehicles.removeIf(vehicle -> vehicle == currentVehicle.vehicleIndex);
             validVehicles.add(newSolution.getDummy().vehicleIndex);
             newSolution.moveCallRandom(call, validVehicles.get(random.nextInt(validVehicles.size())));

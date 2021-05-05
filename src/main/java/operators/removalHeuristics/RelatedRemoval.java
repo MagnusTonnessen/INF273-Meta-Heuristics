@@ -3,13 +3,12 @@ package operators.removalHeuristics;
 import objects.Solution;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static main.Main.problem;
 import static utils.Constants.random;
@@ -20,22 +19,6 @@ public class RelatedRemoval implements RemovalHeuristic {
 
     @Override
     public List<Integer> remove(Solution solution, int number) {
-        return solution
-                .stream()
-                .flatMap(Collection::stream)
-                .distinct()
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        list -> {
-                            Collections.shuffle(list);
-                            return list;
-                        }))
-                .stream()
-                .limit(number)
-                .collect(Collectors.toList());
-    }
-
-    public List<Integer> remove_(Solution solution, int number) {
         List<Integer> removedCalls = new ArrayList<>();
         removedCalls.add(random.nextInt(problem.nCalls));
         while (removedCalls.size() < number) {
@@ -48,7 +31,7 @@ public class RelatedRemoval implements RemovalHeuristic {
                 }
             }
         }
-        return null;
+        return removedCalls;
     }
 
     public List<Integer> getMostRelatedCallsSorted(int call) {
@@ -56,21 +39,29 @@ public class RelatedRemoval implements RemovalHeuristic {
     }
 
     public void calculateRelations() {
+        double maxRelation = Integer.MIN_VALUE;
+        double minRelation = Integer.MAX_VALUE;
         double[][] relations = new double[problem.nCalls][problem.nCalls];
         for (int call1 = 0; call1 < problem.nCalls - 1; call1++) {
             for (int call2 = call1 + 1; call2 < problem.nCalls; call2++) {
                 relations[call1][call2] = relations[call2][call1] = getRelation(call1, call2);
+                maxRelation = max(maxRelation, relations[call1][call2]);
+                minRelation = min(minRelation, relations[call1][call2]);
+            }
+        }
+        for (int call1 = 0; call1 < problem.nCalls - 1; call1++) {
+            for (int call2 = call1 + 1; call2 < problem.nCalls; call2++) {
+                relations[call1][call2] = relations[call2][call1] = normalize(maxRelation, minRelation, relations[call1][call2]);
             }
         }
         this.relations = relations;
     }
 
     private double getRelation(int call1, int call2) {
-        return normalize(4, 0,
-                getDistanceRelation(call1, call2) +
-                        getTimeRelation(call1, call2) +
-                        getSizeRelation(call1, call2) +
-                        getVesselCompatibilityRelation(call1, call2));
+        return getDistanceRelation(call1, call2) +
+                getTimeRelation(call1, call2) +
+                getSizeRelation(call1, call2) +
+                getVesselCompatibilityRelation(call1, call2);
     }
 
     private double getDistanceRelation(int call1, int call2) {
@@ -86,24 +77,16 @@ public class RelatedRemoval implements RemovalHeuristic {
         double dest1ToDest2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][dest1][dest2], Double::sum) / commonVehicles.size();
         // double org1ToDest2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org1][dest2], Double::sum) / commonVehicles.size();
         // double org2ToDest1 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org2][dest1], Double::sum) / commonVehicles.size();
-        System.out.println(call1 + " " + call2 + ": " + normalize(problem.maxTravelDistance, problem.minTravelDistance, org1ToOrg2 + dest1ToDest2));
         return normalize(problem.maxTravelDistance, problem.minTravelDistance, org1ToOrg2 + dest1ToDest2);
     }
 
     private double getTimeRelation(int call1, int call2) {
-        int PL1 = problem.calls.get(call1).lowerTimePickup;
-        int PL2 = problem.calls.get(call2).lowerTimePickup;
-        int PU1 = problem.calls.get(call1).upperTimePickup;
-        int PU2 = problem.calls.get(call2).upperTimePickup;
-        int DL1 = problem.calls.get(call1).lowerTimeDelivery;
-        int DL2 = problem.calls.get(call2).lowerTimeDelivery;
-        int DU1 = problem.calls.get(call1).upperTimeDelivery;
-        int DU2 = problem.calls.get(call2).upperTimeDelivery;
-
-        int pickupWindow = Math.min(PU1, PU2) - Math.max(PL1, PL2);
-        int deliveryWindow = Math.min(DU1, DU2) - Math.max(DL1, DL2);
-
-        return 0.0;
+        return normalize(problem.maxPickupDeliveryTimeWindow,
+                problem.minPickupDeliveryTimeWindow,
+                min(problem.calls.get(call1).upperTimePickup, problem.calls.get(call2).upperTimePickup) -
+                        max(problem.calls.get(call1).lowerTimePickup, problem.calls.get(call2).lowerTimePickup) +
+                        min(problem.calls.get(call1).upperTimeDelivery, problem.calls.get(call2).upperTimeDelivery) -
+                        max(problem.calls.get(call1).lowerTimeDelivery, problem.calls.get(call2).lowerTimeDelivery));
     }
 
     private double getSizeRelation(int call1, int call2) {

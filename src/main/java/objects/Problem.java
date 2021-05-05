@@ -12,13 +12,14 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static main.Main.problem;
 
 public class Problem {
     public int maxCallSize = Integer.MIN_VALUE;
     public int minCallSize = Integer.MAX_VALUE;
     public double maxTravelDistance = Integer.MIN_VALUE;
     public double minTravelDistance = Integer.MAX_VALUE;
+    public double maxPickupDeliveryTimeWindow = Integer.MIN_VALUE;
+    public double minPickupDeliveryTimeWindow = Integer.MAX_VALUE;
     public final int nCalls;
     public final int nVehicles;
     public final int nNodes;
@@ -72,16 +73,12 @@ public class Problem {
 
         cargo = IntStream
                 .range(0, nCalls)
-                .mapToObj(i -> {
-                    int[] call = Arrays
-                            .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
-                            .skip(1)
-                            .mapToInt(Integer::parseInt)
-                            .toArray();
-                    minCallSize = min(minCallSize, call[2]);
-                    maxCallSize = max(maxCallSize, call[2]);
-                    return call;
-                }).toArray(int[][]::new);
+                .mapToObj(i -> Arrays
+                        .stream(input.get(1 + 8 + nVehicles * 2 + i).split(","))
+                        .skip(1)
+                        .mapToInt(Integer::parseInt)
+                        .toArray())
+                .toArray(int[][]::new);
 
         calls = IntStream
                 .range(0, nCalls)
@@ -131,8 +128,14 @@ public class Problem {
             }
         }
 
-        for (int call1 = 0; call1 < nCalls - 1; call1++) {
+        for (int call1 = 0; call1 < nCalls; call1++) {
+
+            // Find max and min cargo size
+            minCallSize = min(minCallSize, calls.get(call1).size);
+            maxCallSize = max(maxCallSize, calls.get(call1).size);
             for (int call2 = call1 + 1; call2 < nCalls; call2++) {
+
+                // Find max and min travel distance
                 List<Integer> commonVehicles = new ArrayList<>(calls.get(call1).validVehicles);
                 commonVehicles.retainAll(calls.get(call2).validVehicles);
                 if (!commonVehicles.isEmpty()) {
@@ -143,11 +146,26 @@ public class Problem {
                     maxTravelDistance = max(maxTravelDistance, orgToOrg + destToDest);
                     minTravelDistance = min(minTravelDistance, orgToOrg + destToDest);
                 }
+
+                // Find max and min pickup and delivery time window
+                int PL1 = calls.get(call1).lowerTimePickup;
+                int PL2 = calls.get(call2).lowerTimePickup;
+                int PU1 = calls.get(call1).upperTimePickup;
+                int PU2 = calls.get(call2).upperTimePickup;
+                int DL1 = calls.get(call1).lowerTimeDelivery;
+                int DL2 = calls.get(call2).lowerTimeDelivery;
+                int DU1 = calls.get(call1).upperTimeDelivery;
+                int DU2 = calls.get(call2).upperTimeDelivery;
+
+                double pickupDeliveryTimeWindow = min(PU1, PU2) - Math.max(PL1, PL2) + min(DU1, DU2) - Math.max(DL1, DL2);
+
+                maxPickupDeliveryTimeWindow = max(maxPickupDeliveryTimeWindow, pickupDeliveryTimeWindow);
+                minPickupDeliveryTimeWindow = min(minPickupDeliveryTimeWindow, pickupDeliveryTimeWindow);
             }
         }
     }
 
-    public Call getCallFromIndex(int call) {
+    public Call getCall(int call) {
         return calls.get(call);
     }
 

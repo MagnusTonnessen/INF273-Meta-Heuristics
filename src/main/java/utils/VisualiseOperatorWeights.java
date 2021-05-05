@@ -71,7 +71,7 @@ public class VisualiseOperatorWeights extends JFrame {
 
         var renderer = new XYLineAndShapeRenderer();
 
-        List<Color> colors = Arrays.asList(Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN, Color.BLACK, Color.MAGENTA);
+        List<Color> colors = Arrays.asList(Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN, Color.BLACK, Color.MAGENTA, Color.CYAN, Color.GRAY);
         for (int i = 0; i < dataset.getSeriesCount(); i++) {
             renderer.setSeriesPaint(i, colors.get(i));
             renderer.setSeriesStroke(i, new BasicStroke(2.0f));
