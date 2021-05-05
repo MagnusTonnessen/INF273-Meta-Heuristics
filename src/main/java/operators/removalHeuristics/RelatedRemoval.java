@@ -76,7 +76,7 @@ public class RelatedRemoval implements RemovalHeuristic {
     private double getDistanceRelation(int call1, int call2) {
         List<Integer> commonVehicles = getCommonVehicles(call1, call2);
         if (commonVehicles.isEmpty()) {
-            return 0;
+            return 1;
         }
         int org1 = problem.calls.get(call1).originNode;
         int org2 = problem.calls.get(call2).originNode;
