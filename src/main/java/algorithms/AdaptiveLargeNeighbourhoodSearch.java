@@ -51,8 +51,8 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         double endTime = System.currentTimeMillis() + runtime * 1000L * (1 - localSearchTime);
 
         final Set<Solution> foundSolutions = new HashSet<>();
-        final int initialTemperatureIterations = 200;
-        final int escapeIterations = 500;
+        final int initTempIter = 200;
+        final int escapeIters = 500;
         final int updateSegment = 100;
 
         Operator escape = new Escape();
@@ -90,7 +90,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         Solution currSolution = initialSolution.copy();
         double currCost = initialCost;
 
-        int iterationsSinceLastImprovement = 0;
+        int itersSinceImp = 0;
         double T = 500;
         double alpha = 0.99;
         int iteration = 1;
@@ -116,7 +116,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             if (feasible) {
                 foundSolutions.add(newSolution);
                 if (deltaE < 0) {
-                    iterationsSinceLastImprovement = 0;
+                    itersSinceImp = 0;
                     currSolution = newSolution;
                     currCost = newCost;
 
@@ -124,32 +124,32 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                         bestSolution = currSolution;
                         bestCost = currCost;
                     }
-                } else if (iteration <= initialTemperatureIterations && random.nextDouble() < 0.8) {
+                } else if (iteration <= initTempIter && random.nextDouble() < 0.8) {
                     deltas += deltaE;
                     numDeltas++;
                     currSolution = newSolution;
                     currCost = newCost;
-                } else if (iteration > initialTemperatureIterations && random.nextDouble() < pow(E, -deltaE / T)) {
+                } else if (iteration > initTempIter && random.nextDouble() < pow(E, -deltaE / T)) {
                     currSolution = newSolution;
                     currCost = newCost;
-                    iterationsSinceLastImprovement++;
+                    itersSinceImp++;
                 }
             } else {
-                iterationsSinceLastImprovement++;
+                itersSinceImp++;
             }
 
-            if (iteration == initialTemperatureIterations) {
-                T = Math.min(5000, Math.max(5, findInitialTemperature(deltas / numDeltas)));
+            if (iteration == initTempIter) {
+                T = Math.min(5000, Math.max(5, findInitTemp(deltas / numDeltas)));
                 alpha = getAlpha(T / 5000, T, iterations * (1 - localSearchTime));
                 System.out.printf("\nInitial temperature: %.4f", T);
             }
 
             updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
 
-            if (iterationsSinceLastImprovement > escapeIterations) {
+            if (itersSinceImp > escapeIters) {
                 currSolution = escape.operate(currSolution, random.nextInt(4) + 1);
                 currCost = currSolution.cost();
-                iterationsSinceLastImprovement = 0;
+                itersSinceImp = 0;
             }
 
             improvement.add(100.0 * (initialCost - currCost) / initialCost);
@@ -201,7 +201,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         );
     }
 
-    private double findInitialTemperature(double delta) {
+    private double findInitTemp(double delta) {
         /*
         p = e ^ ( -delta / T )
         ln ( p ) = -delta / T
