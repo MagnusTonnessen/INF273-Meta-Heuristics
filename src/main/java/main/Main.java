@@ -37,7 +37,6 @@ import static utils.Constants.RUN_TIME_C80V20;
 import static utils.Constants.SEARCHING_ALGORITHMS;
 import static utils.Constants.SEARCH_TIMES;
 import static utils.Constants.SIMULATED_ANNEALING;
-import static utils.Constants.SIMULATED_ANNEALING_NEW_OPERATORS;
 import static utils.Constants.relatedRemoval;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
@@ -50,15 +49,16 @@ public class Main {
     public static double initialCost;
     public static String instanceName;
 
-    // TODO:
-    //  Fix initial temperature calculation
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
         long startTime = System.currentTimeMillis();
-        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
+        finalAssignment();
+//        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
         long endTime = System.currentTimeMillis() - startTime;
-        System.out.printf("Total runtime: %d minutes %d seconds", (endTime/1000)/60, (endTime/1000)%60);
+        System.out.printf("Total runtime: %d minutes %d seconds", (endTime / 1000) / 60, (endTime / 1000) % 60);
+
+
     }
 
     public static void runAllSearches() throws Exception {
@@ -175,7 +175,7 @@ public class Main {
     public static void finalAssignment() throws Exception {
 
         Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>(
-                new JSONCreator("src/main/results/Assignment4.json").read()
+                new JSONCreator("src/main/results/finalAssignment.json").read()
         );
 
         for (String filePath : INSTANCES) {
@@ -190,7 +190,16 @@ public class Main {
 
             printRunResults(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), searchResults);
 
-            resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
+            if ((double) resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Improvement") < searchResults.improvement()) {
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Improvement", searchResults.improvement());
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Best objective", searchResults.improvement());
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Best solution", searchResults.bestSolution());
+            }
+            if ((double) resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Average objective") < searchResults.averageObjective()) {
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Average objective", searchResults.averageObjective());
+            }
+
+            // resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
         new JSONCreator("src/main/results/FinalAssignment.json").save(resultsMap);
@@ -232,13 +241,13 @@ public class Main {
 
             printRunInfo();
 
-            resultsMap.get(getInstanceName(filePath)).put(SIMULATED_ANNEALING_NEW_OPERATORS.getName(), new HashMap<>());
+            resultsMap.get(getInstanceName(filePath)).put(SIMULATED_ANNEALING.getName(), new HashMap<>());
 
-            Results searchResults = runSearch(SIMULATED_ANNEALING_NEW_OPERATORS, getRuntime(filePath), SEARCH_TIMES);
+            Results searchResults = runSearch(SIMULATED_ANNEALING, getRuntime(filePath), SEARCH_TIMES);
 
-            resultsMap.get(getInstanceName(filePath)).get(SIMULATED_ANNEALING_NEW_OPERATORS.getName()).putAll(searchResults.asMap());
+            resultsMap.get(getInstanceName(filePath)).get(SIMULATED_ANNEALING.getName()).putAll(searchResults.asMap());
 
-            printRunResults(SIMULATED_ANNEALING_NEW_OPERATORS.getName(), searchResults);
+            printRunResults(SIMULATED_ANNEALING.getName(), searchResults);
         }
 
         new JSONCreator("src/main/results/test/Assignment4test.json").save(resultsMap);

@@ -5,7 +5,6 @@ import algorithms.LocalSearch;
 import algorithms.RandomSearch;
 import algorithms.SearchingAlgorithm;
 import algorithms.SimulatedAnnealing;
-import algorithms.SimulatedAnnealingNewOperators;
 import operators.insertionHeuristics.GreedyInsertion;
 import operators.insertionHeuristics.RegretKInsertion;
 import operators.operators.OneInsert;
@@ -52,9 +51,8 @@ public class Constants {
     public static final SearchingAlgorithm RANDOM_SEARCH = new RandomSearch();
     public static final SearchingAlgorithm LOCAL_SEARCH = new LocalSearch();
     public static final SearchingAlgorithm SIMULATED_ANNEALING = new SimulatedAnnealing();
-    public static final SearchingAlgorithm SIMULATED_ANNEALING_NEW_OPERATORS = new SimulatedAnnealingNewOperators();
     public static final SearchingAlgorithm ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH = new AdaptiveLargeNeighbourhoodSearch();
-    public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, SIMULATED_ANNEALING_NEW_OPERATORS, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
+    public static final List<SearchingAlgorithm> SEARCHING_ALGORITHMS = Arrays.asList(RANDOM_SEARCH, LOCAL_SEARCH, SIMULATED_ANNEALING, ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH);
 
     // OPERATORS
 
@@ -81,9 +79,10 @@ public class Constants {
 
     // SEARCH CONSTANTS
 
+    public static final boolean VISUALIZE = false;
     public static final boolean ITERATION_SEARCH = false;
-    public static final int ITERATIONS = 10000;
-    public static final int SEARCH_TIMES = 3;
+    public static final int ITERATIONS = 35000;
+    public static final int SEARCH_TIMES = 10;
     public static final double RUN_TIME_C7V3 = 10 * 0.999;
     public static final double RUN_TIME_C18V5 = 30 * 0.999;
     public static final double RUN_TIME_C35V7 = 80 * 0.999;

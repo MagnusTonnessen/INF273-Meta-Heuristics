@@ -2,7 +2,6 @@ package algorithms;
 
 import objects.Solution;
 
-import static algorithms.AdaptiveLargeNeighbourhoodSearch.improvement;
 import static main.Main.initialCost;
 import static main.Main.initialSolution;
 import static utils.Constants.ITERATION_SEARCH;
@@ -51,7 +50,6 @@ public class LocalSearch implements SearchingAlgorithm {
                 bestCost = currentCost;
             }
             iteration++;
-            improvement.add(100.0 * (initialCost - currentCost) / initialCost);
         }
         return bestSolution;
     }

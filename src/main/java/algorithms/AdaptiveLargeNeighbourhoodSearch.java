@@ -21,6 +21,7 @@ import static main.Main.initialCost;
 import static main.Main.initialSolution;
 import static main.Main.instanceName;
 import static utils.Constants.ITERATION_SEARCH;
+import static utils.Constants.VISUALIZE;
 import static utils.Constants.random;
 import static utils.Constants.randomRemovalGreedyInsertion;
 import static utils.Constants.randomRemovalRegretKInsertion;
@@ -31,8 +32,6 @@ import static utils.Constants.worstRemovalRegretKInsertion;
 
 public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
-    public static List<Double> improvement = new ArrayList<>();
-
     @Override
     public Solution search(Solution initialSolution, int iterations, double runtime) {
         return ALNS(iterations, runtime);
@@ -41,8 +40,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
     public Solution ALNS(int iterations, double runtime) {
 
         final double localSearchTime = 0.2;
+        double startTime = System.currentTimeMillis();
         double endTime = System.currentTimeMillis() + runtime * 1000L * (1 - localSearchTime);
 
+        final List<Double> improvement = new ArrayList<>();
         final Set<Solution> foundSolutions = new HashSet<>();
         final int initTempIter = 200;
         final int escapeIter = 500;
@@ -131,8 +132,11 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             }
 
             if (iteration == initTempIter) {
-                T = Math.min(5000, Math.max(5, findInitTemp(deltas / numDeltas)));
-                alpha = getAlpha(T / 5000, T, iterations * (1 - localSearchTime));
+                double timePerIter = (System.currentTimeMillis() - startTime) / initTempIter;
+                double totalIter = (endTime - System.currentTimeMillis()) / timePerIter;
+                T = findInitTemp(deltas / numDeltas);
+                alpha = getAlpha(T / 5000, T, totalIter); // iterations * (1 - localSearchTime));
+
 //                System.out.printf("\nInitial temperature: %.4f", T);
             }
 
@@ -144,8 +148,9 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 iterSinceImp = 0;
             }
 
-            improvement.add(100.0 * (initialCost - currCost) / initialCost);
-
+            if (VISUALIZE) {
+                improvement.add(100.0 * (initialCost - currCost) / initialCost);
+            }
             T *= alpha;
             iteration++;
         }
@@ -158,12 +163,13 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             bestSolution = currSolution;
         }
 
-        improvement.add(100.0 * (initialCost - currCost) / initialCost);
-
+        if (VISUALIZE) {
+            improvement.add(100.0 * (initialCost - currCost) / initialCost);
+            String name = instanceName;
+            EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
+            EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
+        }
 //        System.out.printf("\nFinal temperature: %.4f\n", T);
-//        String name = instanceName;
-//        EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
-//        EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         return bestSolution;
     }
 
