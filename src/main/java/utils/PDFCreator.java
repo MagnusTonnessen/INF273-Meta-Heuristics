@@ -9,8 +9,11 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.FileOutputStream;
@@ -20,7 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static utils.Constants.INSTANCES;
 import static utils.Utils.getInstanceName;
 
 /**
@@ -36,6 +38,21 @@ public class PDFCreator {
         this.document = new Document();
         this.paragraph = new Paragraph();
         PdfWriter.getInstance(document, new FileOutputStream(documentPath));
+        PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(documentPath));
+        Rectangle rect = new Rectangle(90, 100, 494, 800);
+        writer.setBoxSize("art", rect);
+        writer.setPageEvent(new Header());
+    }
+
+    public void addTitle(String title, int size) throws Exception {
+        addEmptyLine(1);
+        newParagraph();
+        Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, size, BaseColor.BLACK);
+        Phrase phrase = new Phrase();
+        phrase.add(new Chunk(title, font));
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        paragraph.add(phrase);
+        newParagraph();
     }
 
     public void closeDocument() {
@@ -76,11 +93,23 @@ public class PDFCreator {
         document.newPage();
     }
 
-    public void addTitle(String title) throws Exception {
-        Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, 14, BaseColor.BLACK);
-        Phrase phrase = new Phrase();
-        phrase.add(new Chunk(title, font));
-        paragraph.add(phrase);
+    public void addBestSolutions(List<int[]> bestSolutions, List<String> instances) throws Exception {
+        IntStream.range(0, bestSolutions.size()).forEach(i -> {
+
+            Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, 12, BaseColor.BLACK);
+            Paragraph subParagraph = new Paragraph();
+            subParagraph.add(new Chunk("Best solution found for " + getInstanceName(instances.get(i)) + "\n", font));
+            subParagraph.add(new Chunk(Arrays.toString(bestSolutions.get(i))));
+
+            subParagraph.setAlignment(Element.ALIGN_CENTER);
+            paragraph.add(subParagraph);
+            addEmptyLine(1);
+            try {
+                newParagraph();
+            } catch (Exception ignored) {
+            }
+        });
+        paragraph.setAlignment(Element.ALIGN_CENTER);
         newParagraph();
     }
 
@@ -93,20 +122,23 @@ public class PDFCreator {
         newParagraph();
     }
 
-    public void addBestSolutions(List<int[]> bestSolutions) throws Exception {
-        IntStream.range(0, bestSolutions.size()).forEach(i -> {
+    public void newTableWithoutAvgObj(String instanceName) {
+        table = new PdfPTable(4);
+        table.setHorizontalAlignment(Element.ALIGN_CENTER);
+        table.setWidthPercentage(100);
 
-            Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, 12, BaseColor.BLACK);
-            Paragraph subParagraph = new Paragraph();
-            subParagraph.add(new Chunk("Best solution found for " + getInstanceName(INSTANCES.get(i)) + "\n", font));
-            subParagraph.add(new Chunk(Arrays.toString(bestSolutions.get(i))));
+        PdfPCell row = new PdfPCell();
+        row.setPhrase(Phrase.getInstance(instanceName));
+        row.setColspan(4);
+        row.setHorizontalAlignment(Element.ALIGN_CENTER);
+        row.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
-            subParagraph.setAlignment(Element.ALIGN_CENTER);
-            paragraph.add(subParagraph);
-            addEmptyLine(1);
-        });
-        paragraph.setAlignment(Element.ALIGN_CENTER);
-        newParagraph();
+        table.addCell(row);
+
+        table.addCell(newCell(" "));
+        table.addCell(newCell("Best objective"));
+        table.addCell(newCell("Improvement (%)"));
+        table.addCell(newCell("Running time (seconds)"));
     }
 
     private void newParagraph() throws Exception {
@@ -135,15 +167,34 @@ public class PDFCreator {
         table.addCell(newCell("Running time (seconds)"));
     }
 
-    private void addEmptyLine(int n) {
-        paragraph.addAll(IntStream.range(0, n).mapToObj(i -> new Paragraph(" ")).collect(Collectors.toList()));
-    }
-
     public PdfPCell newCell(String text) {
         PdfPCell cell = new PdfPCell();
         cell.setPhrase(Phrase.getInstance(text));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         return cell;
+    }
+
+    private void addEmptyLine(int n) {
+        paragraph.addAll(IntStream.range(0, n).mapToObj(i -> new Paragraph(" ")).collect(Collectors.toList()));
+    }
+
+    public void addRowWithoutAvgObj(String search, double bestObj, double imp, double run) {
+        DecimalFormat format = new DecimalFormat("0.0#");
+        PdfPCell cell = newCell(search);
+        cell.setFixedHeight(35);
+
+        /*
+        for (double value : values) {
+            PdfPCell cell = newCell(format.format(value));
+            cell.setMinimumHeight(40);
+        }
+         */
+
+        table.addCell(cell);
+        table.addCell(newCell(format.format(bestObj)));
+        table.addCell(newCell(format.format(imp)));
+        table.addCell(newCell(format.format(run)));
     }
 
     public void addRow(String search, double avgObj, double bestObj, double imp, double run) {
@@ -153,5 +204,13 @@ public class PDFCreator {
         table.addCell(newCell(format.format(bestObj)));
         table.addCell(newCell(format.format(imp)));
         table.addCell(newCell(format.format(run)));
+    }
+
+    private static class Header extends PdfPageEventHelper {
+        public void onStartPage(PdfWriter writer, Document document) {
+            Rectangle rect = writer.getBoxSize("art");
+            ColumnText.showTextAligned(writer.getDirectContent(), Element.ALIGN_CENTER, new Phrase("Tønnessen, Magnus"), rect.getLeft(), rect.getTop(), 0);
+            ColumnText.showTextAligned(writer.getDirectContent(), Element.ALIGN_CENTER, new Phrase("Candidate number: 120"), rect.getRight(), rect.getTop(), 0);
+        }
     }
 }

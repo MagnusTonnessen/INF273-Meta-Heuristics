@@ -1,5 +1,6 @@
 package algorithms;
 
+import me.tongfei.progressbar.ProgressBar;
 import objects.Solution;
 import operators.escapeOperators.Escape;
 import operators.operators.Operator;
@@ -39,11 +40,12 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     public Solution ALNS(int iterations, double runtime) {
 
-        final double localSearchTime = 0.2;
+        final double localSearchTime = 0.1;
         double startTime = System.currentTimeMillis();
         double endTime = System.currentTimeMillis() + runtime * 1000L * (1 - localSearchTime);
 
-        final List<Double> improvement = new ArrayList<>();
+        final ProgressBar pb = new ProgressBar("Progress", (long) runtime);
+
         final Set<Solution> foundSolutions = new HashSet<>();
         final int initTempIter = 200;
         final int escapeIter = 500;
@@ -75,6 +77,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             operatorProbabilities.put(op.getOperator().getName(), list);
         });
 
+        List<Double> improvement = new ArrayList<>();
         improvement.add(0.0);
 
         Solution bestSolution = initialSolution;
@@ -92,6 +95,8 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         // 90 % of runtime is dedicated to ALNS
         while ((ITERATION_SEARCH && iteration < iterations * (1 - localSearchTime)) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
+
+            pb.stepTo((long) (System.currentTimeMillis() - startTime) / 1000);
 
             if (iteration % updateSegment == 0) {
                 updateOperators(operators);
@@ -135,9 +140,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
                 double timePerIter = (System.currentTimeMillis() - startTime) / initTempIter;
                 double totalIter = (endTime - System.currentTimeMillis()) / timePerIter;
                 T = findInitTemp(deltas / numDeltas);
-                alpha = getAlpha(T / 5000, T, totalIter); // iterations * (1 - localSearchTime));
-
-//                System.out.printf("\nInitial temperature: %.4f", T);
+                alpha = getAlpha(T / 5000, T, totalIter);
             }
 
             updateOperator(operator, newSolutionFound, feasible, newCost, currCost, bestCost);
@@ -169,7 +172,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             EventQueue.invokeLater(() -> new VisualiseOperatorWeights(name, operatorProbabilities));
             EventQueue.invokeLater(() -> new VisualiseImprovement(name, improvement));
         }
-//        System.out.printf("\nFinal temperature: %.4f\n", T);
+
         return bestSolution;
     }
 
@@ -200,13 +203,6 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
     }
 
     private double findInitTemp(double delta) {
-        /*
-        p = e ^ -(dE / T)
-        ln (p) = ln (e) * -(dE / T)
-        ln (p) = -dE / T
-        T * ln (p) = -dE
-        T = -dE / ln(p)
-         */
         return -delta / Math.log(0.8);
     }
 
@@ -223,7 +219,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
         return operators
                 .stream()
-                .sorted(Comparator.comparingDouble(op -> op.currentWeight))
+                .sorted(Comparator.comparingDouble(OperatorWithWeights::getCurrentWeight))
                 .dropWhile(op -> {
                     cumulative.weight += op.currentWeight;
                     return p >= cumulative.weight;

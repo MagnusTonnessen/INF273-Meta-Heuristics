@@ -26,6 +26,7 @@ import static utils.Constants.C35V7;
 import static utils.Constants.C7V3;
 import static utils.Constants.C80V20;
 import static utils.Constants.INSTANCES;
+import static utils.Constants.INSTANCES_EXAM;
 import static utils.Constants.ITERATIONS;
 import static utils.Constants.LOCAL_SEARCH;
 import static utils.Constants.RANDOM_SEARCH;
@@ -49,13 +50,19 @@ public class Main {
     public static double initialCost;
     public static String instanceName;
 
+    // TODO:
+    //  VISUALIZE = false
+    //  ITERATION_SEARCH = false
+    //  SEARCH_TIMES = 10
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
         long startTime = System.currentTimeMillis();
-        finalAssignment();
-//        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
-        JSONToPDF("src/main/results/FinalAssignment.json", "src/main/results/FinalAssignment.pdf", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), Collections.singletonList(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH));
+
+        // JSONToPDF("src/main/results/FinalAssignment.json", "src/main/results/FinalAssignment.pdf", "Final report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES);
+        // JSONToPDFExam("src/main/results/Exam.json", "src/main/results/Exam.pdf", "Exam report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES_EXAM);
+        exam();
+
         long endTime = System.currentTimeMillis() - startTime;
         System.out.printf("Total runtime: %d minutes %d seconds", (endTime / 1000) / 60, (endTime / 1000) % 60);
     }
@@ -132,17 +139,19 @@ public class Main {
     }
 
     @SuppressWarnings("unchecked")
-    public static void JSONToPDF(String jsonPath, String pdfPath, String algorithm, List<SearchingAlgorithm> searchingAlgorithms) throws Exception {
+    public static void JSONToPDF(String jsonPath, String pdfPath, String documentTitle, String algorithm, List<String> instances) throws Exception {
         PDFCreator pdf = new PDFCreator(pdfPath);
         pdf.openDocument();
 
+        pdf.addTitle(documentTitle, 20);
+
         Map<String, Map<String, Map<String, Object>>> jsonAsMap = new JSONCreator(jsonPath).read();
 
-        for (String filePath : INSTANCES) {
+        for (String filePath : instances) {
 
             pdf.newTable(getInstanceName(filePath));
 
-            for (SearchingAlgorithm search : searchingAlgorithms) {
+            for (SearchingAlgorithm search : SEARCHING_ALGORITHMS) {
                 try {
                     pdf.addRow(search.getName(),
                             (double) jsonAsMap.get(getInstanceName(filePath)).get(search.getName()).get("Average objective"),
@@ -157,7 +166,9 @@ public class Main {
             pdf.addTable();
         }
 
-        pdf.addTitle("Best solutions found with " + algorithm);
+        pdf.newPage();
+
+        pdf.addTitle("Best solutions found with " + algorithm, 14);
 
         List<int[]> bestSolutions = jsonAsMap
                 .values()
@@ -166,9 +177,72 @@ public class Main {
                 .sorted(Comparator.comparingInt(solution -> solution.length))
                 .collect(Collectors.toList());
 
-        pdf.addBestSolutions(bestSolutions);
+        pdf.addBestSolutions(bestSolutions, instances);
 
         pdf.closeDocument();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void JSONToPDFExam(String jsonPath, String pdfPath, String documentTitle, String algorithm, List<String> instances) throws Exception {
+        PDFCreator pdf = new PDFCreator(pdfPath);
+        pdf.openDocument();
+
+        pdf.addTitle(documentTitle, 20);
+
+        Map<String, Map<String, Map<String, Object>>> jsonAsMap = new JSONCreator(jsonPath).read();
+
+        for (String filePath : instances) {
+
+            pdf.newTableWithoutAvgObj(getInstanceName(filePath));
+
+            try {
+                pdf.addRowWithoutAvgObj(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(),
+                        (double) jsonAsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Best objective"),
+                        (double) jsonAsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Improvement"),
+                        (double) jsonAsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Average run time")
+                );
+            } catch (Exception ignored) {
+            }
+
+            pdf.addTable();
+        }
+
+        pdf.newPage();
+
+        pdf.addTitle("Best solutions found with " + algorithm, 14);
+
+        List<int[]> bestSolutions = jsonAsMap
+                .values()
+                .stream()
+                .map(instance -> ((List<Integer>) instance.get(algorithm).get("Best solution")).stream().mapToInt(i -> i).toArray())
+                .sorted(Comparator.comparingInt(solution -> solution.length))
+                .collect(Collectors.toList());
+
+        pdf.addBestSolutions(bestSolutions, instances);
+
+        pdf.closeDocument();
+    }
+
+    public static void exam() throws Exception {
+        Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>();
+
+        for (String filePath : INSTANCES_EXAM) {
+
+            initialize(filePath);
+            printRunInfo();
+
+            resultsMap.put(getInstanceName(filePath), new HashMap<>());
+            resultsMap.get(getInstanceName(filePath)).put(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), new HashMap<>());
+
+            Results searchResults = runSearch(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, getRuntime(filePath), SEARCH_TIMES);
+
+            printRunResults(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), searchResults);
+
+            resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
+        }
+
+        new JSONCreator("src/main/results/Exam.json").save(resultsMap);
+        JSONToPDFExam("src/main/results/Exam.json", "src/main/results/Exam.pdf", "Exam report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES_EXAM);
     }
 
     public static void finalAssignment() throws Exception {
@@ -189,16 +263,7 @@ public class Main {
 
             printRunResults(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), searchResults);
 
-            if ((double) resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Improvement") < searchResults.improvement()) {
-                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Improvement", searchResults.improvement());
-                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Best objective", searchResults.bestObjective());
-                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Best solution", searchResults.bestSolution());
-            }
-            if ((double) resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Average objective") < searchResults.averageObjective()) {
-                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Average objective", searchResults.averageObjective());
-            }
-
-            // resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
+            resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
         new JSONCreator("src/main/results/FinalAssignment.json").save(resultsMap);

@@ -81,12 +81,14 @@ public class RelatedRemoval implements RemovalHeuristic {
     }
 
     private double getTimeRelation(int call1, int call2) {
-        return normalize(problem.maxPickupDeliveryTimeWindow,
+        return 1 - normalize(
+                problem.maxPickupDeliveryTimeWindow,
                 problem.minPickupDeliveryTimeWindow,
                 min(problem.calls.get(call1).upperTimePickup, problem.calls.get(call2).upperTimePickup) -
                         max(problem.calls.get(call1).lowerTimePickup, problem.calls.get(call2).lowerTimePickup) +
                         min(problem.calls.get(call1).upperTimeDelivery, problem.calls.get(call2).upperTimeDelivery) -
-                        max(problem.calls.get(call1).lowerTimeDelivery, problem.calls.get(call2).lowerTimeDelivery));
+                        max(problem.calls.get(call1).lowerTimeDelivery, problem.calls.get(call2).lowerTimeDelivery)
+        );
     }
 
     private double getSizeRelation(int call1, int call2) {
