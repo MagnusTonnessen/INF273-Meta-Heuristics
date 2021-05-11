@@ -59,8 +59,6 @@ public class Main {
         System.out.println(LocalTime.now());
         long startTime = System.currentTimeMillis();
 
-        // JSONToPDF("src/main/results/FinalAssignment.json", "src/main/results/FinalAssignment.pdf", "Final report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES);
-        // JSONToPDFExam("src/main/results/Exam.json", "src/main/results/Exam.pdf", "Exam report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES_EXAM);
         exam();
 
         long endTime = System.currentTimeMillis() - startTime;
@@ -116,7 +114,7 @@ public class Main {
 
         for (int i = 0; i < times; i++) {
 
-            System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times);
+//            System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times);
 
             long startTime = System.currentTimeMillis();
             Solution solution = searchingAlgorithm.search(initialSolution, ITERATIONS, runtime);
@@ -263,7 +261,16 @@ public class Main {
 
             printRunResults(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), searchResults);
 
-            resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
+            if ((double) resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Improvement") < searchResults.improvement()) {
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Improvement", searchResults.improvement());
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Best objective", searchResults.bestObjective());
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Best solution", searchResults.bestSolution());
+            }
+
+            if ((double) resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Average objective") < searchResults.averageObjective()) {
+                resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).put("Average objective", searchResults.averageObjective());
+            }
+            // resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
         new JSONCreator("src/main/results/FinalAssignment.json").save(resultsMap);

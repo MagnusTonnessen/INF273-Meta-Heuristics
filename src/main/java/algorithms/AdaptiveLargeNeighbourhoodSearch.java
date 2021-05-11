@@ -40,11 +40,12 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     public Solution ALNS(int iterations, double runtime) {
 
-        final double localSearchTime = 0.1;
+        final double localSearchTime = 0.01;
         double startTime = System.currentTimeMillis();
         double endTime = System.currentTimeMillis() + runtime * 1000L * (1 - localSearchTime);
 
-        final ProgressBar pb = new ProgressBar("Progress", (long) runtime);
+        final ProgressBar pb = new ProgressBar("Progress", (long) Math.ceil(runtime));
+        pb.setExtraMessage(" ");
 
         final Set<Solution> foundSolutions = new HashSet<>();
         final int initTempIter = 200;
