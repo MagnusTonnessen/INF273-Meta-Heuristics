@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("unused")
 public class Constants {
 
     // INSTANCES
@@ -44,7 +45,7 @@ public class Constants {
     public static final String C35V7_EXAM = "src/main/resources/exam/";
     public static final String C80V20_EXAM = "src/main/resources/exam/";
     public static final String C130V40_EXAM = "src/main/resources/exam/";
-    public static final List<String> INSTANCES_EXAM = Arrays.asList(C7V3_EXAM, C18V5_EXAM, C35V7_EXAM, C80V20_EXAM, C130V40_EXAM);
+    public static final List<String> INSTANCES_EXAM = INSTANCES; // Arrays.asList(C7V3_EXAM, C18V5_EXAM, C35V7_EXAM, C80V20_EXAM, C130V40_EXAM);
 
     // SEARCHING ALGORITHMS
 
@@ -79,10 +80,10 @@ public class Constants {
 
     // SEARCH CONSTANTS
 
-    public static final boolean VISUALIZE = false;
+    public static final boolean VISUALIZE = true;
     public static final boolean ITERATION_SEARCH = false;
     public static final int ITERATIONS = 10000;
-    public static final int SEARCH_TIMES = 10;
+    public static final int SEARCH_TIMES = 1;
     public static final double RUN_TIME_C7V3 = 10 * 0.999;
     public static final double RUN_TIME_C18V5 = 30 * 0.999;
     public static final double RUN_TIME_C35V7 = 80 * 0.999;

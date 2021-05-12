@@ -14,9 +14,8 @@ import java.util.Set;
 
 import static main.Main.problem;
 
-public class WorstRemoval implements RemovalHeuristic {
+public class WorstRemoval {
 
-    @Override
     public List<Integer> remove(Solution solution, int number) {
 
         Solution solutionCopy = solution.copy();

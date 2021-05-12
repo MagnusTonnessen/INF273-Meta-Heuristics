@@ -2,14 +2,12 @@ package objects;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparingInt;
 import static main.Main.problem;
-import static utils.Constants.random;
 import static utils.Utils.costFunction;
 import static utils.Utils.feasibilityCheck;
 
@@ -58,9 +56,7 @@ public class Solution extends ArrayList<Vehicle> {
 
     public void moveCallRandom(int call, int vehicle) {
         removeCall(call);
-        int index1 = random.nextInt(getVehicleSize(vehicle) + 1);
-        int index2 = random.nextInt(getVehicleSize(vehicle) + 2);
-        moveCall(call, vehicle, index1, index2);
+        get(vehicle).randomInsert(call);
     }
 
     public Vehicle getVehicle(int call) {

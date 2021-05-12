@@ -21,7 +21,7 @@ import static java.awt.Color.BLACK;
 
 public class VisualiseImprovement extends JFrame {
 
-    XYSeriesCollection dataset = new XYSeriesCollection();
+    final XYSeriesCollection dataset = new XYSeriesCollection();
 
     public VisualiseImprovement(String instance, List<Double> costs) {
         addSeries(costs);

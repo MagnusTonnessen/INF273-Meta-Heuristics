@@ -10,9 +10,8 @@ import java.util.stream.Collectors;
 
 import static main.Main.problem;
 
-public class RegretKInsertion implements InsertionHeuristic {
+public class RegretKInsertion {
 
-    @Override
     public Solution insert(Solution solution, List<Integer> calls) {
         int k = calls.size();
         List<RegretK> bestInserts = calls.stream().map(call -> bestInserts(solution, call, calls.size())).collect(Collectors.toList());
@@ -65,6 +64,7 @@ public class RegretKInsertion implements InsertionHeuristic {
                             if (minCosts.size() < k) {
                                 minCosts.add(new VehicleInsertCost(cost, copy.vehicleIndex));
                             } else if (cost < maxCost) {
+                                //noinspection SuspiciousMethodCalls
                                 minCosts.remove((Integer) maxCost);
                                 minCosts.add(new VehicleInsertCost(cost, copy.vehicleIndex));
                                 maxCost = Collections.max(minCosts, VehicleInsertCost::compareTo).cost;

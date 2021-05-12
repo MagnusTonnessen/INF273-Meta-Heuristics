@@ -68,10 +68,6 @@ public class Vehicle extends ArrayList<Integer> {
         return IntStream.range(0, size()).filter(c -> get(c) == call).boxed().collect(Collectors.toList());
     }
 
-    public List<Integer> currentCalls() {
-        return this;
-    }
-
     @Override
     public String toString() {
         return "Vehicle{" +

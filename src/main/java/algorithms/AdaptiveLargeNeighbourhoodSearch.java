@@ -34,7 +34,7 @@ import static utils.Constants.worstRemovalRegretKInsertion;
 public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
 
     @Override
-    public Solution search(Solution initialSolution, int iterations, double runtime) {
+    public Solution search(int iterations, double runtime) {
         return ALNS(iterations, runtime);
     }
 
@@ -196,10 +196,10 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
     private void updateOperator(OperatorWithWeights operator, boolean newSolutionFound, boolean feasible, double newCost, double currCost, double bestCost) {
         operator.incrementTimesUsed();
         operator.adjustScore(
-                (feasible ? 0.5 : 0) +
-                (feasible && newSolutionFound ? 1 : 0) +
-                (feasible && newCost < currCost ? 2 : 0) +
-                (feasible && newCost < bestCost ? 4 : 0)
+                (feasible ? 1 : 0) +
+                        (feasible && newSolutionFound ? 1 : 0) +
+                        (feasible && newCost < currCost ? 1 : 0) +
+                        (feasible && newCost < bestCost ? 1 : 0)
         );
     }
 

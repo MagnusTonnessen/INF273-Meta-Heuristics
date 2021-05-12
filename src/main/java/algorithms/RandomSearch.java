@@ -10,7 +10,7 @@ import static utils.Constants.randomOperator;
 
 public class RandomSearch implements SearchingAlgorithm {
     @Override
-    public Solution search(Solution initialSolution, int iterations, double runtime) {
+    public Solution search(int iterations, double runtime) {
 
         Solution bestSolution = Main.initialSolution.copy();
         double bestCost = initialCost;

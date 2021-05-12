@@ -13,11 +13,10 @@ import static java.lang.Math.min;
 import static main.Main.problem;
 import static utils.Constants.random;
 
-public class RelatedRemoval implements RemovalHeuristic {
+public class RelatedRemoval {
 
     private double[][] relations;
 
-    @Override
     public List<Integer> remove(Solution solution, int number) {
         List<Integer> removedCalls = new ArrayList<>();
         removedCalls.add(random.nextInt(problem.nCalls));
@@ -75,20 +74,16 @@ public class RelatedRemoval implements RemovalHeuristic {
         int dest2 = problem.calls.get(call2).destinationNode;
         double org1ToOrg2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org1][org2], Double::sum) / commonVehicles.size();
         double dest1ToDest2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][dest1][dest2], Double::sum) / commonVehicles.size();
-        // double org1ToDest2 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org1][dest2], Double::sum) / commonVehicles.size();
-        // double org2ToDest1 = commonVehicles.stream().reduce(0.0, (acc, vehicle) -> (double) problem.travelTime[vehicle][org2][dest1], Double::sum) / commonVehicles.size();
         return normalize(problem.maxTravelDistance, problem.minTravelDistance, org1ToOrg2 + dest1ToDest2);
     }
 
     private double getTimeRelation(int call1, int call2) {
-        return 1 - normalize(
-                problem.maxPickupDeliveryTimeWindow,
-                problem.minPickupDeliveryTimeWindow,
-                min(problem.calls.get(call1).upperTimePickup, problem.calls.get(call2).upperTimePickup) -
-                        max(problem.calls.get(call1).lowerTimePickup, problem.calls.get(call2).lowerTimePickup) +
-                        min(problem.calls.get(call1).upperTimeDelivery, problem.calls.get(call2).upperTimeDelivery) -
-                        max(problem.calls.get(call1).lowerTimeDelivery, problem.calls.get(call2).lowerTimeDelivery)
-        );
+        double sum = min(problem.calls.get(call1).upperTimePickup, problem.calls.get(call2).upperTimePickup) -
+                max(problem.calls.get(call1).lowerTimePickup, problem.calls.get(call2).lowerTimePickup) +
+                min(problem.calls.get(call1).upperTimeDelivery, problem.calls.get(call2).upperTimeDelivery) -
+                max(problem.calls.get(call1).lowerTimeDelivery, problem.calls.get(call2).lowerTimeDelivery);
+
+        return 1 - normalize(problem.maxPickupDeliveryTimeWindow, problem.minPickupDeliveryTimeWindow, sum);
     }
 
     private double getSizeRelation(int call1, int call2) {
@@ -98,7 +93,7 @@ public class RelatedRemoval implements RemovalHeuristic {
     private double getVesselCompatibilityRelation(int call1, int call2) {
         double minSize = min(problem.calls.get(call1).validVehicles.size(), problem.calls.get(call2).validVehicles.size());
         double commonVehicles = getCommonVehicles(call1, call2).size();
-        return normalize(1, 0, 1 - (commonVehicles / minSize));
+        return 1 - (commonVehicles / minSize);
     }
 
     private double normalize(double maxX, double minX, double X) {

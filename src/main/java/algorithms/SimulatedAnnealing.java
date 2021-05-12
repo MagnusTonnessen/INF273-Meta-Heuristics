@@ -14,7 +14,7 @@ import static utils.Constants.twoExchange;
 
 public class SimulatedAnnealing implements SearchingAlgorithm {
     @Override
-    public Solution search(Solution initialSolution, int iterations, double runtime) {
+    public Solution search(int iterations, double runtime) {
         return simulatedAnnealing(iterations, runtime, 0.33, 0.33, 200, 0.999);
     }
 

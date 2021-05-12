@@ -7,16 +7,14 @@ import java.util.List;
 
 import static main.Main.problem;
 import static utils.Constants.random;
-import static utils.Constants.relatedRemoval;
 
 public class ThreeExchange extends Operator {
     @Override
     public Solution operate(Solution solution, int numberOfMoves) {
 
-        List<Integer> calls = relatedRemoval.remove(solution, numberOfMoves);
-        int firstCall = random.nextInt(problem.nCalls); // calls.get(0); //
-        int secondCall = random.nextInt(problem.nCalls); // calls.get(1); //
-        int thirdCall = random.nextInt(problem.nCalls); // calls.get(2); //
+        int firstCall = random.nextInt(problem.nCalls);
+        int secondCall = random.nextInt(problem.nCalls);
+        int thirdCall = random.nextInt(problem.nCalls);
 
         if (firstCall == secondCall || secondCall == thirdCall || firstCall == thirdCall) {
             return solution.copy();

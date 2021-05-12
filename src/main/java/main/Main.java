@@ -4,20 +4,15 @@ import algorithms.SearchingAlgorithm;
 import objects.Problem;
 import objects.Results;
 import objects.Solution;
-import utils.JSONCreator;
-import utils.PDFCreator;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static utils.Constants.ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH;
 import static utils.Constants.C130V40;
@@ -39,6 +34,9 @@ import static utils.Constants.SEARCHING_ALGORITHMS;
 import static utils.Constants.SEARCH_TIMES;
 import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.relatedRemoval;
+import static utils.JSONCreator.JSONToPDFExam;
+import static utils.JSONCreator.readJSONToMap;
+import static utils.JSONCreator.saveToJSON;
 import static utils.Utils.getInstanceName;
 import static utils.Utils.printRunInfo;
 import static utils.Utils.printRunResults;
@@ -54,13 +52,15 @@ public class Main {
     //  VISUALIZE = false
     //  ITERATION_SEARCH = false
     //  SEARCH_TIMES = 10
+    //  Insert exam instances
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
         long startTime = System.currentTimeMillis();
-
-        exam();
-
+        //exam();
+        //finalAssignment();
+        //JSONToPDF("src/main/results/FinalAssignmentCopy.json", "src/main/results/FinalAssignmentCopy.pdf", "Final report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES);
+        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
         long endTime = System.currentTimeMillis() - startTime;
         System.out.printf("Total runtime: %d minutes %d seconds", (endTime / 1000) / 60, (endTime / 1000) % 60);
     }
@@ -96,10 +96,10 @@ public class Main {
 
             }
 
-            IntStream.range(0, algorithms.size()).forEach(i -> {
+            for (int i = 0; i < algorithms.size(); i++) {
                 System.out.println("\nBest solution found with " + algorithms.get(i).getName());
                 System.out.println(Arrays.toString(bestSolutions.get(i)) + "\n");
-            });
+            }
         }
     }
 
@@ -114,10 +114,10 @@ public class Main {
 
         for (int i = 0; i < times; i++) {
 
-//            System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times);
+            // System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times + "\n");
 
             long startTime = System.currentTimeMillis();
-            Solution solution = searchingAlgorithm.search(initialSolution, ITERATIONS, runtime);
+            Solution solution = searchingAlgorithm.search(ITERATIONS, runtime);
             executionTime += System.currentTimeMillis() - startTime;
 
             double cost = solution.cost();
@@ -134,91 +134,6 @@ public class Main {
         double averageExecutionTime = (executionTime / times) / 1000;
 
         return new Results(Arrays.stream(bestSolution.asArray()).map(i -> i + 1).toArray(), bestCost, averageCost, improvement, averageExecutionTime);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void JSONToPDF(String jsonPath, String pdfPath, String documentTitle, String algorithm, List<String> instances) throws Exception {
-        PDFCreator pdf = new PDFCreator(pdfPath);
-        pdf.openDocument();
-
-        pdf.addTitle(documentTitle, 20);
-
-        Map<String, Map<String, Map<String, Object>>> jsonAsMap = new JSONCreator(jsonPath).read();
-
-        for (String filePath : instances) {
-
-            pdf.newTable(getInstanceName(filePath));
-
-            for (SearchingAlgorithm search : SEARCHING_ALGORITHMS) {
-                try {
-                    pdf.addRow(search.getName(),
-                            (double) jsonAsMap.get(getInstanceName(filePath)).get(search.getName()).get("Average objective"),
-                            (double) jsonAsMap.get(getInstanceName(filePath)).get(search.getName()).get("Best objective"),
-                            (double) jsonAsMap.get(getInstanceName(filePath)).get(search.getName()).get("Improvement"),
-                            (double) jsonAsMap.get(getInstanceName(filePath)).get(search.getName()).get("Average run time")
-                    );
-                } catch (Exception ignored) {
-                }
-            }
-
-            pdf.addTable();
-        }
-
-        pdf.newPage();
-
-        pdf.addTitle("Best solutions found with " + algorithm, 14);
-
-        List<int[]> bestSolutions = jsonAsMap
-                .values()
-                .stream()
-                .map(instance -> ((List<Integer>) instance.get(algorithm).get("Best solution")).stream().mapToInt(i -> i).toArray())
-                .sorted(Comparator.comparingInt(solution -> solution.length))
-                .collect(Collectors.toList());
-
-        pdf.addBestSolutions(bestSolutions, instances);
-
-        pdf.closeDocument();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void JSONToPDFExam(String jsonPath, String pdfPath, String documentTitle, String algorithm, List<String> instances) throws Exception {
-        PDFCreator pdf = new PDFCreator(pdfPath);
-        pdf.openDocument();
-
-        pdf.addTitle(documentTitle, 20);
-
-        Map<String, Map<String, Map<String, Object>>> jsonAsMap = new JSONCreator(jsonPath).read();
-
-        for (String filePath : instances) {
-
-            pdf.newTableWithoutAvgObj(getInstanceName(filePath));
-
-            try {
-                pdf.addRowWithoutAvgObj(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(),
-                        (double) jsonAsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Best objective"),
-                        (double) jsonAsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Improvement"),
-                        (double) jsonAsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).get("Average run time")
-                );
-            } catch (Exception ignored) {
-            }
-
-            pdf.addTable();
-        }
-
-        pdf.newPage();
-
-        pdf.addTitle("Best solutions found with " + algorithm, 14);
-
-        List<int[]> bestSolutions = jsonAsMap
-                .values()
-                .stream()
-                .map(instance -> ((List<Integer>) instance.get(algorithm).get("Best solution")).stream().mapToInt(i -> i).toArray())
-                .sorted(Comparator.comparingInt(solution -> solution.length))
-                .collect(Collectors.toList());
-
-        pdf.addBestSolutions(bestSolutions, instances);
-
-        pdf.closeDocument();
     }
 
     public static void exam() throws Exception {
@@ -239,14 +154,14 @@ public class Main {
             resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
-        new JSONCreator("src/main/results/Exam.json").save(resultsMap);
+        saveToJSON(resultsMap, "src/main/results/Exam.json");
         JSONToPDFExam("src/main/results/Exam.json", "src/main/results/Exam.pdf", "Exam report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES_EXAM);
     }
 
     public static void finalAssignment() throws Exception {
 
         Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>(
-                new JSONCreator("src/main/results/FinalAssignment.json").read()
+                readJSONToMap("src/main/results/FinalAssignment.json")
         );
 
         for (String filePath : INSTANCES) {
@@ -273,13 +188,13 @@ public class Main {
             // resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
-        new JSONCreator("src/main/results/FinalAssignment.json").save(resultsMap);
+        saveToJSON(resultsMap, "src/main/results/FinalAssignmentCopy.json");
     }
 
     public static void assignment5() throws Exception {
 
         Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>(
-                new JSONCreator("src/main/results/Assignment4.json").read()
+                readJSONToMap("src/main/results/Assignment4.json")
         );
 
         for (String filePath : INSTANCES) {
@@ -297,13 +212,13 @@ public class Main {
             resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
-        new JSONCreator("src/main/results/Assignment5.json").save(resultsMap);
+        saveToJSON(resultsMap, "src/main/results/Assignment5.json");
     }
 
     public static void assignment4() throws Exception {
 
         Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>(
-                new JSONCreator("src/main/results/test/Assignment3test.json").read()
+                readJSONToMap("src/main/results/test/Assignment3.json")
         );
 
         for (String filePath : INSTANCES) {
@@ -321,13 +236,13 @@ public class Main {
             printRunResults(SIMULATED_ANNEALING.getName(), searchResults);
         }
 
-        new JSONCreator("src/main/results/test/Assignment4test.json").save(resultsMap);
+        saveToJSON(resultsMap, "src/main/results/test/Assignment4.json");
     }
 
     public static void assignment3() throws Exception {
 
         Map<String, Map<String, Map<String, Object>>> resultsMap = new HashMap<>(
-                new JSONCreator("src/main/results/test/Assignment2test.json").read()
+                readJSONToMap("src/main/results/test/Assignment2.json")
         );
 
         for (String filePath : INSTANCES) {
@@ -348,7 +263,7 @@ public class Main {
             }
         }
 
-        new JSONCreator("src/main/results/test/Assignment3test.json").save(resultsMap);
+        saveToJSON(resultsMap, "src/main/results/test/Assignment3.json");
     }
 
     public static void assignment2() throws Exception {
@@ -372,7 +287,7 @@ public class Main {
             printRunResults(RANDOM_SEARCH.getName(), searchResults);
         }
 
-        new JSONCreator("src/main/results/test/Assignment2test.json").save(resultsMap);
+        saveToJSON(resultsMap, "src/main/results/test/Assignment2.json");
     }
 
     public static void initialize(String filePath) throws Exception {

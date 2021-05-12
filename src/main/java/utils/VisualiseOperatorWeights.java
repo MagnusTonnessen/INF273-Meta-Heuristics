@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class VisualiseOperatorWeights extends JFrame {
 
-    XYSeriesCollection dataset = new XYSeriesCollection();
+    final XYSeriesCollection dataset = new XYSeriesCollection();
 
     public VisualiseOperatorWeights(String instance, Map<String, List<Double>> probabilities) {
         probabilities.forEach(this::addSeries);

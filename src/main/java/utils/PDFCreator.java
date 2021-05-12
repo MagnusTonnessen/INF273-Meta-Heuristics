@@ -20,7 +20,6 @@ import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static utils.Utils.getInstanceName;
@@ -30,7 +29,7 @@ import static utils.Utils.getInstanceName;
  */
 public class PDFCreator {
 
-    Document document;
+    final Document document;
     PdfPTable table;
     Paragraph paragraph;
 
@@ -45,7 +44,7 @@ public class PDFCreator {
     }
 
     public void addTitle(String title, int size) throws Exception {
-        addEmptyLine(1);
+        addEmptyLine();
         newParagraph();
         Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, size, BaseColor.BLACK);
         Phrase phrase = new Phrase();
@@ -68,7 +67,7 @@ public class PDFCreator {
         paragraph.add(table);
 
         IntStream.range(0, bestSolutions.size()).forEach(i -> {
-            addEmptyLine(1);
+            addEmptyLine();
 
             Font font = FontFactory.getFont(FontFactory.TIMES, 12, BaseColor.BLACK);
             Phrase phrase = new Phrase();
@@ -103,7 +102,7 @@ public class PDFCreator {
 
             subParagraph.setAlignment(Element.ALIGN_CENTER);
             paragraph.add(subParagraph);
-            addEmptyLine(1);
+            addEmptyLine();
             try {
                 newParagraph();
             } catch (Exception ignored) {
@@ -142,7 +141,7 @@ public class PDFCreator {
     }
 
     private void newParagraph() throws Exception {
-        addEmptyLine(1);
+        addEmptyLine();
         document.add(paragraph);
         paragraph = new Paragraph();
         paragraph.setAlignment(Element.ALIGN_CENTER);
@@ -175,22 +174,14 @@ public class PDFCreator {
         return cell;
     }
 
-    private void addEmptyLine(int n) {
-        paragraph.addAll(IntStream.range(0, n).mapToObj(i -> new Paragraph(" ")).collect(Collectors.toList()));
+    private void addEmptyLine() {
+        paragraph.add(new Paragraph(" "));
     }
 
     public void addRowWithoutAvgObj(String search, double bestObj, double imp, double run) {
         DecimalFormat format = new DecimalFormat("0.0#");
         PdfPCell cell = newCell(search);
         cell.setFixedHeight(35);
-
-        /*
-        for (double value : values) {
-            PdfPCell cell = newCell(format.format(value));
-            cell.setMinimumHeight(40);
-        }
-         */
-
         table.addCell(cell);
         table.addCell(newCell(format.format(bestObj)));
         table.addCell(newCell(format.format(imp)));

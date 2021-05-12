@@ -19,7 +19,9 @@ public class Escape extends Operator {
             Vehicle currentVehicle = newSolution.getVehicleFromCall(call);
             List<Integer> validVehicles = problem.getCall(call).getValidVehicles();
             validVehicles.removeIf(vehicle -> vehicle == currentVehicle.vehicleIndex);
-            validVehicles.add(newSolution.getDummy().vehicleIndex);
+            if (validVehicles.isEmpty() || !currentVehicle.isDummy) {
+                validVehicles.add(newSolution.getDummy().vehicleIndex);
+            }
             newSolution.moveCallRandom(call, validVehicles.get(random.nextInt(validVehicles.size())));
             if (newSolution.isFeasible()) {
                 solution = newSolution;

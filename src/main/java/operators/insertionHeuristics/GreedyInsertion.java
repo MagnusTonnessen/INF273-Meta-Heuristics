@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GreedyInsertion implements InsertionHeuristic {
-    @Override
+public class GreedyInsertion {
+
     public Solution insert(Solution solution, List<Integer> calls) {
         List<Greedy> bestInserts = calls.stream().map(call -> bestInsert(solution, call)).collect(Collectors.toList());
         while (!bestInserts.isEmpty()) {
