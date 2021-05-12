@@ -34,6 +34,7 @@ import static utils.Constants.SEARCHING_ALGORITHMS;
 import static utils.Constants.SEARCH_TIMES;
 import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.relatedRemoval;
+import static utils.JSONCreator.JSONToPDF;
 import static utils.JSONCreator.JSONToPDFExam;
 import static utils.JSONCreator.readJSONToMap;
 import static utils.JSONCreator.saveToJSON;
@@ -57,10 +58,9 @@ public class Main {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
         long startTime = System.currentTimeMillis();
-        //exam();
-        //finalAssignment();
-        //JSONToPDF("src/main/results/FinalAssignmentCopy.json", "src/main/results/FinalAssignmentCopy.pdf", "Final report INF273", ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName(), INSTANCES);
-        runSearches(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH, INSTANCES);
+
+        exam();
+
         long endTime = System.currentTimeMillis() - startTime;
         System.out.printf("Total runtime: %d minutes %d seconds", (endTime / 1000) / 60, (endTime / 1000) % 60);
     }
@@ -114,7 +114,7 @@ public class Main {
 
         for (int i = 0; i < times; i++) {
 
-            // System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times + "\n");
+            System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times + "\n");
 
             long startTime = System.currentTimeMillis();
             Solution solution = searchingAlgorithm.search(ITERATIONS, runtime);
@@ -188,7 +188,7 @@ public class Main {
             // resultsMap.get(getInstanceName(filePath)).get(ADAPTIVE_LARGE_NEIGHBOURHOOD_SEARCH.getName()).putAll(searchResults.asMap());
         }
 
-        saveToJSON(resultsMap, "src/main/results/FinalAssignmentCopy.json");
+        saveToJSON(resultsMap, "src/main/results/FinalAssignment.json");
     }
 
     public static void assignment5() throws Exception {

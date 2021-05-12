@@ -80,7 +80,7 @@ public class Constants {
 
     // SEARCH CONSTANTS
 
-    public static final boolean VISUALIZE = true;
+    public static final boolean VISUALIZE = false;
     public static final boolean ITERATION_SEARCH = false;
     public static final int ITERATIONS = 10000;
     public static final int SEARCH_TIMES = 1;
