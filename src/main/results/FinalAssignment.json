@@ -25,8 +25,8 @@
       ],
       "Improvement": 72.12159978015431,
       "Average run time": 139.8638,
-      "Average objective": 12274850.5,
-      "Best objective": 1.176787E7
+      "Average objective": 12251384.3,
+      "Best objective": 11767870.0
     }
   },
   "Call 130 Vehicle 40": {
@@ -47,7 +47,7 @@
       "Improvement": 76.73683272533889,
       "Average run time": 339.6639,
       "Average objective": 17735264.8,
-      "Best objective": 1.7551289E7
+      "Best objective": 17551289.0
     }
   },
   "Call 18 Vehicle 5": {
@@ -58,7 +58,7 @@
       ],
       "Improvement": 72.60722260546491,
       "Average run time": 29.97,
-      "Average objective": 2420645.0,
+      "Average objective": 2419552.5,
       "Best objective": 2400016.0
     }
   },
