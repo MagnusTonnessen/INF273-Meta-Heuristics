@@ -34,7 +34,6 @@ import static utils.Constants.SEARCHING_ALGORITHMS;
 import static utils.Constants.SEARCH_TIMES;
 import static utils.Constants.SIMULATED_ANNEALING;
 import static utils.Constants.relatedRemoval;
-import static utils.JSONCreator.JSONToPDF;
 import static utils.JSONCreator.JSONToPDFExam;
 import static utils.JSONCreator.readJSONToMap;
 import static utils.JSONCreator.saveToJSON;
@@ -52,7 +51,7 @@ public class Main {
     // TODO:
     //  VISUALIZE = false
     //  ITERATION_SEARCH = false
-    //  SEARCH_TIMES = 10
+    //  SEARCH_TIMES = 1
     //  Insert exam instances
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
