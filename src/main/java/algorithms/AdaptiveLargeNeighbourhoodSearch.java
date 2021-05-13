@@ -92,7 +92,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         double alpha = 0.99;
         int iteration = 1;
         double deltas = 0;
-        int numDeltas = 0;
+        int numDeltas = 1;
 
         // 90 % of runtime is dedicated to ALNS
         while ((ITERATION_SEARCH && iteration < iterations * (1 - localSearchTime)) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
@@ -140,7 +140,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             if (iteration == initTempIter) {
                 double timePerIter = (System.currentTimeMillis() - startTime) / initTempIter;
                 double totalIter = (endTime - System.currentTimeMillis()) / timePerIter;
-                T = findInitTemp(deltas / numDeltas);
+                T = deltas == 0 ? T : findInitTemp(deltas / numDeltas);
                 alpha = getAlpha(T / 5000, T, totalIter);
             }
 
