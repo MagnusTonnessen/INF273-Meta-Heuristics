@@ -40,12 +40,12 @@ public class Constants {
 
     // EXAM INSTANCES
 
-    public static final String C7V3_EXAM = "src/main/resources/exam/";
-    public static final String C18V5_EXAM = "src/main/resources/exam/";
-    public static final String C35V7_EXAM = "src/main/resources/exam/";
-    public static final String C80V20_EXAM = "src/main/resources/exam/";
-    public static final String C130V40_EXAM = "src/main/resources/exam/";
-    public static final List<String> INSTANCES_EXAM = INSTANCES; // Arrays.asList(C7V3_EXAM, C18V5_EXAM, C35V7_EXAM, C80V20_EXAM, C130V40_EXAM);
+    public static final String C7V3_EXAM = "src/main/resources/exam/Call_7_Vehicle_3.txt";
+    public static final String C18V5_EXAM = "src/main/resources/exam/Call_18_Vehicle_5.txt";
+    public static final String C35V7_EXAM = "src/main/resources/exam/Call_35_Vehicle_7.txt";
+    public static final String C80V20_EXAM = "src/main/resources/exam/Call_80_Vehicle_20.txt";
+    public static final String C130V40_EXAM = "src/main/resources/exam/Call_130_Vehicle_40.txt";
+    public static final List<String> INSTANCES_EXAM = Arrays.asList(C7V3_EXAM, C18V5_EXAM, C35V7_EXAM, C80V20_EXAM, C130V40_EXAM);
 
     // SEARCHING ALGORITHMS
 
