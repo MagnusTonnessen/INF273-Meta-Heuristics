@@ -94,7 +94,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
         double deltas = 0;
         int numDeltas = 1;
 
-        // 90 % of runtime is dedicated to ALNS
+        // 99 % of runtime is dedicated to ALNS
         while ((ITERATION_SEARCH && iteration < iterations * (1 - localSearchTime)) || (!ITERATION_SEARCH && System.currentTimeMillis() < endTime)) {
 
             pb.stepTo((long) (System.currentTimeMillis() - startTime) / 1000);
@@ -159,7 +159,7 @@ public class AdaptiveLargeNeighbourhoodSearch implements SearchingAlgorithm {
             iteration++;
         }
 
-        // 10 % of runtime is dedicated to local search
+        // 1 % of runtime is dedicated to local search
         currSolution = new LocalSearch().localSearch(bestSolution, bestCost, iterations * localSearchTime, runtime * localSearchTime, 0.33, 0.33);
         currCost = currSolution.cost();
 

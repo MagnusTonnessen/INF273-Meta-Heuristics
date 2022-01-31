@@ -37,13 +37,13 @@
     <dependency>
       <groupId>com.itextpdf</groupId>
       <artifactId>itextpdf</artifactId>
-      <version>5.5.10</version>
+      <version>5.5.13.2</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.7</version>
+      <version>2.13.1</version>
     </dependency>
 
     <dependency>
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>me.tongfei</groupId>
       <artifactId>progressbar</artifactId>
-      <version>0.9.1</version>
+      <version>0.9.3</version>
     </dependency>
 
   </dependencies>
