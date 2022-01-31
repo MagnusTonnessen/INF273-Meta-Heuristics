@@ -48,11 +48,6 @@ public class Main {
     public static double initialCost;
     public static String instanceName;
 
-    // TODO:
-    //  VISUALIZE = false
-    //  ITERATION_SEARCH = false
-    //  SEARCH_TIMES = 1
-    //  Insert exam instances
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ROOT);
         System.out.println(LocalTime.now());
@@ -113,7 +108,7 @@ public class Main {
 
         for (int i = 0; i < times; i++) {
 
-            System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times + "\n");
+//            System.out.print("\r" + algorithmName + " progress: " + (i + 1) + "/" + times + "\n");
 
             long startTime = System.currentTimeMillis();
             Solution solution = searchingAlgorithm.search(ITERATIONS, runtime);
